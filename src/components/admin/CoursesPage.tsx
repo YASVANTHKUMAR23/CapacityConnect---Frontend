@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, ChevronDown, MoreHorizontal } from 'lucide-react';
+import { Search, ChevronDown } from 'lucide-react';
 import { useAdminData } from '../../context/AdminDataContext';
 
 interface CoursesPageProps {
@@ -102,16 +102,15 @@ export const CoursesPage: React.FC<CoursesPageProps> = () => {
       {/* Courses Table */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-[13px]">
             <thead>
-              <tr className="border-b border-slate-100 text-slate-400 font-semibold">
+              <tr className="border-b border-slate-100 text-slate-400 font-semibold text-[13px]">
                 <th className="pb-3.5 font-medium">Course</th>
                 <th className="pb-3.5 font-medium">Trainer</th>
                 <th className="pb-3.5 font-medium">Enrolled</th>
                 <th className="pb-3.5 font-medium">Completion</th>
                 <th className="pb-3.5 font-medium">Deadline</th>
                 <th className="pb-3.5 font-medium">Status</th>
-                <th className="pb-3.5 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -120,52 +119,41 @@ export const CoursesPage: React.FC<CoursesPageProps> = () => {
                   <td className="py-3.5 pr-3">
                     <div className="flex items-center gap-3">
                       <div
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${c.avatarBg}`}
+                        className={`w-9 h-9 rounded-lg flex items-center justify-center font-bold text-[13px] shrink-0 ${c.avatarBg}`}
                       >
                         {c.initials}
                       </div>
                       <div>
-                        <div className="font-semibold text-slate-900">{c.title}</div>
-                        <div className="text-slate-400 text-[11px] font-normal">
+                        <div className="font-semibold text-slate-900 text-[13px]">{c.title}</div>
+                        <div className="text-slate-400 text-xs font-normal">
                           {c.category}
                         </div>
                       </div>
                     </div>
                   </td>
-                  <td className="py-3.5 text-slate-700 font-medium">{c.trainer}</td>
-                  <td className="py-3.5 text-slate-800 font-semibold tabular-nums">
+                  <td className="py-3.5 text-slate-700 font-medium text-[13px]">{c.trainer}</td>
+                  <td className="py-3.5 text-slate-800 font-semibold tabular-nums text-[13px]">
                     {c.enrolled}
                   </td>
                   <td className="py-3.5">
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-20 h-2 bg-slate-100 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-blue-600 rounded-full"
                           style={{ width: `${c.completion}%` }}
                         />
                       </div>
-                      <span className="text-slate-500 text-[11px] font-medium tabular-nums">
+                      <span className="text-slate-500 text-xs font-medium tabular-nums">
                         {c.completion}%
                       </span>
                     </div>
                   </td>
-                  <td className="py-3.5 text-slate-500 font-medium">{c.deadline}</td>
+                  <td className="py-3.5 text-slate-500 font-medium text-[13px]">{c.deadline}</td>
                   <td className="py-3.5">
-                    <span className="inline-flex items-center gap-1.5 text-emerald-700 font-semibold text-[11px]">
+                    <span className="inline-flex items-center gap-1.5 text-emerald-700 font-semibold text-xs">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                       Active
                     </span>
-                  </td>
-                  <td className="py-3.5 text-right">
-                    <div className="flex items-center justify-end gap-1 text-slate-400">
-                      <button
-                        type="button"
-                        className="p-1.5 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer"
-                        title="More options"
-                      >
-                        <MoreHorizontal className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
                   </td>
                 </tr>
               ))}

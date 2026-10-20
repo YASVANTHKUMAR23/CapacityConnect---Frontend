@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Users,
   Award,
@@ -10,14 +10,12 @@ import {
   ArrowDownRight,
   Megaphone,
   Plus,
-  RotateCcw,
-  Sparkles,
-  ChevronUp,
   ChevronDown,
   X,
-  Play,
-  Pause,
-  Trash2,
+  ArrowRight,
+  Pin,
+  Calendar,
+  FileText,
 } from 'lucide-react';
 import { AdminTab } from '../../types';
 import { useAdminData } from '../../context/AdminDataContext';
@@ -108,11 +106,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
   // Dynamic divisions state for participation bubbles
   const [divisions, setDivisions] = useState<DivisionItem[]>(INITIAL_DIVISIONS);
-  const [isTestWidgetOpen, setIsTestWidgetOpen] = useState(false);
-  const [isAutoStreaming, setIsAutoStreaming] = useState(false);
   const [hoveredDivisionId, setHoveredDivisionId] = useState<string | null>(null);
-  const [customName, setCustomName] = useState('');
-  const [customCount, setCustomCount] = useState('');
 
   // Active announcement displayed in hero card (connected to AdminDataContext)
   const heroAnn = pinnedAnnouncement || announcements[0];
@@ -267,232 +261,272 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
     }
   };
 
-  const handleRemoveDivision = (id: string) => {
-    setDivisions((prev) => prev.filter((d) => d.id !== id));
-    showToast('Division removed.');
-  };
 
-  const handleAddCustom = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!customName.trim()) return;
-    const parsedCount = parseInt(customCount, 10) || 220;
-    const colors = ['#6366f1', '#4338ca', '#7c3aed', '#818cf8', '#5157ea', '#3b41e3'];
-    const selectedColor = colors[divisions.length % colors.length];
-
-    const newItem: DivisionItem = {
-      id: `div-${Date.now()}`,
-      name: customName.trim(),
-      count: parsedCount,
-      change: '+5%',
-      isPositive: true,
-      color: selectedColor,
-    };
-
-    setDivisions((prev) => [...prev, newItem]);
-    setCustomName('');
-    setCustomCount('');
-    showToast(`Created & placed dynamic circle for ${newItem.name} (${newItem.count}).`);
-  };
-
-  const handleResetDivisions = () => {
-    setIsAutoStreaming(false);
-    setDivisions(INITIAL_DIVISIONS);
-    showToast('Reset division circles back to default 4.');
-  };
-
-  // Auto-stream effect when toggled on
-  useEffect(() => {
-    if (!isAutoStreaming) return;
-    const interval = setInterval(() => {
-      handleQuickNextArrival();
-    }, 3200);
-    return () => clearInterval(interval);
-  }, [isAutoStreaming, divisions.length]);
 
   return (
     <div className="space-y-6">
-      {/* 1. Three Quick-Management Progress Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-slate-900 text-sm">Course management</h3>
-            <div className="flex items-center gap-1 text-slate-400">
-              <button
-                type="button"
-                onClick={() => onNavigateTab('courses')}
-                className="hover:text-slate-600"
-              >
-                <MoreHorizontal className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => onNavigateTab('courses')}
-                className="hover:text-slate-600"
-              >
-                <Maximize2 className="w-3.5 h-3.5" />
-              </button>
+      {/* ======================================================== */}
+      {/* 1. TOP SECTION: Announcement Card (Left) + Management (Right) */}
+      {/* Layout strictly conforms to Screenshot_2026-10-19_204608_6bbe42ed.png */}
+      {/* ======================================================== */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-stretch">
+        {/* Left: Large Announcement Card (7 cols) */}
+        <div className="lg:col-span-7 bg-white rounded-2xl p-4 sm:p-7 border border-slate-200/90 shadow-2xs flex flex-col justify-between relative overflow-hidden group">
+          {/* Subtle background glow */}
+          <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-bl from-blue-50/80 via-indigo-50/30 to-transparent rounded-full -mr-16 -mt-16 pointer-events-none" />
+
+          <div>
+            {/* Top Badge & Date Row */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 mb-3.5 sm:mb-4">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200/60">
+                  <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+                  Official Announcement
+                </span>
+                {heroAnn?.isPinned && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/60">
+                    <Pin className="w-3 h-3 fill-amber-500 text-amber-600" />
+                    Pinned
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+                <Calendar className="w-3.5 h-3.5" />
+                <span>Published {heroAnn?.date || 'Today'}</span>
+              </div>
+            </div>
+
+            {/* Announcement Headline */}
+            <h2 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight leading-snug mb-2.5 sm:mb-3">
+              {heroAnn?.title || 'Severe Cyclone Early Warning Protocol: Specialized Doppler Radar Simulation'}
+            </h2>
+
+            {/* Message Body */}
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-3 mb-4 sm:mb-5">
+              {heroAnn?.message ||
+                'Comprehensive operational training deployed across Coastal & Regional Meteorological Centers. Specialized modules cover high-resolution wind-shear detection, automated coastal storm-surge alerts, and emergency advisory dissemination.'}
+            </p>
+
+            {/* Quick Metrics / Key Highlights */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 mb-5 sm:mb-6 text-xs">
+              <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50/80 border border-slate-100 flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs shrink-0">
+                  142
+                </div>
+                <div>
+                  <span className="font-semibold text-slate-800 block">Duty Officers Enrolled</span>
+                  <span className="text-[11px] text-slate-400">Class-I & II Meteorologists</span>
+                </div>
+              </div>
+
+              <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50/80 border border-slate-100 flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs shrink-0">
+                  98%
+                </div>
+                <div>
+                  <span className="font-semibold text-slate-800 block">Divisional Readiness</span>
+                  <span className="text-[11px] text-slate-400">National Radar Network</span>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="flex items-baseline justify-between mb-2">
-            <div>
-              <span className="text-[11px] text-slate-400 font-medium block">Active courses</span>
-              <span className="text-xl font-bold text-slate-900">36 / 48</span>
-            </div>
-            <div className="text-right">
-              <span className="text-[11px] text-slate-400 font-medium block">Inactive</span>
-              <span className="text-sm font-semibold text-slate-600">12</span>
-            </div>
-          </div>
-          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden flex">
-            <div className="bg-gradient-to-r from-purple-500 to-pink-500 h-full w-[75%]" />
-            <div className="bg-slate-200 h-full w-[25%]" />
+
+          {/* Bottom Actions */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 pt-3.5 sm:pt-4 border-t border-slate-100">
+            <button
+              type="button"
+              onClick={() => onNavigateTab('announcements')}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+            >
+              <span>View full announcement</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                showToast('Official meteorology bulletin downloaded as PDF.');
+              }}
+              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-medium border border-slate-200/80 transition-colors cursor-pointer"
+            >
+              <FileText className="w-3.5 h-3.5 text-slate-500" />
+              <span>Operational Bulletin (PDF)</span>
+            </button>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-slate-900 text-sm">Trainer management</h3>
-            <div className="flex items-center gap-1 text-slate-400">
-              <button
-                type="button"
-                onClick={() => onNavigateTab('trainers')}
-                className="hover:text-slate-600"
-              >
-                <MoreHorizontal className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => onNavigateTab('trainers')}
-                className="hover:text-slate-600"
-              >
-                <Maximize2 className="w-3.5 h-3.5" />
-              </button>
+        {/* Right: 3 Management Cards (5 cols) matching Screenshot_2026-10-19_204608_6bbe42ed.png */}
+        <div className="lg:col-span-5 flex flex-col justify-between gap-3.5 sm:gap-4">
+          {/* Top 2 Cards: Course Management & Trainer Management */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+            {/* 1. Course Management */}
+            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[13px] text-slate-500 font-normal">Course management</span>
+                <button
+                  type="button"
+                  onClick={() => onNavigateTab('courses')}
+                  className="text-slate-400 hover:text-slate-600 p-1 rounded-md"
+                  title="View courses"
+                >
+                  <Maximize2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <div className="my-1.5 sm:my-2">
+                <div className="text-[26px] sm:text-[32px] font-semibold text-slate-900 tracking-tight leading-none">
+                  36 <span className="text-sm font-normal text-slate-400">/ 48</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-xs mt-2">
+                  <span className="text-emerald-600 font-medium">↗ 75%</span>
+                  <span className="text-slate-400">active courses</span>
+                </div>
+              </div>
+              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden flex mt-2">
+                <div className="bg-gradient-to-r from-purple-500 to-pink-500 h-full w-[75%]" />
+                <div className="bg-slate-200 h-full w-[25%]" />
+              </div>
             </div>
-          </div>
-          <div className="flex items-baseline justify-between mb-2">
-            <div>
-              <span className="text-[11px] text-slate-400 font-medium block">Active trainers</span>
-              <span className="text-xl font-bold text-slate-900">54 / 62</span>
-            </div>
-            <div className="text-right">
-              <span className="text-[11px] text-slate-400 font-medium block">Inactive</span>
-              <span className="text-sm font-semibold text-slate-600">8</span>
-            </div>
-          </div>
-          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden flex">
-            <div className="bg-blue-600 h-full w-[87%]" />
-            <div className="bg-slate-200 h-full w-[13%]" />
-          </div>
-        </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-slate-900 text-sm">Trainee management</h3>
-            <div className="flex items-center gap-1 text-slate-400">
+            {/* 2. Trainer Management */}
+            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[13px] text-slate-500 font-normal">Trainer management</span>
+                <button
+                  type="button"
+                  onClick={() => onNavigateTab('trainers')}
+                  className="text-slate-400 hover:text-slate-600 p-1 rounded-md"
+                  title="View trainers"
+                >
+                  <Maximize2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <div className="my-1.5 sm:my-2">
+                <div className="text-[26px] sm:text-[32px] font-semibold text-slate-900 tracking-tight leading-none">
+                  54 <span className="text-sm font-normal text-slate-400">/ 62</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-xs mt-2">
+                  <span className="text-emerald-600 font-medium">↗ 87%</span>
+                  <span className="text-slate-400">active trainers</span>
+                </div>
+              </div>
+              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden flex mt-2">
+                <div className="bg-blue-600 h-full w-[87%]" />
+                <div className="bg-slate-200 h-full w-[13%]" />
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Card: Trainee Management (spans across both columns) */}
+          <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between flex-1">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[13px] text-slate-500 font-normal">Trainee management</span>
               <button
                 type="button"
                 onClick={() => onNavigateTab('trainees')}
-                className="hover:text-slate-600"
-              >
-                <MoreHorizontal className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => onNavigateTab('trainees')}
-                className="hover:text-slate-600"
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-md"
+                title="View trainees"
               >
                 <Maximize2 className="w-3.5 h-3.5" />
               </button>
             </div>
-          </div>
-          <div className="flex items-baseline justify-between mb-2">
-            <div>
-              <span className="text-[11px] text-slate-400 font-medium block">Active trainees</span>
-              <span className="text-xl font-bold text-slate-900">1,096 / 1,284</span>
+            <div className="my-1.5 sm:my-2">
+              <div className="text-[26px] sm:text-[32px] font-semibold text-slate-900 tracking-tight leading-none">
+                1,096 <span className="text-sm font-normal text-slate-400">/ 1,284</span>
+              </div>
+              <div className="flex items-center justify-between text-xs mt-2">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-emerald-600 font-medium">↗ 85%</span>
+                  <span className="text-slate-400">active trainees</span>
+                </div>
+                <span className="text-slate-400">188 inactive</span>
+              </div>
             </div>
-            <div className="text-right">
-              <span className="text-[11px] text-slate-400 font-medium block">Inactive</span>
-              <span className="text-sm font-semibold text-slate-600">188</span>
+            <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden flex mt-2">
+              <div className="bg-blue-600 h-full w-[85%]" />
+              <div className="bg-slate-200 h-full w-[15%]" />
             </div>
-          </div>
-          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden flex">
-            <div className="bg-blue-600 h-full w-[85%]" />
-            <div className="bg-slate-200 h-full w-[15%]" />
           </div>
         </div>
       </div>
 
-      {/* 3. Four Metric KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+      {/* ======================================================== */}
+      {/* 2. BOTTOM SECTION: Four KTG Metric Cards                  */}
+      {/* Visual strictly matching image_a88f9ff2.png with 40px icon */}
+      {/* ======================================================== */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5">
+        {/* Card 1: User Signups / Enrollments */}
+        <div className="bg-white rounded-2xl p-4 sm:p-5 lg:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
           <div className="flex items-start justify-between">
-            <span className="text-xs font-semibold text-slate-500">Enrollments</span>
-            <div className="w-[40px] h-[40px] rounded-full bg-pink-100 text-pink-600 flex items-center justify-center shrink-0">
-              <Users className="w-[26px] h-[26px]" />
+            <span className="text-[13px] sm:text-[14px] text-slate-500 font-normal">User Signups</span>
+            <div className="w-9 h-9 sm:w-[40px] sm:h-[40px] rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center shrink-0">
+              <Users className="w-5 h-5 sm:w-[26px] sm:h-[26px]" />
             </div>
           </div>
-          <div className="mt-4">
-            <div className="text-2xl font-bold text-slate-900 tabular-nums">3,420</div>
-            <div className="flex items-center gap-1.5 mt-1">
-              <span className="inline-flex items-center text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
-                <ArrowUpRight className="w-3 h-3" /> +12.4%
-              </span>
-              <span className="text-[11px] text-slate-400">from last month</span>
+          <div className="my-1.5 sm:my-2">
+            <div className="text-2xl sm:text-[32px] lg:text-[36px] font-semibold text-slate-900 tracking-tight leading-none">
+              450
             </div>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs">
+            <span className="text-emerald-600 font-medium">↗ 10%</span>
+            <span className="text-slate-400 font-normal">vs last 30 days</span>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+        {/* Card 2: Churn Rate / Issuance */}
+        <div className="bg-white rounded-2xl p-4 sm:p-5 lg:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
           <div className="flex items-start justify-between">
-            <span className="text-xs font-semibold text-slate-500">Certifications issued</span>
-            <div className="w-[40px] h-[40px] rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
-              <Award className="w-[26px] h-[26px]" />
+            <span className="text-[13px] sm:text-[14px] text-slate-500 font-normal">Churn Rate</span>
+            <div className="w-9 h-9 sm:w-[40px] sm:h-[40px] rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <Award className="w-5 h-5 sm:w-[26px] sm:h-[26px]" />
             </div>
           </div>
-          <div className="mt-4">
-            <div className="text-2xl font-bold text-slate-900 tabular-nums">912</div>
-            <div className="flex items-center gap-1.5 mt-1">
-              <span className="inline-flex items-center text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
-                <ArrowUpRight className="w-3 h-3" /> +8.1%
-              </span>
-              <span className="text-[11px] text-slate-400">from last month</span>
+          <div className="my-1.5 sm:my-2">
+            <div className="text-2xl sm:text-[32px] lg:text-[36px] font-semibold text-slate-900 tracking-tight leading-none">
+              2.3%
             </div>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs">
+            <span className="text-rose-500 font-medium">↘ 10%</span>
+            <span className="text-slate-400 font-normal">vs last 30 days</span>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+        {/* Card 3: Customer Support Tickets / Assessments */}
+        <div className="bg-white rounded-2xl p-4 sm:p-5 lg:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
           <div className="flex items-start justify-between">
-            <span className="text-xs font-semibold text-slate-500">Assessments completed</span>
-            <div className="w-[40px] h-[40px] rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-              <CheckCircle2 className="w-[26px] h-[26px]" />
+            <span className="text-[13px] sm:text-[14px] text-slate-500 font-normal">Customer Support Tickets</span>
+            <div className="w-9 h-9 sm:w-[40px] sm:h-[40px] rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-5 h-5 sm:w-[26px] sm:h-[26px]" />
             </div>
           </div>
-          <div className="mt-4">
-            <div className="text-2xl font-bold text-slate-900 tabular-nums">5,870</div>
-            <div className="flex items-center gap-1.5 mt-1">
-              <span className="inline-flex items-center text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
-                <ArrowUpRight className="w-3 h-3" /> +15.2%
-              </span>
-              <span className="text-[11px] text-slate-400">from last month</span>
+          <div className="my-1.5 sm:my-2">
+            <div className="text-2xl sm:text-[32px] lg:text-[36px] font-semibold text-slate-900 tracking-tight leading-none">
+              120
             </div>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs">
+            <span className="text-emerald-600 font-medium">↗ 10%</span>
+            <span className="text-slate-400 font-normal">vs last 30 days</span>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+        {/* Card 4: Active Subscriptions / Participation */}
+        <div className="bg-white rounded-2xl p-4 sm:p-5 lg:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
           <div className="flex items-start justify-between">
-            <span className="text-xs font-semibold text-slate-500">Participation rate</span>
-            <div className="w-[40px] h-[40px] rounded-full bg-purple-100 text-purple-600 flex items-center justify-center shrink-0">
-              <TrendingUp className="w-[26px] h-[26px]" />
+            <span className="text-[13px] sm:text-[14px] text-slate-500 font-normal">Active Subscriptions</span>
+            <div className="w-9 h-9 sm:w-[40px] sm:h-[40px] rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+              <TrendingUp className="w-5 h-5 sm:w-[26px] sm:h-[26px]" />
             </div>
           </div>
-          <div className="mt-4">
-            <div className="text-2xl font-bold text-slate-900 tabular-nums">78%</div>
-            <div className="flex items-center gap-1.5 mt-1">
-              <span className="inline-flex items-center text-[11px] font-semibold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded">
-                <ArrowDownRight className="w-3 h-3" /> -2.3%
-              </span>
-              <span className="text-[11px] text-slate-400">from last month</span>
+          <div className="my-1.5 sm:my-2">
+            <div className="text-2xl sm:text-[32px] lg:text-[36px] font-semibold text-slate-900 tracking-tight leading-none">
+              1,250
             </div>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs">
+            <span className="text-emerald-600 font-medium">↗ 10%</span>
+            <span className="text-slate-400 font-normal">vs last 30 days</span>
           </div>
         </div>
       </div>
@@ -1042,153 +1076,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             </button>
           </div>
         </section>
-      </div>
-
-      {/* Floating Widget to test new divisions arriving dynamically per user request */}
-      <div className="fixed bottom-6 left-6 lg:left-72 z-40 select-none">
-        {isTestWidgetOpen ? (
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200/90 p-4 w-[330px] text-xs animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
-                <Sparkles className="w-4 h-4 text-blue-600" />
-                <span>Division Circles Simulator</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsTestWidgetOpen(false)}
-                className="text-slate-400 hover:text-slate-600 p-0.5 rounded cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <p className="text-[11px] text-slate-500 mb-2.5 leading-relaxed">
-              Test dynamic creation and organic placement of division circles as new regional data arrives:
-            </p>
-
-            {/* Quick Auto Stream Simulator */}
-            <div className="flex items-center justify-between bg-slate-50 border border-slate-200/80 rounded-xl p-2 mb-3">
-              <div className="flex items-center gap-2">
-                <span
-                  className={`w-2 h-2 rounded-full ${
-                    isAutoStreaming ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'
-                  }`}
-                />
-                <span className="font-semibold text-slate-700 text-[11px]">
-                  {isAutoStreaming ? 'Auto-streaming arrivals' : 'Stream simulator'}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsAutoStreaming(!isAutoStreaming)}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-semibold text-[11px] transition-colors cursor-pointer ${
-                  isAutoStreaming
-                    ? 'bg-rose-50 text-rose-600 hover:bg-rose-100'
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
-              >
-                {isAutoStreaming ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
-                <span>{isAutoStreaming ? 'Stop' : 'Start auto'}</span>
-              </button>
-            </div>
-
-            {/* Quick Presets */}
-            <div className="space-y-1.5 mb-3">
-              <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                <span>Simulate New Arrivals</span>
-                <span className="text-slate-400 font-normal">Click to arrive</span>
-              </div>
-              <div className="grid grid-cols-2 gap-1.5 max-h-[110px] overflow-y-auto pr-0.5">
-                {SAMPLE_PRESETS.map((preset) => {
-                  const alreadyAdded = divisions.some((d) => d.name === preset.name);
-                  return (
-                    <button
-                      key={preset.name}
-                      type="button"
-                      disabled={alreadyAdded}
-                      onClick={() => handleAddPreset(preset)}
-                      className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg border text-left font-medium transition-colors ${
-                        alreadyAdded
-                          ? 'border-emerald-200 bg-emerald-50/60 text-emerald-800 opacity-70 cursor-default'
-                          : 'border-slate-200/80 bg-slate-50 hover:bg-blue-50 hover:border-blue-200 text-slate-700 hover:text-blue-700 cursor-pointer'
-                      }`}
-                    >
-                      <span className="truncate">{preset.name}</span>
-                      <span className="font-bold text-[10px]">
-                        {alreadyAdded ? '✓' : `+${preset.count}`}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Custom Addition Form */}
-            <form onSubmit={handleAddCustom} className="space-y-2 pt-2 border-t border-slate-100">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Division name"
-                  value={customName}
-                  onChange={(e) => setCustomName(e.target.value)}
-                  className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-600"
-                />
-                <input
-                  type="number"
-                  placeholder="Count"
-                  value={customCount}
-                  onChange={(e) => setCustomCount(e.target.value)}
-                  className="w-20 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-600"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 rounded-lg text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Create & Place Circle</span>
-              </button>
-            </form>
-
-            {/* Reset & Active Summary */}
-            <div className="pt-2.5 mt-2.5 border-t border-slate-100 flex items-center justify-between">
-              <span className="text-[11px] text-slate-500 font-medium">
-                {divisions.length} circles placed
-              </span>
-              <button
-                type="button"
-                onClick={handleResetDivisions}
-                className="flex items-center gap-1 text-[11px] font-semibold text-rose-600 hover:text-rose-700 cursor-pointer"
-              >
-                <RotateCcw className="w-3 h-3" />
-                <span>Reset to default 4</span>
-              </button>
-            </div>
-          </div>
-        ) : (
-          /* Floating Pill with Instant Quick Arrive */
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleQuickNextArrival}
-              className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-full shadow-xl text-xs font-semibold cursor-pointer transition-all hover:scale-105 active:scale-95"
-              title="Instantly create and place next arriving division circle"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>+ Quick Arrive</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsTestWidgetOpen(true)}
-              className="flex items-center gap-2 bg-[#14162b] hover:bg-slate-900 text-white px-3.5 py-2 rounded-full shadow-xl border border-slate-700/60 backdrop-blur-md text-xs font-medium cursor-pointer transition-all hover:scale-105 active:scale-95"
-              title="Open dynamic division circles test simulator"
-            >
-              <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-              <span className="font-semibold">Test Circles ({divisions.length})</span>
-              <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

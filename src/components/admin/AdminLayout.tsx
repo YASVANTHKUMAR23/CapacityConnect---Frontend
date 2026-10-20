@@ -14,8 +14,11 @@ import {
   Bell,
   LogOut,
   ChevronDown,
-  PanelLeft,
-  PanelLeftClose,
+  ChevronsLeft,
+  ChevronsRight,
+  Compass,
+  Sparkles,
+  ArrowRight,
 } from 'lucide-react';
 import { AdminTab, Screen } from '../../types';
 import { useAdminData } from '../../context/AdminDataContext';
@@ -99,37 +102,43 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       )}
 
       {/* Sidebar with Open / Close transition */}
+      {/* Sidebar with Open / Close transition matching Tailgrids design */}
       <aside
         className={`w-64 bg-white border-r border-slate-200/80 flex flex-col justify-between shrink-0 fixed top-0 bottom-0 left-0 z-30 overflow-y-auto transition-transform duration-300 ease-in-out ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="p-5">
-          {/* Logo with Close button */}
-          <div className="pt-2 pb-5 px-2 flex items-start justify-between">
-            <div>
-              <h1 className="text-xl font-bold tracking-tight text-slate-900 select-none">
-                Capacity Connect
-              </h1>
-              <p className="text-[11px] font-medium text-slate-400 mt-0.5">
-                India Meteorological Dept.
-              </p>
+        <div>
+          {/* Tailgrids-styled Sidebar Header */}
+          <div className="p-4 pb-4 border-b border-slate-100 flex items-center justify-between">
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="flex aspect-square size-10 h-[40px] w-[40px] items-center justify-center rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-xs shrink-0">
+                <Compass className="w-5.5 h-5.5 text-white" />
+              </span>
+              <div className="min-w-0">
+                <span className="font-bold text-slate-900 text-sm tracking-tight block truncate">
+                  Capacity Connect
+                </span>
+                <span className="text-[10.5px] text-slate-400 font-medium block truncate">
+                  IMD Training Portal
+                </span>
+              </div>
             </div>
             <button
               type="button"
               onClick={() => setIsSidebarOpen(false)}
-              className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
-              title="Close sidebar"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+              title="Collapse sidebar"
             >
-              <PanelLeftClose className="w-4 h-4" />
+              <ChevronsLeft className="w-4 h-4" />
             </button>
           </div>
 
           {/* Nav list */}
-          <nav className="space-y-6">
+          <nav className="p-4 space-y-5">
             {navItems.map((group) => (
               <div key={group.section}>
-                <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-3 mb-2 select-none">
+                <div className="text-[10.5px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-1.5 select-none">
                   {group.section}
                 </div>
                 <div className="space-y-1">
@@ -141,23 +150,23 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                         key={item.id}
                         type="button"
                         onClick={() => onSelectTab(item.id)}
-                        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all cursor-pointer ${
+                        className={`w-full h-[40px] flex items-center justify-between px-3.5 rounded-xl font-semibold text-xs transition-all cursor-pointer ${
                           isActive
                             ? 'bg-blue-600 text-white shadow-xs'
                             : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
                         }`}
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2.5">
                           <Icon
-                            className={`w-4 h-4 ${
+                            className={`w-4 h-4 shrink-0 ${
                               isActive ? 'text-white' : 'text-slate-400'
                             }`}
                           />
-                          <span>{item.label}</span>
+                          <span className="truncate">{item.label}</span>
                         </div>
                         {item.badge !== undefined && (
                           <span
-                            className={`px-2 py-0.5 text-xs font-semibold rounded-full ${
+                            className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${
                               isActive
                                 ? 'bg-white/25 text-white'
                                 : 'bg-red-500 text-white'
@@ -175,25 +184,31 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           </nav>
         </div>
 
-        {/* Ask the Assistant Promo Box at bottom of sidebar */}
-        <div className="p-5 pt-0">
-          <div className="bg-[#181c24] text-white p-4 rounded-2xl shadow-sm relative overflow-hidden">
-            <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center mb-3">
-              <MessageSquare className="w-4 h-4 text-blue-400" />
+        {/* Tailgrids-styled Ask Assistant Box in Sidebar */}
+        <div className="p-4 pt-0">
+          <div className="rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 p-4 text-white border border-slate-800 shadow-md relative overflow-hidden group">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="flex size-7 items-center justify-center rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                <Sparkles className="size-3.5" />
+              </span>
+              <span className="font-bold text-xs text-white">Ask Assistant</span>
+              <span className="ml-auto text-[9px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                Active
+              </span>
             </div>
-            <h4 className="text-sm font-semibold text-white mb-1">
-              Ask the assistant
-            </h4>
-            <p className="text-xs text-slate-400 mb-3.5 leading-relaxed">
-              Get quick answers on courses, trainees and competency gaps.
+            <p className="text-[11px] text-slate-400 mb-3 leading-relaxed">
+              Instant answers on meteorology courses, trainees and competency gaps.
             </p>
-            <button
-              type="button"
-              onClick={() => setIsChatbotOpen(true)}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-xl text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5"
-            >
-              <span>Open assistant</span>
-            </button>
+            <div>
+              <button
+                type="button"
+                onClick={() => setIsChatbotOpen(true)}
+                className="w-full h-[40px] flex items-center justify-between px-3.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-xs text-slate-300 hover:text-white transition-all cursor-pointer text-left shadow-xs"
+              >
+                <span className="text-[11px] truncate">Ask question...</span>
+                <MessageSquare className="w-4 h-4 text-blue-400 shrink-0" />
+              </button>
+            </div>
           </div>
         </div>
       </aside>
@@ -205,109 +220,109 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         }`}
       >
         {/* Top Header */}
-        <header className="sticky top-0 z-20 bg-[#f3f4f8]/90 backdrop-blur-md px-6 sm:px-8 py-4 sm:py-5 flex items-center justify-between border-b border-slate-200/40">
+        <header className="sticky top-0 z-20 bg-[#f3f4f8]/90 backdrop-blur-md px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 flex items-center justify-between border-b border-slate-200/40">
           <div className="flex items-center gap-3">
-            {/* Sidebar Open/Close Toggle Button */}
+            {/* Sidebar Open/Close Toggle Trigger with ChevronsLeft */}
             <button
               type="button"
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-2 rounded-xl bg-white border border-slate-200/90 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
-              title={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+              className="p-2 rounded-xl bg-white border border-slate-200/90 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all shadow-2xs cursor-pointer flex items-center justify-center"
+              title={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
             >
-              {isSidebarOpen ? (
-                <PanelLeftClose className="w-4 h-4" />
-              ) : (
-                <PanelLeft className="w-4 h-4" />
-              )}
+              <ChevronsLeft
+                className={`w-4 h-4 transition-transform duration-300 ${
+                  !isSidebarOpen ? 'rotate-180' : ''
+                }`}
+              />
             </button>
 
             <div>
               {currentTab === 'dashboard' && (
                 <>
-                  <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                  <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight truncate">
                     Good morning, Admin
                   </h1>
-                  <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                  <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 font-medium truncate">
                     Monday, 19 October 2026
                   </p>
                 </>
               )}
             {currentTab === 'courses' && (
               <>
-                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight truncate">
                   Course management
                 </h1>
-                <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 font-medium truncate">
                   All courses with trainer, enrollment and status
                 </p>
               </>
             )}
             {currentTab === 'trainers' && (
               <>
-                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight truncate">
                   Trainer management
                 </h1>
-                <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 font-medium truncate">
                   Review trainers and their activity status
                 </p>
               </>
             )}
             {currentTab === 'trainees' && (
               <>
-                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight truncate">
                   Trainee management
                 </h1>
-                <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 font-medium truncate">
                   Review trainees, progress and activity status
                 </p>
               </>
             )}
             {currentTab === 'role-management' && (
               <>
-                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight truncate">
                   Role management
                 </h1>
-                <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 font-medium truncate">
                   Approve new accounts and update user roles
                 </p>
               </>
             )}
             {currentTab === 'announcements' && (
               <>
-                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight truncate">
                   Homepage updates
                 </h1>
-                <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 font-medium truncate">
                   Publish notifications, announcements, achievements and new content
                 </p>
               </>
             )}
             {currentTab === 'analytics' && (
               <>
-                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight truncate">
                   Analytics
                 </h1>
-                <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 font-medium truncate">
                   Detailed enrollment, assessment and participation results
                 </p>
               </>
             )}
             {currentTab === 'competency' && (
               <>
-                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight truncate">
                   Competency
                 </h1>
-                <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 font-medium truncate">
                   Skill gaps, trainer coverage and capacity building progress
                 </p>
               </>
             )}
             {currentTab === 'settings' && (
               <>
-                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight truncate">
                   Settings
                 </h1>
-                <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 font-medium truncate">
                   Configure how the portal behaves for everyone
                 </p>
               </>
@@ -316,13 +331,13 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         </div>
 
         {/* Right Header Controls */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Export report button (matching 01-dashboard.png & 08-analytics.png) */}
             {(currentTab === 'dashboard' || currentTab === 'analytics') && (
               <button
                 type="button"
                 onClick={() => showToast('Exporting executive report summary as PDF...')}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-4 py-2 rounded-xl shadow-xs transition-colors cursor-pointer hidden sm:flex items-center gap-1.5"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-3 sm:px-4 py-2 rounded-xl shadow-xs transition-colors cursor-pointer hidden sm:flex items-center gap-1.5"
               >
                 <span>Export report</span>
               </button>
@@ -332,7 +347,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             <button
               type="button"
               onClick={() => setSearchModalOpen(true)}
-              className="w-9 h-9 rounded-full bg-white border border-slate-200/90 flex items-center justify-center text-slate-500 hover:text-slate-800 hover:border-slate-300 shadow-xs transition-colors cursor-pointer"
+              className="w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-full bg-white border border-slate-200/90 flex items-center justify-center text-slate-500 hover:text-slate-800 hover:border-slate-300 shadow-xs transition-colors cursor-pointer shrink-0"
               title="Search portal"
             >
               <Search className="w-4 h-4" />
@@ -343,7 +358,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
               <button
                 type="button"
                 onClick={() => setNotificationsOpen(!notificationsOpen)}
-                className="w-9 h-9 rounded-full bg-white border border-slate-200/90 flex items-center justify-center text-slate-500 hover:text-slate-800 hover:border-slate-300 shadow-xs transition-colors cursor-pointer relative"
+                className="w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-full bg-white border border-slate-200/90 flex items-center justify-center text-slate-500 hover:text-slate-800 hover:border-slate-300 shadow-xs transition-colors cursor-pointer relative shrink-0"
                 title="Notifications"
               >
                 <Bell className="w-4 h-4" />
@@ -351,7 +366,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
               </button>
 
               {notificationsOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-200 p-4 z-40 text-xs">
+                <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-xl border border-slate-200 p-4 z-40 text-xs">
                   <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
                     <span className="font-semibold text-slate-800 text-sm">Notifications</span>
                     <span className="text-[10px] text-blue-600 cursor-pointer font-medium">Mark read</span>
@@ -385,12 +400,12 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
               <button
                 type="button"
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center gap-2.5 bg-white border border-slate-200/90 rounded-full py-1.5 pl-2 pr-3.5 shadow-xs hover:border-slate-300 transition-all cursor-pointer select-none"
+                className="flex items-center gap-1.5 sm:gap-2.5 bg-white border border-slate-200/90 rounded-full py-1 sm:py-1.5 pl-1.5 sm:pl-2 pr-2.5 sm:pr-3.5 shadow-xs hover:border-slate-300 transition-all cursor-pointer select-none"
               >
-                <div className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center justify-center">
+                <div className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center justify-center shrink-0">
                   AU
                 </div>
-                <div className="text-left">
+                <div className="text-left hidden sm:block">
                   <div className="text-xs font-semibold text-slate-900 leading-tight">
                     Admin
                   </div>
@@ -398,7 +413,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                     IMD Headquarters
                   </div>
                 </div>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-0.5" />
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-0.5 shrink-0" />
               </button>
 
               {/* Profile Dropdown */}
@@ -443,7 +458,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         </header>
 
         {/* Page Content */}
-        <main className="p-8 pb-16 flex-1">{children}</main>
+        <main className="p-3 sm:p-6 lg:p-8 pb-32 sm:pb-16 flex-1 max-w-full overflow-x-hidden min-w-0">{children}</main>
       </div>
 
       {/* Floating Chatbot Bubble at bottom-right */}
@@ -451,7 +466,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         <button
           type="button"
           onClick={() => setIsChatbotOpen(true)}
-          className="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-xl flex items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-xl flex items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer"
           title="Open Capacity Assistant"
         >
           <MessageSquare className="w-5 h-5" />

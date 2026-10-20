@@ -15,6 +15,8 @@ import {
   Mail,
   Phone,
   Calendar,
+  GraduationCap,
+  Info,
 } from 'lucide-react';
 import { useAdminData } from '../../context/AdminDataContext';
 import { PendingApprovalItem, UserDirectoryItem } from '../../types';
@@ -23,24 +25,20 @@ interface RoleManagementPageProps {
   showToast: (msg: string) => void;
 }
 
-interface PendingRoleChangeState {
-  user: UserDirectoryItem;
-  targetRole: 'Trainer' | 'Trainee' | 'Admin';
-  verificationChecked: boolean;
-  reason: string;
-}
-
 export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToast }) => {
   const { pendingApprovals, approveUser, rejectUser, userDirectory, updateUserRole } =
     useAdminData();
 
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Modal 1: User Profile Approval Summary Pop-up
+  // Tailgrids-style Approval Dialog
   const [selectedApprovalUser, setSelectedApprovalUser] = useState<PendingApprovalItem | null>(null);
 
-  // Modal 2: Administrative Verification Pop-up before changing user role
-  const [pendingRoleChange, setPendingRoleChange] = useState<PendingRoleChangeState | null>(null);
+  // Role Change Drawer state
+  const [roleDrawerUser, setRoleDrawerUser] = useState<UserDirectoryItem | null>(null);
+  const [drawerTargetRole, setDrawerTargetRole] = useState<'Trainee' | 'Trainer' | null>(null);
+  const [drawerConfirmed, setDrawerConfirmed] = useState(false);
+  const [drawerReason, setDrawerReason] = useState('Routine departmental reassignment');
 
   const confirmApprove = (p: PendingApprovalItem) => {
     approveUser(p.id);
@@ -54,12 +52,13 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
     setSelectedApprovalUser(null);
   };
 
-  const confirmRoleChange = () => {
-    if (!pendingRoleChange) return;
-    const { user, targetRole } = pendingRoleChange;
-    updateUserRole(user.id, targetRole);
-    showToast(`Administrative verification complete: Updated ${user.name}'s role to ${targetRole}.`);
-    setPendingRoleChange(null);
+  const handleConfirmDrawerRoleChange = () => {
+    if (!roleDrawerUser || !drawerTargetRole) return;
+    updateUserRole(roleDrawerUser.id, drawerTargetRole);
+    showToast(`Role updated: ${roleDrawerUser.name} is now assigned as ${drawerTargetRole}.`);
+    setRoleDrawerUser(null);
+    setDrawerTargetRole(null);
+    setDrawerConfirmed(false);
   };
 
   const filteredDirectory = userDirectory.filter(
@@ -102,19 +101,10 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
                 {pendingApprovals.map((p) => (
                   <tr key={p.id} className="hover:bg-slate-50/50">
                     <td className="py-3.5 pr-3">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
-                            p.avatarBg || 'bg-rose-100 text-rose-800'
-                          }`}
-                        >
-                          {p.initials}
-                        </div>
-                        <div>
-                          <div className="font-semibold text-slate-900">{p.name}</div>
-                          <div className="text-slate-400 text-[11px] font-normal">
-                            {p.email}
-                          </div>
+                      <div>
+                        <div className="font-semibold text-slate-900">{p.name}</div>
+                        <div className="text-slate-400 text-[11px] font-normal">
+                          {p.email}
                         </div>
                       </div>
                     </td>
@@ -190,19 +180,10 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
               {filteredDirectory.map((u) => (
                 <tr key={u.id} className="hover:bg-slate-50/50">
                   <td className="py-3.5 pr-3">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
-                          u.avatarBg || 'bg-blue-100 text-blue-800'
-                        }`}
-                      >
-                        {u.initials}
-                      </div>
-                      <div>
-                        <div className="font-semibold text-slate-900">{u.name}</div>
-                        <div className="text-slate-400 text-[11px] font-normal">
-                          {u.email}
-                        </div>
+                    <div>
+                      <div className="font-semibold text-slate-900">{u.name}</div>
+                      <div className="text-slate-400 text-[11px] font-normal">
+                        {u.email}
                       </div>
                     </div>
                   </td>
@@ -226,28 +207,20 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
                   </td>
                   <td className="py-3.5 text-slate-500 font-medium">{u.joined}</td>
                   <td className="py-3.5 text-right">
-                    <div className="inline-flex items-center">
-                      <select
-                        value={u.role}
-                        onChange={(e) => {
-                          const newRole = e.target.value as 'Trainer' | 'Trainee' | 'Admin';
-                          if (newRole !== u.role) {
-                            // Triggers Admin Verification Pop-up before changing role
-                            setPendingRoleChange({
-                              user: u,
-                              targetRole: newRole,
-                              verificationChecked: false,
-                              reason: 'Routine departmental role reassignment',
-                            });
-                          }
-                        }}
-                        className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600/30 cursor-pointer hover:border-blue-300 transition-colors"
-                      >
-                        <option value="Trainee">Trainee</option>
-                        <option value="Trainer">Trainer</option>
-                        <option value="Admin">Admin</option>
-                      </select>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRoleDrawerUser(u);
+                        setDrawerTargetRole(u.role === 'Trainer' ? 'Trainee' : 'Trainer');
+                        setDrawerConfirmed(false);
+                        setDrawerReason('Routine departmental role reassignment');
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200/90 hover:border-blue-300 hover:bg-blue-50/70 text-slate-700 hover:text-blue-700 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
+                      title="Open role change drawer"
+                    >
+                      <Shield className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Change role</span>
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -276,158 +249,113 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
       </div>
 
       {/* ======================================================== */}
-      {/* POP-UP 1: Profile Details & Summary on User Approval      */}
+      {/* 1. TAILGRIDS-STYLE APPROVAL DIALOG (on User Approval)     */}
       {/* ======================================================== */}
       {selectedApprovalUser && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
-          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200/90 overflow-hidden animate-in zoom-in-95 duration-150">
-            {/* Header */}
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
-                  <UserCheck className="w-4 h-4" />
-                </div>
+          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-150">
+            {/* Dialog Header */}
+            <div className="p-6 pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <span className="flex size-10 items-center justify-center rounded-full bg-blue-50 text-blue-600 shrink-0">
+                  <CheckCircle2 className="w-5 h-5" />
+                </span>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-sm">User Profile Approval Summary</h3>
-                  <p className="text-[11px] text-slate-400">Review profile details before granting portal access</p>
+                  <h3 className="font-bold text-slate-900 text-base">Approve User Profile</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    A new account request is pending. Review profile details before granting portal access.
+                  </p>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setSelectedApprovalUser(null)}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg transition-colors cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
             </div>
 
-            {/* Content Body */}
+            {/* Dialog Body */}
             <div className="p-6 space-y-4 text-xs">
-              {/* Profile Card Header */}
-              <div className="flex items-start gap-3.5 p-3.5 bg-blue-50/60 border border-blue-100 rounded-xl">
-                <div
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-base shrink-0 shadow-2xs ${
-                    selectedApprovalUser.avatarBg || 'bg-rose-100 text-rose-800'
-                  }`}
-                >
-                  {selectedApprovalUser.initials}
+              {/* Profile Card */}
+              <div className="rounded-xl bg-slate-50 border border-slate-200/80 p-4">
+                <div className="flex items-center gap-3.5 mb-3">
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 ${
+                      selectedApprovalUser.avatarBg || 'bg-blue-100 text-blue-800'
+                    }`}
+                  >
+                    {selectedApprovalUser.initials}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-bold text-slate-900 text-sm truncate">
+                        {selectedApprovalUser.name}
+                      </h4>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-600 text-white">
+                        Requested: {selectedApprovalUser.roleRequested}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 truncate mt-0.5">{selectedApprovalUser.email}</p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-bold text-slate-900 text-sm truncate">
-                      {selectedApprovalUser.name}
-                    </h4>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-600 text-white">
-                      Requested: {selectedApprovalUser.roleRequested}
+
+                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-200/60 text-xs">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Division</span>
+                    <span className="font-semibold text-slate-700">{selectedApprovalUser.division}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Submitted</span>
+                    <span className="font-semibold text-slate-700">{selectedApprovalUser.submitted}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Employee ID</span>
+                    <span className="font-semibold text-slate-700">
+                      IMD-2026-{selectedApprovalUser.id.replace('app-', '').toUpperCase().padStart(4, '0')}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-slate-500 text-[11px] mt-0.5">
-                    <Mail className="w-3 h-3 text-slate-400 shrink-0" />
-                    <span className="truncate">{selectedApprovalUser.email}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-[11px] text-slate-500 mt-1">
-                    <span className="flex items-center gap-1">
-                      <Building className="w-3 h-3 text-slate-400" />
-                      {selectedApprovalUser.division}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3 text-slate-400" />
-                      Submitted {selectedApprovalUser.submitted}
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Security Clearance</span>
+                    <span className="font-semibold text-emerald-600 flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Level 2 Verified
                     </span>
                   </div>
                 </div>
               </div>
 
-              {/* Profile Details Grid */}
-              <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200/80">
-                <div>
-                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
-                    Employee ID
-                  </span>
-                  <span className="font-bold text-slate-800 text-xs">
-                    IMD-2026-{selectedApprovalUser.id.replace('app-', '').toUpperCase().padStart(4, '0')}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
-                    Official Phone
-                  </span>
-                  <span className="font-semibold text-slate-700 text-xs">
-                    +91 98201 44820
-                  </span>
-                </div>
-                <div>
-                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
-                    Assigned Region
-                  </span>
-                  <span className="font-semibold text-slate-700 text-xs">
-                    {selectedApprovalUser.division} Station
-                  </span>
-                </div>
-                <div>
-                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
-                    Clearance Status
-                  </span>
-                  <span className="font-semibold text-emerald-600 text-xs flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" /> Level 2 Verified
-                  </span>
-                </div>
-              </div>
-
-              {/* Simple Profile Summary */}
-              <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-                  Profile Summary & Endorsement
-                </span>
-                <p className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl text-slate-600 leading-relaxed text-[11.5px]">
-                  Scientific officer candidate stationed at <b>{selectedApprovalUser.division}</b>. Specializes in synoptic weather analysis, observational telemetry, and early warning radar interpretation. Completed preliminary background checks and holds departmental endorsement for <b>{selectedApprovalUser.roleRequested}</b> portal credentials.
-                </p>
-              </div>
-
-              {/* Verification Checklist */}
-              <div className="space-y-1.5">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                  Automated Verification Checks
-                </span>
-                <div className="flex items-center gap-2 text-[11px] text-slate-700">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                  <span>Official Government email domain verified (<b>@imd.gov.in</b>)</span>
-                </div>
-                <div className="flex items-center gap-2 text-[11px] text-slate-700">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                  <span>Head of Division recommendation document verified</span>
-                </div>
-                <div className="flex items-center gap-2 text-[11px] text-slate-700">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                  <span>Orientation and data compliance acknowledgement signed</span>
-                </div>
+              {/* Tailgrids-styled Summary Checklist */}
+              <div className="rounded-xl bg-blue-50/60 border border-blue-100 p-4">
+                <h4 className="mb-2 text-sm font-semibold text-slate-900">
+                  Profile Details & Verification Checklist
+                </h4>
+                <ul className="list-inside list-disc space-y-1.5 text-xs text-slate-600">
+                  <li>Official Government email domain verified (<b>@imd.gov.in</b>)</li>
+                  <li>Scientific Officer credential verified by Head of Division</li>
+                  <li>National Meteorology Center security clearance completed</li>
+                  <li>Orientation and data compliance acknowledgement signed</li>
+                </ul>
               </div>
             </div>
 
-            {/* Footer Buttons */}
+            {/* Dialog Footer */}
             <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-slate-50/50">
               <button
                 type="button"
-                onClick={() => confirmReject(selectedApprovalUser)}
-                className="px-3.5 py-2 text-rose-600 hover:bg-rose-50 font-semibold rounded-xl transition-colors cursor-pointer"
+                onClick={() => setSelectedApprovalUser(null)}
+                className="px-4 py-2 border border-slate-200 hover:bg-slate-100 text-slate-600 font-semibold rounded-xl text-xs transition-colors cursor-pointer"
               >
-                Reject Request
+                Remind Me Later
               </button>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setSelectedApprovalUser(null)}
-                  className="px-4 py-2 border border-slate-200 hover:bg-slate-100 font-semibold text-slate-600 rounded-xl transition-colors cursor-pointer"
+                  onClick={() => confirmReject(selectedApprovalUser)}
+                  className="px-3.5 py-2 text-rose-600 hover:bg-rose-50 font-semibold rounded-xl text-xs transition-colors cursor-pointer"
                 >
-                  Cancel
+                  Reject
                 </button>
                 <button
                   type="button"
                   onClick={() => confirmApprove(selectedApprovalUser)}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors cursor-pointer shadow-xs"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-xs transition-colors cursor-pointer shadow-xs"
                 >
                   <Check className="w-4 h-4" />
-                  <span>Confirm & Grant Access</span>
+                  <span>Update & Approve Now</span>
                 </button>
               </div>
             </div>
@@ -436,145 +364,209 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
       )}
 
       {/* ======================================================== */}
-      {/* POP-UP 2: Admin Verification Pop-up for User Role Change */}
+      {/* 2. ROLE CHANGE DRAWER (2 Options: Trainee / Trainer)     */}
       {/* ======================================================== */}
-      {pendingRoleChange && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200/90 overflow-hidden animate-in zoom-in-95 duration-150">
-            {/* Header */}
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-amber-50/70">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center">
-                  <ShieldCheck className="w-4 h-4" />
-                </div>
+      {roleDrawerUser && (
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+            onClick={() => setRoleDrawerUser(null)}
+          />
+
+          {/* Sliding Drawer */}
+          <div className="fixed inset-y-0 right-0 w-full sm:w-[460px] bg-white shadow-2xl flex flex-col justify-between border-l border-slate-200 animate-in slide-in-from-right duration-200 z-50">
+            {/* Drawer Header */}
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
+              <div className="flex items-center gap-3">
+                <span className="flex size-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 shrink-0">
+                  <Shield className="w-5 h-5" />
+                </span>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-sm">
-                    Administrative Verification Required
-                  </h3>
-                  <p className="text-[11px] text-amber-800/80">Secondary confirmation for role modification</p>
+                  <h3 className="font-bold text-slate-900 text-base">Change User Role</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Modify portal authorization and role permissions
+                  </p>
                 </div>
               </div>
               <button
                 type="button"
-                onClick={() => setPendingRoleChange(null)}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg transition-colors cursor-pointer"
+                onClick={() => setRoleDrawerUser(null)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                title="Close drawer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Body */}
-            <div className="p-6 space-y-4 text-xs">
-              {/* User details */}
-              <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
+            {/* Drawer Content */}
+            <div className="p-6 overflow-y-auto space-y-5 text-xs flex-1">
+              {/* User Profile Card */}
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center gap-3.5">
                 <div
-                  className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
-                    pendingRoleChange.user.avatarBg || 'bg-blue-100 text-blue-800'
+                  className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-sm shrink-0 shadow-2xs ${
+                    roleDrawerUser.avatarBg || 'bg-blue-100 text-blue-800'
                   }`}
                 >
-                  {pendingRoleChange.user.initials}
+                  {roleDrawerUser.initials}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="font-bold text-slate-900 text-xs">
-                    {pendingRoleChange.user.name}
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-bold text-slate-900 text-sm truncate">{roleDrawerUser.name}</h4>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-200/80 text-slate-700">
+                      Current: {roleDrawerUser.role}
+                    </span>
                   </div>
-                  <div className="text-[11px] text-slate-400 truncate">
-                    {pendingRoleChange.user.email}
+                  <p className="text-slate-500 text-xs truncate mt-0.5">{roleDrawerUser.email}</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Joined: {roleDrawerUser.joined}</p>
+                </div>
+              </div>
+
+              {/* 2 Role Options: Trainee and Trainer only */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    Select New Role (2 Options)
+                  </span>
+                  <span className="text-[11px] text-slate-400 font-medium">Trainee / Trainer</span>
+                </div>
+
+                {/* Option 1: Trainee */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDrawerTargetRole('Trainee');
+                    setDrawerConfirmed(false);
+                  }}
+                  className={`w-full text-left p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-start gap-3.5 ${
+                    drawerTargetRole === 'Trainee'
+                      ? 'border-blue-600 bg-blue-50/40 shadow-xs'
+                      : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50/60'
+                  }`}
+                >
+                  <div
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                      drawerTargetRole === 'Trainee'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-slate-100 text-slate-600'
+                    }`}
+                  >
+                    <GraduationCap className="w-5 h-5" />
                   </div>
-                </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-bold text-slate-900 text-sm">Trainee</span>
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                        Learner Track
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      Access training modules, radar & synoptic weather quizzes, track competency gaps, and participate in divisional sessions.
+                    </p>
+                  </div>
+                </button>
+
+                {/* Option 2: Trainer */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDrawerTargetRole('Trainer');
+                    setDrawerConfirmed(false);
+                  }}
+                  className={`w-full text-left p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-start gap-3.5 ${
+                    drawerTargetRole === 'Trainer'
+                      ? 'border-blue-600 bg-blue-50/40 shadow-xs'
+                      : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50/60'
+                  }`}
+                >
+                  <div
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                      drawerTargetRole === 'Trainer'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-slate-100 text-slate-600'
+                    }`}
+                  >
+                    <UserCheck className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-bold text-slate-900 text-sm">Trainer</span>
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                        Instructor Track
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      Manage course curriculums, organize live simulations, score assignments, evaluate trainees, and oversee competency metrics.
+                    </p>
+                  </div>
+                </button>
               </div>
 
-              {/* Role Transition Visual */}
-              <div className="flex items-center justify-between p-3.5 bg-blue-50/50 border border-blue-100 rounded-xl">
-                <div className="text-center">
-                  <span className="text-[10px] font-semibold text-slate-400 block mb-1">
-                    Current Role
-                  </span>
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-200/80 text-slate-700 inline-block">
-                    {pendingRoleChange.user.role}
-                  </span>
-                </div>
-                <div className="flex flex-col items-center justify-center text-blue-600 px-2">
-                  <ArrowRight className="w-4 h-4" />
-                  <span className="text-[9px] font-bold uppercase mt-0.5">Switching to</span>
-                </div>
-                <div className="text-center">
-                  <span className="text-[10px] font-semibold text-blue-600 block mb-1">
-                    New Target Role
-                  </span>
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-600 text-white inline-block shadow-2xs">
-                    {pendingRoleChange.targetRole}
-                  </span>
-                </div>
-              </div>
+              {/* Confirmation Step */}
+              {drawerTargetRole && (
+                <div className="space-y-3 pt-3 border-t border-slate-200/80 animate-in fade-in duration-150">
+                  {/* Transition visual */}
+                  <div className="p-3.5 bg-blue-50/60 border border-blue-200/80 rounded-2xl flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-500 block">From</span>
+                      <span className="font-bold text-slate-800 text-xs">{roleDrawerUser.role}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-blue-600 font-bold text-xs">
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] uppercase font-bold text-blue-600 block">To</span>
+                      <span className="font-bold text-blue-700 text-xs">{drawerTargetRole}</span>
+                    </div>
+                  </div>
 
-              {/* Permission Impact Description */}
-              <div className="p-3 bg-amber-50/80 border border-amber-200/70 rounded-xl space-y-1 text-amber-900">
-                <div className="flex items-center gap-1.5 font-bold text-[11px]">
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                  <span>Access & Security Impact</span>
+                  {/* Justification input */}
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">
+                      Administrative Reason (Audit Log Reference)
+                    </label>
+                    <input
+                      type="text"
+                      value={drawerReason}
+                      onChange={(e) => setDrawerReason(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-blue-600/30"
+                      placeholder="e.g., Routine departmental role reassignment"
+                    />
+                  </div>
+
+                  {/* Verification Checkbox */}
+                  <label className="flex items-start gap-2.5 p-3 rounded-xl border border-slate-200 bg-slate-50/80 hover:bg-slate-50 cursor-pointer transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={drawerConfirmed}
+                      onChange={(e) => setDrawerConfirmed(e.target.checked)}
+                      className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <span className="text-[11.5px] font-medium text-slate-700 leading-snug">
+                      I confirm that as an Administrator, I have verified the credentials and authorization to modify <b>{roleDrawerUser.name}</b>'s role to <b>{drawerTargetRole}</b>.
+                    </span>
+                  </label>
                 </div>
-                <p className="text-[11px] leading-relaxed text-amber-900/90">
-                  {pendingRoleChange.targetRole === 'Admin'
-                    ? 'Granting Administrator privileges provides full system governance, role elevation, data modification, and emergency broadcast publishing.'
-                    : pendingRoleChange.targetRole === 'Trainer'
-                    ? 'Granting Trainer credentials allows curriculum authoring, scoring assignments, publishing grades, and evaluating trainees.'
-                    : 'Switching to Trainee restricts access to standard learner modules, self-enrollment, and personal progress tracking.'}
-                </p>
-              </div>
-
-              {/* Justification note */}
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Reason for Role Change (Audit Log Reference)
-                </label>
-                <input
-                  type="text"
-                  value={pendingRoleChange.reason}
-                  onChange={(e) =>
-                    setPendingRoleChange({ ...pendingRoleChange, reason: e.target.value })
-                  }
-                  placeholder="e.g., Annual promotion, inter-division transfer"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-hidden focus:ring-2 focus:ring-blue-600/30"
-                />
-              </div>
-
-              {/* Mandatory Verification Checkbox */}
-              <label className="flex items-start gap-2.5 p-3 rounded-xl border border-slate-200/90 bg-slate-50/80 hover:bg-slate-50 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
-                  checked={pendingRoleChange.verificationChecked}
-                  onChange={(e) =>
-                    setPendingRoleChange({
-                      ...pendingRoleChange,
-                      verificationChecked: e.target.checked,
-                    })
-                  }
-                  className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                />
-                <span className="text-[11px] font-medium text-slate-700 leading-snug">
-                  I confirm that as an Administrator, I have verified the credentials and authorization to modify <b>{pendingRoleChange.user.name}</b>'s role to <b>{pendingRoleChange.targetRole}</b>.
-                </span>
-              </label>
+              )}
             </div>
 
-            {/* Footer Buttons */}
-            <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-2 bg-slate-50/50">
+            {/* Drawer Footer */}
+            <div className="p-6 border-t border-slate-100 flex items-center justify-end gap-2.5 bg-slate-50/50">
               <button
                 type="button"
-                onClick={() => setPendingRoleChange(null)}
-                className="px-4 py-2 border border-slate-200 hover:bg-slate-100 font-semibold text-slate-600 rounded-xl transition-colors cursor-pointer"
+                onClick={() => setRoleDrawerUser(null)}
+                className="px-4 py-2 border border-slate-200 hover:bg-slate-100 text-slate-600 font-semibold rounded-xl text-xs transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="button"
-                disabled={!pendingRoleChange.verificationChecked}
-                onClick={confirmRoleChange}
-                className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors cursor-pointer shadow-xs"
+                disabled={!drawerTargetRole || !drawerConfirmed}
+                onClick={handleConfirmDrawerRoleChange}
+                className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-xl text-xs transition-colors cursor-pointer shadow-xs"
               >
                 <ShieldCheck className="w-4 h-4" />
-                <span>Verify & Update Role</span>
+                <span>Confirm & Change Role</span>
               </button>
             </div>
           </div>

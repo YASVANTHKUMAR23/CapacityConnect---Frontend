@@ -1,19 +1,17 @@
 import React, { useState } from 'react';
-import { Search, ChevronDown, Edit2, MoreHorizontal, X } from 'lucide-react';
+import { Search, ChevronDown } from 'lucide-react';
 import { useAdminData } from '../../context/AdminDataContext';
-import { TrainerItem } from '../../types';
 
 interface TrainersPageProps {
   showToast?: (msg: string) => void;
 }
 
-export const TrainersPage: React.FC<TrainersPageProps> = ({ showToast }) => {
-  const { trainers, updateTrainer } = useAdminData();
+export const TrainersPage: React.FC<TrainersPageProps> = () => {
+  const { trainers } = useAdminData();
   const [activeTab, setActiveTab] = useState<'All' | 'Active' | 'Inactive'>('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [subjectFilter, setSubjectFilter] = useState('All');
   const [divisionFilter, setDivisionFilter] = useState('All');
-  const [editingTrainer, setEditingTrainer] = useState<TrainerItem | null>(null);
 
   const filteredTrainers = trainers.filter((t) => {
     if (activeTab !== 'All' && t.status !== activeTab) return false;
@@ -119,71 +117,48 @@ export const TrainersPage: React.FC<TrainersPageProps> = ({ showToast }) => {
       {/* Trainers Table */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-[13px]">
             <thead>
-              <tr className="border-b border-slate-100 text-slate-400 font-semibold">
+              <tr className="border-b border-slate-100 text-slate-400 font-semibold text-[13px]">
                 <th className="pb-3.5 font-medium">Trainer</th>
                 <th className="pb-3.5 font-medium">Subject expertise</th>
                 <th className="pb-3.5 font-medium">Courses</th>
                 <th className="pb-3.5 font-medium">Trainees</th>
                 <th className="pb-3.5 font-medium">Last active</th>
                 <th className="pb-3.5 font-medium">Status</th>
-                <th className="pb-3.5 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredTrainers.map((t) => (
                 <tr key={t.id} className="hover:bg-slate-50/50">
                   <td className="py-3.5 pr-3">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${t.avatarBg}`}
-                      >
-                        {t.initials}
-                      </div>
-                      <div>
-                        <div className="font-semibold text-slate-900">{t.name}</div>
-                        <div className="text-slate-400 text-[11px] font-normal">
-                          {t.email}
-                        </div>
+                    <div>
+                      <div className="font-semibold text-slate-900 text-[13px]">{t.name}</div>
+                      <div className="text-slate-400 text-xs font-normal">
+                        {t.email}
                       </div>
                     </div>
                   </td>
-                  <td className="py-3.5 text-slate-700 font-medium">{t.expertise}</td>
-                  <td className="py-3.5 text-slate-800 font-semibold tabular-nums">
+                  <td className="py-3.5 text-slate-700 font-medium text-[13px]">{t.expertise}</td>
+                  <td className="py-3.5 text-slate-800 font-semibold tabular-nums text-[13px]">
                     {t.coursesCount}
                   </td>
-                  <td className="py-3.5 text-slate-800 font-semibold tabular-nums">
+                  <td className="py-3.5 text-slate-800 font-semibold tabular-nums text-[13px]">
                     {t.traineesCount}
                   </td>
-                  <td className="py-3.5 text-slate-500 font-medium">{t.lastActive}</td>
+                  <td className="py-3.5 text-slate-500 font-medium text-[13px]">{t.lastActive}</td>
                   <td className="py-3.5">
                     {t.status === 'Active' ? (
-                      <span className="inline-flex items-center gap-1.5 text-emerald-700 font-semibold text-[11px]">
+                      <span className="inline-flex items-center gap-1.5 text-emerald-700 font-semibold text-xs">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                         Active
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 text-slate-500 font-semibold text-[11px]">
+                      <span className="inline-flex items-center gap-1.5 text-slate-500 font-semibold text-xs">
                         <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
                         Inactive
                       </span>
                     )}
-                  </td>
-                  <td className="py-3.5 text-right">
-                    <div className="flex items-center justify-end gap-1 text-slate-400">
-                      <button
-                        type="button"
-                        onClick={() => setEditingTrainer({ ...t })}
-                        className="p-1.5 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                        title="Edit trainer"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button type="button" className="p-1.5 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer">
-                        <MoreHorizontal className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
                   </td>
                 </tr>
               ))}
@@ -211,139 +186,8 @@ export const TrainersPage: React.FC<TrainersPageProps> = ({ showToast }) => {
         </div>
       </div>
 
-      {/* Edit Trainer Modal Dialog */}
-      {editingTrainer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-              <div className="flex items-center gap-2">
-                <div
-                  className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs ${editingTrainer.avatarBg}`}
-                >
-                  {editingTrainer.initials}
-                </div>
-                <h3 className="font-bold text-slate-900 text-sm">Edit Trainer</h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setEditingTrainer(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
 
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                updateTrainer(editingTrainer.id, editingTrainer);
-                showToast?.(`Trainer "${editingTrainer.name}" updated successfully.`);
-                setEditingTrainer(null);
-              }}
-              className="p-6 space-y-4 text-xs"
-            >
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Trainer Name</label>
-                <input
-                  type="text"
-                  value={editingTrainer.name}
-                  onChange={(e) => setEditingTrainer({ ...editingTrainer, name: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-hidden focus:ring-2 focus:ring-blue-600/30"
-                  required
-                />
-              </div>
 
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Official Email</label>
-                <input
-                  type="email"
-                  value={editingTrainer.email}
-                  onChange={(e) => setEditingTrainer({ ...editingTrainer, email: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-hidden focus:ring-2 focus:ring-blue-600/30"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Subject Expertise</label>
-                <input
-                  type="text"
-                  value={editingTrainer.expertise}
-                  onChange={(e) =>
-                    setEditingTrainer({ ...editingTrainer, expertise: e.target.value })
-                  }
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-hidden focus:ring-2 focus:ring-blue-600/30"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Assigned Courses</label>
-                  <input
-                    type="number"
-                    value={editingTrainer.coursesCount}
-                    onChange={(e) =>
-                      setEditingTrainer({
-                        ...editingTrainer,
-                        coursesCount: parseInt(e.target.value, 10) || 0,
-                      })
-                    }
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-hidden focus:ring-2 focus:ring-blue-600/30"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Trainees Mentored</label>
-                  <input
-                    type="number"
-                    value={editingTrainer.traineesCount}
-                    onChange={(e) =>
-                      setEditingTrainer({
-                        ...editingTrainer,
-                        traineesCount: parseInt(e.target.value, 10) || 0,
-                      })
-                    }
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-hidden focus:ring-2 focus:ring-blue-600/30"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Status</label>
-                <select
-                  value={editingTrainer.status}
-                  onChange={(e) =>
-                    setEditingTrainer({
-                      ...editingTrainer,
-                      status: e.target.value as 'Active' | 'Inactive',
-                    })
-                  }
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold focus:outline-hidden focus:ring-2 focus:ring-blue-600/30 cursor-pointer"
-                >
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                </select>
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setEditingTrainer(null)}
-                  className="px-4 py-2 border border-slate-200 hover:bg-slate-50 font-semibold text-slate-600 rounded-xl transition-colors cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors cursor-pointer shadow-xs"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -84,65 +84,77 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ showToast }) => {
         </button>
       </div>
 
-      {/* 4 Top KPI Cards matching 08-analytics.png */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+      {/* 4 Top KPI Cards matching image_a88f9ff2.png */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
           <div className="flex items-start justify-between">
-            <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center">
-              <Users className="w-4 h-4" />
+            <span className="text-[13px] sm:text-[14px] text-slate-500 font-normal">Total Enrollments</span>
+            <div className="w-[40px] h-[40px] rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center shrink-0">
+              <Users className="w-[26px] h-[26px]" />
             </div>
-            <span className="inline-flex items-center text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-              +12.4%
-            </span>
           </div>
-          <div className="mt-4">
-            <span className="text-xs text-slate-400 font-medium block">Total enrollments</span>
-            <div className="text-2xl font-bold text-slate-900 tabular-nums">3,420</div>
+          <div className="my-2">
+            <div className="text-[32px] sm:text-[36px] font-semibold text-slate-900 tracking-tight leading-none">
+              3,420
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs">
+            <span className="text-emerald-600 font-medium">↗ 12.4%</span>
+            <span className="text-slate-400 font-normal">vs last 30 days</span>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
           <div className="flex items-start justify-between">
-            <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center">
-              <CheckCircle2 className="w-4 h-4" />
+            <span className="text-[13px] sm:text-[14px] text-slate-500 font-normal">Completion Rate</span>
+            <div className="w-[40px] h-[40px] rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-[26px] h-[26px]" />
             </div>
-            <span className="inline-flex items-center text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-              +4.1%
-            </span>
           </div>
-          <div className="mt-4">
-            <span className="text-xs text-slate-400 font-medium block">Completion rate</span>
-            <div className="text-2xl font-bold text-slate-900 tabular-nums">68%</div>
+          <div className="my-2">
+            <div className="text-[32px] sm:text-[36px] font-semibold text-slate-900 tracking-tight leading-none">
+              68%
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs">
+            <span className="text-emerald-600 font-medium">↗ 4.1%</span>
+            <span className="text-slate-400 font-normal">vs last 30 days</span>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
           <div className="flex items-start justify-between">
-            <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center">
-              <Target className="w-4 h-4" />
+            <span className="text-[13px] sm:text-[14px] text-slate-500 font-normal">Avg. Assessment Score</span>
+            <div className="w-[40px] h-[40px] rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <Target className="w-[26px] h-[26px]" />
             </div>
-            <span className="inline-flex items-center text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-              +2.8%
-            </span>
           </div>
-          <div className="mt-4">
-            <span className="text-xs text-slate-400 font-medium block">Avg. assessment score</span>
-            <div className="text-2xl font-bold text-slate-900 tabular-nums">74%</div>
+          <div className="my-2">
+            <div className="text-[32px] sm:text-[36px] font-semibold text-slate-900 tracking-tight leading-none">
+              74%
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs">
+            <span className="text-emerald-600 font-medium">↗ 2.8%</span>
+            <span className="text-slate-400 font-normal">vs last 30 days</span>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
           <div className="flex items-start justify-between">
-            <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center">
-              <Award className="w-4 h-4" />
+            <span className="text-[13px] sm:text-[14px] text-slate-500 font-normal">Certificates Issued</span>
+            <div className="w-[40px] h-[40px] rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+              <Award className="w-[26px] h-[26px]" />
             </div>
-            <span className="inline-flex items-center text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-              +8.1%
-            </span>
           </div>
-          <div className="mt-4">
-            <span className="text-xs text-slate-400 font-medium block">Certificates issued</span>
-            <div className="text-2xl font-bold text-slate-900 tabular-nums">912</div>
+          <div className="my-2">
+            <div className="text-[32px] sm:text-[36px] font-semibold text-slate-900 tracking-tight leading-none">
+              912
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs">
+            <span className="text-emerald-600 font-medium">↗ 8.1%</span>
+            <span className="text-slate-400 font-normal">vs last 30 days</span>
           </div>
         </div>
       </div>

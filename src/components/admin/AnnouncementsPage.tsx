@@ -7,6 +7,10 @@ import {
   Trash2,
   Check,
   Megaphone,
+  Pin,
+  Copy,
+  Globe,
+  Eye,
 } from 'lucide-react';
 import { AnnouncementItem } from '../../types';
 import { useAdminData } from '../../context/AdminDataContext';
@@ -26,6 +30,7 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ showToast 
   } = useAdminData();
 
   const [activeFilter, setActiveFilter] = useState('All');
+  const [openActionDropdownId, setOpenActionDropdownId] = useState<string | null>(null);
 
   // Find currently selected announcement or default to first
   const currentAnn =
@@ -242,25 +247,127 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ showToast 
                         )}
                       </td>
                       <td className="py-3.5 text-slate-500">{item.date}</td>
-                      <td className="py-3.5 text-right">
-                        <div className="flex items-center justify-end gap-1 text-slate-400">
+                      <td className="py-3.5 text-right relative">
+                        <div className="flex items-center justify-end gap-1.5 text-slate-400">
+                          {/* Quick Pin Action */}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const newPinned = !item.isPinned;
+                              updateAnnouncement(item.id, { isPinned: newPinned });
+                              if (item.id === currentAnn?.id) setFormIsPinned(newPinned);
+                              showToast(newPinned ? `Pinned "${item.title}" to homepage banner.` : `Unpinned "${item.title}".`);
+                            }}
+                            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                              item.isPinned
+                                ? 'text-blue-600 bg-blue-50 hover:bg-blue-100'
+                                : 'hover:text-blue-600 hover:bg-slate-100'
+                            }`}
+                            title={item.isPinned ? 'Unpin from homepage banner' : 'Pin to homepage banner'}
+                          >
+                            <Pin className="w-3.5 h-3.5" />
+                          </button>
+
+                          {/* Quick Edit in Panel Action */}
                           <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleSelectAnnouncement(item);
+                              showToast(`Editing "${item.title}" in panel.`);
                             }}
-                            className="p-1 hover:text-blue-600"
+                            className="p-1.5 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                            title="Edit announcement"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </button>
-                          <button
-                            type="button"
-                            onClick={(e) => e.stopPropagation()}
-                            className="p-1 hover:text-slate-600"
-                          >
-                            <MoreHorizontal className="w-3.5 h-3.5" />
-                          </button>
+
+                          {/* More Options Dropdown Toggle */}
+                          <div className="relative">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenActionDropdownId(openActionDropdownId === item.id ? null : item.id);
+                              }}
+                              className="p-1.5 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                              title="More actions"
+                            >
+                              <MoreHorizontal className="w-3.5 h-3.5" />
+                            </button>
+
+                            {/* Dropdown Menu */}
+                            {openActionDropdownId === item.id && (
+                              <div
+                                onClick={(e) => e.stopPropagation()}
+                                className="absolute right-0 mt-1 w-48 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-30 text-xs text-left animate-in fade-in zoom-in-95 duration-100"
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    handleSelectAnnouncement(item);
+                                    setOpenActionDropdownId(null);
+                                  }}
+                                  className="w-full px-3 py-1.5 flex items-center gap-2 hover:bg-slate-50 text-slate-700 font-medium"
+                                >
+                                  <Edit2 className="w-3.5 h-3.5 text-slate-400" />
+                                  <span>Edit details</span>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const nextStatus = item.status === 'Published' ? 'Draft' : 'Published';
+                                    updateAnnouncement(item.id, { status: nextStatus });
+                                    showToast(`Status updated: "${item.title}" is now ${nextStatus}.`);
+                                    setOpenActionDropdownId(null);
+                                  }}
+                                  className="w-full px-3 py-1.5 flex items-center gap-2 hover:bg-slate-50 text-slate-700 font-medium"
+                                >
+                                  <Globe className="w-3.5 h-3.5 text-slate-400" />
+                                  <span>{item.status === 'Published' ? 'Revert to Draft' : 'Publish to Homepage'}</span>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const duplicatedItem: Omit<AnnouncementItem, 'id'> = {
+                                      title: `${item.title} (Copy)`,
+                                      type: item.type,
+                                      status: 'Draft',
+                                      date: 'Today',
+                                      message: item.message,
+                                      publishOn: item.publishOn,
+                                      isPinned: false,
+                                    };
+                                    addAnnouncement(duplicatedItem);
+                                    showToast(`Duplicated announcement as draft.`);
+                                    setOpenActionDropdownId(null);
+                                  }}
+                                  className="w-full px-3 py-1.5 flex items-center gap-2 hover:bg-slate-50 text-slate-700 font-medium"
+                                >
+                                  <Copy className="w-3.5 h-3.5 text-slate-400" />
+                                  <span>Duplicate announcement</span>
+                                </button>
+
+                                <div className="my-1 border-t border-slate-100" />
+
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    deleteAnnouncement(item.id);
+                                    showToast(`Removed "${item.title}".`);
+                                    setOpenActionDropdownId(null);
+                                  }}
+                                  className="w-full px-3 py-1.5 flex items-center gap-2 hover:bg-rose-50 text-rose-600 font-medium"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                                  <span>Delete announcement</span>
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </td>
                     </tr>

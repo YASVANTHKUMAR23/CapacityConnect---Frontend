@@ -1,19 +1,17 @@
 import React, { useState } from 'react';
-import { Search, ChevronDown, Edit2, MoreHorizontal, X } from 'lucide-react';
+import { Search, ChevronDown } from 'lucide-react';
 import { useAdminData } from '../../context/AdminDataContext';
-import { TraineeItem } from '../../types';
 
 interface TraineesPageProps {
   showToast?: (msg: string) => void;
 }
 
-export const TraineesPage: React.FC<TraineesPageProps> = ({ showToast }) => {
-  const { trainees, updateTrainee } = useAdminData();
+export const TraineesPage: React.FC<TraineesPageProps> = () => {
+  const { trainees } = useAdminData();
   const [activeTab, setActiveTab] = useState<'All' | 'Active' | 'Inactive'>('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [divisionFilter, setDivisionFilter] = useState('All');
   const [courseFilter, setCourseFilter] = useState('All');
-  const [editingTrainee, setEditingTrainee] = useState<TraineeItem | null>(null);
 
   const filteredTrainees = trainees.filter((t) => {
     if (activeTab !== 'All' && t.status !== activeTab) return false;
@@ -117,85 +115,58 @@ export const TraineesPage: React.FC<TraineesPageProps> = ({ showToast }) => {
       {/* Trainees Table */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-[13px]">
             <thead>
-              <tr className="border-b border-slate-100 text-slate-400 font-semibold">
+              <tr className="border-b border-slate-100 text-slate-400 font-semibold text-[13px]">
                 <th className="pb-3.5 font-medium">Trainee</th>
                 <th className="pb-3.5 font-medium">Division</th>
                 <th className="pb-3.5 font-medium">Enrolled courses</th>
                 <th className="pb-3.5 font-medium">Avg. progress</th>
                 <th className="pb-3.5 font-medium">Last active</th>
                 <th className="pb-3.5 font-medium">Status</th>
-                <th className="pb-3.5 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredTrainees.map((t) => (
                 <tr key={t.id} className="hover:bg-slate-50/50">
                   <td className="py-3.5 pr-3">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${t.avatarBg}`}
-                      >
-                        {t.initials}
-                      </div>
-                      <div>
-                        <div className="font-semibold text-slate-900">{t.name}</div>
-                        <div className="text-slate-400 text-[11px] font-normal">
-                          {t.email}
-                        </div>
+                    <div>
+                      <div className="font-semibold text-slate-900 text-[13px]">{t.name}</div>
+                      <div className="text-slate-400 text-xs font-normal">
+                        {t.email}
                       </div>
                     </div>
                   </td>
-                  <td className="py-3.5 text-slate-700 font-medium">{t.division}</td>
-                  <td className="py-3.5 text-slate-800 font-semibold tabular-nums">
+                  <td className="py-3.5 text-slate-700 font-medium text-[13px]">{t.division}</td>
+                  <td className="py-3.5 text-slate-800 font-semibold tabular-nums text-[13px]">
                     {t.enrolledCount}
                   </td>
                   <td className="py-3.5">
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-20 h-2 bg-slate-100 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-blue-600 rounded-full"
                           style={{ width: `${t.avgProgress}%` }}
                         />
                       </div>
-                      <span className="text-slate-500 text-[11px] font-medium tabular-nums">
+                      <span className="text-slate-500 text-xs font-medium tabular-nums">
                         {t.avgProgress}%
                       </span>
                     </div>
                   </td>
-                  <td className="py-3.5 text-slate-500 font-medium">{t.lastActive}</td>
+                  <td className="py-3.5 text-slate-500 font-medium text-[13px]">{t.lastActive}</td>
                   <td className="py-3.5">
                     {t.status === 'Active' ? (
-                      <span className="inline-flex items-center gap-1.5 text-emerald-700 font-semibold text-[11px]">
+                      <span className="inline-flex items-center gap-1.5 text-emerald-700 font-semibold text-xs">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                         Active
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 text-slate-500 font-semibold text-[11px]">
+                      <span className="inline-flex items-center gap-1.5 text-slate-500 font-semibold text-xs">
                         <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
                         Inactive
                       </span>
                     )}
-                  </td>
-                  <td className="py-3.5 text-right">
-                    <div className="flex items-center justify-end gap-1 text-slate-400">
-                      <button
-                        type="button"
-                        onClick={() => setEditingTrainee({ ...t })}
-                        className="p-1.5 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                        title="Edit trainee"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        className="p-1.5 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer"
-                        title="More options"
-                      >
-                        <MoreHorizontal className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
                   </td>
                 </tr>
               ))}
@@ -223,160 +194,7 @@ export const TraineesPage: React.FC<TraineesPageProps> = ({ showToast }) => {
         </div>
       </div>
 
-      {/* Edit Trainee Modal Dialog */}
-      {editingTrainee && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200/90 overflow-hidden animate-in zoom-in-95 duration-150">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">
-                  <Edit2 className="w-3.5 h-3.5" />
-                </div>
-                <h3 className="font-bold text-slate-900 text-sm">Edit Trainee Profile</h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setEditingTrainee(null)}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg transition-colors cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
 
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                updateTrainee(editingTrainee.id, {
-                  name: editingTrainee.name,
-                  email: editingTrainee.email,
-                  division: editingTrainee.division,
-                  enrolledCount: editingTrainee.enrolledCount,
-                  avgProgress: editingTrainee.avgProgress,
-                  status: editingTrainee.status,
-                });
-                showToast?.(`Trainee profile for "${editingTrainee.name}" updated successfully.`);
-                setEditingTrainee(null);
-              }}
-              className="p-6 space-y-4 text-xs"
-            >
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Full Name</label>
-                <input
-                  type="text"
-                  value={editingTrainee.name}
-                  onChange={(e) =>
-                    setEditingTrainee({ ...editingTrainee, name: e.target.value })
-                  }
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-hidden focus:ring-2 focus:ring-blue-600/30"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Official Email</label>
-                <input
-                  type="email"
-                  value={editingTrainee.email}
-                  onChange={(e) =>
-                    setEditingTrainee({ ...editingTrainee, email: e.target.value })
-                  }
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-hidden focus:ring-2 focus:ring-blue-600/30"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Division / Center</label>
-                <select
-                  value={editingTrainee.division}
-                  onChange={(e) =>
-                    setEditingTrainee({ ...editingTrainee, division: e.target.value })
-                  }
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold focus:outline-hidden focus:ring-2 focus:ring-blue-600/30 cursor-pointer"
-                >
-                  <option value="Delhi HQ">Delhi HQ</option>
-                  <option value="Pune">Pune</option>
-                  <option value="Chennai">Chennai</option>
-                  <option value="Regional Satellites">Regional Satellites</option>
-                  <option value="Kolkata">Kolkata</option>
-                  <option value="Mumbai">Mumbai</option>
-                  <option value="Bengaluru">Bengaluru</option>
-                  <option value="Hyderabad">Hyderabad</option>
-                  <option value="Guwahati">Guwahati</option>
-                  <option value="Ahmedabad">Ahmedabad</option>
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Enrolled Courses</label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={editingTrainee.enrolledCount}
-                    onChange={(e) =>
-                      setEditingTrainee({
-                        ...editingTrainee,
-                        enrolledCount: parseInt(e.target.value, 10) || 0,
-                      })
-                    }
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-hidden focus:ring-2 focus:ring-blue-600/30"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Progress (%)</label>
-                  <input
-                    type="number"
-                    min={0}
-                    max={100}
-                    value={editingTrainee.avgProgress}
-                    onChange={(e) =>
-                      setEditingTrainee({
-                        ...editingTrainee,
-                        avgProgress: parseInt(e.target.value, 10) || 0,
-                      })
-                    }
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-hidden focus:ring-2 focus:ring-blue-600/30"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Status</label>
-                <select
-                  value={editingTrainee.status}
-                  onChange={(e) =>
-                    setEditingTrainee({
-                      ...editingTrainee,
-                      status: e.target.value as 'Active' | 'Inactive',
-                    })
-                  }
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold focus:outline-hidden focus:ring-2 focus:ring-blue-600/30 cursor-pointer"
-                >
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                </select>
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setEditingTrainee(null)}
-                  className="px-4 py-2 border border-slate-200 hover:bg-slate-50 font-semibold text-slate-600 rounded-xl transition-colors cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors cursor-pointer shadow-xs"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
