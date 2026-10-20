@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
 import {
+  Menu,
   LayoutDashboard,
   BookOpen,
   UserCheck,
@@ -220,21 +220,72 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         }`}
       >
         {/* Top Header */}
-        <header className="sticky top-0 z-20 bg-[#f3f4f8]/90 backdrop-blur-md px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 flex items-center justify-between border-b border-slate-200/40">
-          <div className="flex items-center gap-3">
-            {/* Sidebar Open/Close Toggle Trigger with ChevronsLeft */}
-            <button
-              type="button"
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-2 rounded-xl bg-white border border-slate-200/90 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all shadow-2xs cursor-pointer flex items-center justify-center"
-              title={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-            >
-              <ChevronsLeft
-                className={`w-4 h-4 transition-transform duration-300 ${
-                  !isSidebarOpen ? 'rotate-180' : ''
-                }`}
-              />
-            </button>
+        <header className="sticky top-0 z-20 bg-[#f3f4f8]/90 backdrop-blur-md px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 border-b border-slate-200/40">
+          {/* Mobile Header Strictly Matching Reference Images (sm:hidden) */}
+          <div className="flex sm:hidden items-center justify-between w-full">
+            {/* Left Controls: Hamburger Menu + Bell with dot */}
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => setIsSidebarOpen(true)}
+                className="w-10 h-10 rounded-xl bg-white border border-slate-200/90 shadow-2xs flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                title="Open menu"
+              >
+                <Menu className="w-5 h-5 text-slate-700" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setNotificationsOpen(!notificationsOpen)}
+                className="w-10 h-10 rounded-xl bg-white border border-slate-200/90 shadow-2xs flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer relative"
+                title="Notifications"
+              >
+                <Bell className="w-5 h-5 text-slate-700" />
+                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
+              </button>
+            </div>
+
+            {/* Right: Willow Green Profile Pill matching reference images */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                className="flex items-center gap-2 bg-white border border-slate-200/90 rounded-2xl py-1.5 px-2.5 shadow-2xs hover:border-slate-300 transition-all cursor-pointer select-none"
+              >
+                <img
+                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80"
+                  alt="Willow Green"
+                  className="w-8 h-8 rounded-full object-cover shrink-0 ring-1 ring-slate-100"
+                />
+                <div className="text-left">
+                  <div className="text-xs font-semibold text-slate-900 leading-tight">
+                    Willow Green
+                  </div>
+                  <div className="text-[10px] text-slate-400 font-normal leading-tight">
+                    willow.green@com
+                  </div>
+                </div>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-0.5 shrink-0" />
+              </button>
+            </div>
+          </div>
+
+          {/* Desktop Header strictly preserved for non-mobile views (hidden sm:flex) */}
+          <div className="hidden sm:flex items-center justify-between w-full">
+            <div className="flex items-center gap-3">
+              {/* Sidebar Open/Close Toggle Trigger with ChevronsLeft */}
+              <button
+                type="button"
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="p-2 rounded-xl bg-white border border-slate-200/90 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all shadow-2xs cursor-pointer flex items-center justify-center"
+                title={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+              >
+                <ChevronsLeft
+                  className={`w-4 h-4 transition-transform duration-300 ${
+                    !isSidebarOpen ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
 
             <div>
               {currentTab === 'dashboard' && (
@@ -455,10 +506,31 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
               )}
             </div>
           </div>
+        </div>
         </header>
 
         {/* Page Content */}
-        <main className="p-3 sm:p-6 lg:p-8 pb-32 sm:pb-16 flex-1 max-w-full overflow-x-hidden min-w-0">{children}</main>
+        <main className="p-4 sm:p-6 lg:p-8 pb-28 sm:pb-16 flex-1 max-w-full overflow-x-hidden min-w-0">
+          {/* Mobile Page Title strictly matching reference images */}
+          <div className="sm:hidden mb-4">
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+              {currentTab === 'dashboard'
+                ? 'Dashboard'
+                : currentTab === 'trainees' || currentTab === 'trainers' || currentTab === 'role-management'
+                ? 'Users'
+                : currentTab === 'courses'
+                ? 'Courses'
+                : currentTab === 'announcements'
+                ? 'Announcements'
+                : currentTab === 'analytics'
+                ? 'Analytics'
+                : currentTab === 'competency'
+                ? 'Competency'
+                : 'Settings'}
+            </h1>
+          </div>
+          {children}
+        </main>
       </div>
 
       {/* Floating Chatbot Bubble at bottom-right */}

@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { AdminTab } from '../../types';
 import { useAdminData } from '../../context/AdminDataContext';
+import { ScrollDrivenTable } from './ScrollDrivenTable';
+import { MobileStatCards } from './MobileStatCards';
 
 interface DashboardPageProps {
   onNavigateTab: (tab: AdminTab) => void;
@@ -264,14 +266,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Mobile Stat Cards at top strictly matching reference image image_ccbc04a5.png */}
+      <MobileStatCards />
+
       {/* ======================================================== */}
       {/* 1. TOP SECTION: Announcement Card (Left) + Management (Right) */}
       {/* Layout strictly conforms to Screenshot_2026-10-19_204608_6bbe42ed.png */}
       {/* ======================================================== */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-stretch">
         {/* Left: Large Announcement Card (7 cols) */}
-        <div className="lg:col-span-7 bg-white rounded-2xl p-4 sm:p-7 border border-slate-200/90 shadow-2xs flex flex-col justify-between relative overflow-hidden group">
+        <div className="lg:col-span-7 bg-white rounded-2xl p-5 sm:p-7 border border-slate-200/90 shadow-2xs flex flex-col justify-between relative overflow-hidden group">
           {/* Subtle background glow */}
           <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-bl from-blue-50/80 via-indigo-50/30 to-transparent rounded-full -mr-16 -mt-16 pointer-events-none" />
 
@@ -360,7 +365,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           {/* Top 2 Cards: Course Management & Trainer Management */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
             {/* 1. Course Management */}
-            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+            <div className="bg-white rounded-2xl p-5 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[13px] text-slate-500 font-normal">Course management</span>
                 <button
@@ -388,7 +393,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             </div>
 
             {/* 2. Trainer Management */}
-            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+            <div className="bg-white rounded-2xl p-5 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[13px] text-slate-500 font-normal">Trainer management</span>
                 <button
@@ -417,7 +422,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
 
           {/* Bottom Card: Trainee Management (spans across both columns) */}
-          <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between flex-1">
+          <div className="bg-white rounded-2xl p-5 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between flex-1">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[13px] text-slate-500 font-normal">Trainee management</span>
               <button
@@ -450,10 +455,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       </div>
 
       {/* ======================================================== */}
-      {/* 2. BOTTOM SECTION: Four KTG Metric Cards                  */}
+      {/* 2. Four KTG Metric Cards (Desktop preserved: hidden sm:grid) */}
       {/* Visual strictly matching image_a88f9ff2.png with 40px icon */}
       {/* ======================================================== */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5">
+      <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5">
         {/* Card 1: User Signups / Enrollments */}
         <div className="bg-white rounded-2xl p-4 sm:p-5 lg:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
           <div className="flex items-start justify-between">
@@ -830,7 +835,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             </button>
           </div>
 
-          <div className="overflow-x-auto mt-3.5">
+            <ScrollDrivenTable className="mt-3.5" minWidth="min-w-[520px]">
             <table className="w-full border-collapse min-w-[520px]">
               <thead>
                 <tr>
@@ -963,7 +968,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollDrivenTable>
         </section>
 
         {/* SECTION 4: Participation by division (Dynamic Circles Generation & Placement) */}
