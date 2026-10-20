@@ -835,21 +835,21 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             </button>
           </div>
 
-            <ScrollDrivenTable className="mt-3.5" minWidth="min-w-[520px]">
-            <table className="w-full border-collapse min-w-[520px]">
+            <ScrollDrivenTable className="mt-3.5" minWidth="min-w-[680px]">
+            <table className="w-full border-collapse min-w-[680px]">
               <thead>
                 <tr>
-                  <th className="text-left font-medium text-[#6b6f8a] text-[12px] py-3 border-y border-[#eceef6]">Course</th>
-                  <th className="text-left font-medium text-[#6b6f8a] text-[12px] py-3 border-y border-[#eceef6]">Trainer</th>
-                  <th className="text-left font-medium text-[#6b6f8a] text-[12px] py-3 border-y border-[#eceef6]">Enrolled</th>
-                  <th className="text-left font-medium text-[#6b6f8a] text-[12px] py-3 border-y border-[#eceef6]">Completion</th>
-                  <th className="text-left font-medium text-[#6b6f8a] text-[12px] py-3 border-y border-[#eceef6]">Status</th>
+                  <th className="text-left font-medium text-[#6b6f8a] text-[12px] py-3 px-4 sm:px-5 whitespace-nowrap min-w-[220px] border-y border-[#eceef6]">Course</th>
+                  <th className="text-left font-medium text-[#6b6f8a] text-[12px] py-3 px-4 sm:px-5 whitespace-nowrap min-w-[140px] border-y border-[#eceef6]">Trainer</th>
+                  <th className="text-left font-medium text-[#6b6f8a] text-[12px] py-3 px-4 sm:px-5 whitespace-nowrap min-w-[90px] border-y border-[#eceef6]">Enrolled</th>
+                  <th className="text-left font-medium text-[#6b6f8a] text-[12px] py-3 px-4 sm:px-5 whitespace-nowrap min-w-[130px] border-y border-[#eceef6]">Completion</th>
+                  <th className="text-left font-medium text-[#6b6f8a] text-[12px] py-3 px-4 sm:px-5 whitespace-nowrap min-w-[100px] border-y border-[#eceef6]">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {/* Cyclone Track Analysis */}
-                <tr className="border-b border-[#eceef6]">
-                  <td className="py-3.5">
+                <tr className="border-b border-[#eceef6] hover:bg-slate-50/50">
+                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
                     <div className="flex items-center gap-3">
                       <div className="w-[30px] h-[30px] rounded-full grid place-items-center text-[10px] font-bold shrink-0 bg-[#fde8cf] text-[#b8680f]">
                         CT
@@ -860,17 +860,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                       </div>
                     </div>
                   </td>
-                  <td className="py-3.5 text-[#14162b] font-medium text-[12.5px]">Dr. Ravi Menon</td>
-                  <td className="py-3.5 text-[#14162b] font-medium text-[12.5px]">214</td>
-                  <td className="py-3.5">
+                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap text-[#14162b] font-medium text-[12.5px]">Dr. Ravi Menon</td>
+                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap text-[#14162b] font-medium text-[12.5px]">214</td>
+                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-[5px] bg-[#e3e5f3] rounded-[3px] overflow-hidden">
+                      <div className="w-12 h-[5px] bg-[#e3e5f3] rounded-[3px] overflow-hidden">
                         <i className="block h-full bg-[#3b41e3] rounded-[3px]" style={{ width: '38%' }} />
                       </div>
                       <span className="text-[#6b6f8a] text-[11px]">38%</span>
                     </div>
                   </td>
-                  <td className="py-3.5">
+                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
                     <span className="inline-flex items-center gap-1.5 rounded-[8px] py-1 px-2.5 text-[11px] font-semibold bg-[#fdebd0] text-[#c9791a] before:content-[''] before:w-1.5 before:h-1.5 before:rounded-full before:bg-current">
                       Behind
                     </span>
@@ -878,8 +878,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 </tr>
 
                 {/* Numerical Weather Models */}
-                <tr className="border-b border-[#eceef6]">
-                  <td className="py-3.5">
+                <tr className="border-b border-[#eceef6] hover:bg-slate-50/50">
+                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
                     <div className="flex items-center gap-3">
                       <div className="w-[30px] h-[30px] rounded-full grid place-items-center text-[10px] font-bold shrink-0 bg-[#dfe1ff] text-[#3b41e3]">
                         NW
@@ -890,17 +890,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                       </div>
                     </div>
                   </td>
-                  <td className="py-3.5 text-[#14162b] font-medium text-[12.5px]">Dr. Anita Rao</td>
-                  <td className="py-3.5 text-[#14162b] font-medium text-[12.5px]">356</td>
-                  <td className="py-3.5">
+                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap text-[#14162b] font-medium text-[12.5px]">Dr. Anita Rao</td>
+                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap text-[#14162b] font-medium text-[12.5px]">356</td>
+                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-[5px] bg-[#e3e5f3] rounded-[3px] overflow-hidden">
+                      <div className="w-12 h-[5px] bg-[#e3e5f3] rounded-[3px] overflow-hidden">
                         <i className="block h-full bg-[#3b41e3] rounded-[3px]" style={{ width: '47%' }} />
                       </div>
                       <span className="text-[#6b6f8a] text-[11px]">47%</span>
                     </div>
                   </td>
-                  <td className="py-3.5">
+                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
                     <span className="inline-flex items-center gap-1.5 rounded-[8px] py-1 px-2.5 text-[11px] font-semibold bg-[#fdebd0] text-[#c9791a] before:content-[''] before:w-1.5 before:h-1.5 before:rounded-full before:bg-current">
                       Behind
                     </span>
@@ -908,8 +908,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 </tr>
 
                 {/* Climate Data Handling */}
-                <tr className="border-b border-[#eceef6]">
-                  <td className="py-3.5">
+                <tr className="border-b border-[#eceef6] hover:bg-slate-50/50">
+                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
                     <div className="flex items-center gap-3">
                       <div className="w-[30px] h-[30px] rounded-full grid place-items-center text-[10px] font-bold shrink-0 bg-[#d9e4ff] text-[#2f4fd0]">
                         CD
@@ -920,17 +920,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                       </div>
                     </div>
                   </td>
-                  <td className="py-3.5 text-[#14162b] font-medium text-[12.5px]">Prof. Sunil Das</td>
-                  <td className="py-3.5 text-[#14162b] font-medium text-[12.5px]">298</td>
-                  <td className="py-3.5">
+                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap text-[#14162b] font-medium text-[12.5px]">Prof. Sunil Das</td>
+                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap text-[#14162b] font-medium text-[12.5px]">298</td>
+                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-[5px] bg-[#e3e5f3] rounded-[3px] overflow-hidden">
+                      <div className="w-12 h-[5px] bg-[#e3e5f3] rounded-[3px] overflow-hidden">
                         <i className="block h-full bg-[#3b41e3] rounded-[3px]" style={{ width: '76%' }} />
                       </div>
                       <span className="text-[#6b6f8a] text-[11px]">76%</span>
                     </div>
                   </td>
-                  <td className="py-3.5">
+                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
                     <span className="inline-flex items-center gap-1.5 rounded-[8px] py-1 px-2.5 text-[11px] font-semibold bg-[#d6f5df] text-[#1e8a4c] before:content-[''] before:w-1.5 before:h-1.5 before:rounded-full before:bg-current">
                       On track
                     </span>
@@ -938,8 +938,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 </tr>
 
                 {/* Radar Data Quality */}
-                <tr>
-                  <td className="py-3.5">
+                <tr className="hover:bg-slate-50/50">
+                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
                     <div className="flex items-center gap-3">
                       <div className="w-[30px] h-[30px] rounded-full grid place-items-center text-[10px] font-bold shrink-0 bg-[#fddcdc] text-[#d03a3a]">
                         RD
@@ -950,17 +950,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                       </div>
                     </div>
                   </td>
-                  <td className="py-3.5 text-[#14162b] font-medium text-[12.5px]">Meera Iyer</td>
-                  <td className="py-3.5 text-[#14162b] font-medium text-[12.5px]">187</td>
-                  <td className="py-3.5">
+                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap text-[#14162b] font-medium text-[12.5px]">Meera Iyer</td>
+                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap text-[#14162b] font-medium text-[12.5px]">187</td>
+                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-[5px] bg-[#e3e5f3] rounded-[3px] overflow-hidden">
+                      <div className="w-12 h-[5px] bg-[#e3e5f3] rounded-[3px] overflow-hidden">
                         <i className="block h-full bg-[#3b41e3] rounded-[3px]" style={{ width: '44%' }} />
                       </div>
                       <span className="text-[#6b6f8a] text-[11px]">44%</span>
                     </div>
                   </td>
-                  <td className="py-3.5">
+                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
                     <span className="inline-flex items-center gap-1.5 rounded-[8px] py-1 px-2.5 text-[11px] font-semibold bg-[#fdebd0] text-[#c9791a] before:content-[''] before:w-1.5 before:h-1.5 before:rounded-full before:bg-current">
                       Behind
                     </span>

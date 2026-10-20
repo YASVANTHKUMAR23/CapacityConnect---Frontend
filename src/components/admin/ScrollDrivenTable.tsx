@@ -14,16 +14,19 @@ export const ScrollDrivenTable: React.FC<ScrollDrivenTableProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [thumbWidthPercent, setThumbWidthPercent] = useState(42);
+  const [hasOverflow, setHasOverflow] = useState(false);
 
   const updateScroll = () => {
     if (!containerRef.current) return;
     const { scrollLeft, scrollWidth, clientWidth } = containerRef.current;
     const maxScroll = scrollWidth - clientWidth;
-    if (maxScroll > 0) {
+    if (maxScroll > 1) {
+      setHasOverflow(true);
       setScrollProgress(scrollLeft / maxScroll);
-      const ratio = Math.max(0.3, Math.min(0.5, clientWidth / scrollWidth));
+      const ratio = Math.max(0.25, Math.min(0.5, clientWidth / scrollWidth));
       setThumbWidthPercent(ratio * 100);
     } else {
+      setHasOverflow(false);
       setScrollProgress(0);
     }
   };
@@ -33,15 +36,15 @@ export const ScrollDrivenTable: React.FC<ScrollDrivenTableProps> = ({
     const handleResize = () => updateScroll();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [children]);
 
   return (
-    <div className={`w-full ${className}`}>
-      {/* Scrollable Container with horizontal scroll */}
+    <div className={`w-full max-w-full min-w-0 overflow-hidden ${className}`}>
+      {/* Scrollable Container with horizontal scroll and hidden native scrollbars */}
       <div
         ref={containerRef}
         onScroll={updateScroll}
-        className={`overflow-x-auto w-full ${minWidth ? `[&>table]:${minWidth}` : ''}`}
+        className={`overflow-x-auto w-full max-w-full [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${minWidth ? `[&>table]:${minWidth}` : ''}`}
         style={{
           WebkitOverflowScrolling: 'touch',
         }}
@@ -49,18 +52,20 @@ export const ScrollDrivenTable: React.FC<ScrollDrivenTableProps> = ({
         {children}
       </div>
 
-      {/* Mobile Scroll-Driven Indicator strictly matching reference image */}
-      <div className="sm:hidden mt-3.5 mb-1 px-0.5">
-        <div className="w-full h-1 bg-slate-200/90 rounded-full overflow-hidden relative">
-          <div
-            className="h-full bg-slate-500 rounded-full transition-all duration-75"
-            style={{
-              width: `${thumbWidthPercent}%`,
-              marginLeft: `${scrollProgress * (100 - thumbWidthPercent)}%`,
-            }}
-          />
+      {/* Custom Scroll-Driven Indicator matching Dashboard */}
+      {hasOverflow && (
+        <div className="mt-3.5 mb-1 px-1">
+          <div className="w-full h-1 sm:h-1.5 bg-slate-200/90 rounded-full overflow-hidden relative">
+            <div
+              className="h-full bg-slate-500 rounded-full transition-all duration-75"
+              style={{
+                width: `${thumbWidthPercent}%`,
+                marginLeft: `${scrollProgress * (100 - thumbWidthPercent)}%`,
+              }}
+            />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import {
   Menu,
   LayoutDashboard,
@@ -215,7 +216,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 
       {/* Main Container */}
       <div
-        className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out ${
+        className={`flex-1 flex flex-col min-h-screen min-w-0 max-w-full w-full overflow-x-hidden transition-all duration-300 ease-in-out ${
           isSidebarOpen ? 'lg:ml-64' : 'ml-0'
         }`}
       >
@@ -510,7 +511,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         </header>
 
         {/* Page Content */}
-        <main className="p-4 sm:p-6 lg:p-8 pb-28 sm:pb-16 flex-1 max-w-full overflow-x-hidden min-w-0">
+        <main className="p-4 sm:p-6 lg:p-8 pb-28 sm:pb-16 flex-1 w-full max-w-full overflow-x-hidden min-w-0">
           {/* Mobile Page Title strictly matching reference images */}
           <div className="sm:hidden mb-4">
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">

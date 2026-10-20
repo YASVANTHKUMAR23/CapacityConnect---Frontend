@@ -46,8 +46,8 @@ export interface UserDirectoryItem {
   id: string;
   name: string;
   email: string;
-  role: 'Trainer' | 'Trainee' | 'Admin';
-  status: 'Active' | 'Suspended';
+  role: 'Trainer' | 'Trainee' | 'Admin' | 'Editor' | 'Viewer' | string;
+  status: 'Active' | 'Suspended' | 'Inactive';
   joined: string;
   avatarBg?: string;
   initials: string;

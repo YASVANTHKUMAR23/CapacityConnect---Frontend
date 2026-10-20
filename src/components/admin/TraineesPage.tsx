@@ -28,7 +28,7 @@ export const TraineesPage: React.FC<TraineesPageProps> = () => {
   });
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="w-full max-w-full min-w-0 space-y-4 sm:space-y-6">
       {/* Mobile Stat Cards at top strictly matching reference image image_e0a499b4.png */}
       <MobileStatCards />
 
@@ -118,7 +118,7 @@ export const TraineesPage: React.FC<TraineesPageProps> = () => {
       </div>
 
       {/* Trainees / Members list Table Card */}
-      <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs overflow-hidden">
+      <div className="w-full max-w-full min-w-0 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs overflow-hidden">
         {/* Mobile Heading and Search+Filter row strictly matching image_e0a499b4.png */}
         <div className="sm:hidden mb-3">
           <h2 className="font-bold text-slate-900 text-base mb-3">Members list</h2>
@@ -135,7 +135,7 @@ export const TraineesPage: React.FC<TraineesPageProps> = () => {
             </div>
             <button
               type="button"
-              className="px-3.5 py-2.5 rounded-xl border border-slate-200/90 bg-white text-xs font-semibold text-slate-700 flex items-center gap-1.5 shadow-2xs shrink-0 hover:bg-slate-50 transition-colors"
+              className="px-3.5 py-2.5 rounded-xl border border-slate-200/90 bg-white text-xs font-semibold text-slate-700 flex items-center gap-1.5 shadow-2xs shrink-0 hover:bg-slate-50 transition-colors cursor-pointer"
             >
               <SlidersHorizontal className="w-4 h-4 text-slate-600" />
               <span>Filter</span>
@@ -144,35 +144,35 @@ export const TraineesPage: React.FC<TraineesPageProps> = () => {
         </div>
 
         {/* Scroll-Driven Table with Mobile Scroll Progress Bar */}
-        <ScrollDrivenTable minWidth="min-w-[560px]">
-          <table className="w-full text-left text-[13px]">
+        <ScrollDrivenTable minWidth="min-w-[860px]">
+          <table className="w-full text-left text-[13px] min-w-[860px]">
             <thead>
               <tr className="border-b border-slate-100 text-slate-400 font-semibold text-[13px]">
-                <th className="pb-3.5 pl-1 w-8">
+                <th className="py-3.5 pl-3 pr-2 w-10">
                   <input
                     type="checkbox"
                     className="rounded border-slate-300 text-blue-600 focus:ring-0 w-4 h-4 cursor-pointer"
                   />
                 </th>
-                <th className="pb-3.5 font-medium">Client</th>
-                <th className="pb-3.5 font-medium">Division / Role</th>
-                <th className="pb-3.5 font-medium">Enrolled</th>
-                <th className="pb-3.5 font-medium">Avg. progress</th>
-                <th className="pb-3.5 font-medium">Status</th>
+                <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[240px]">Client</th>
+                <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[170px]">Division / Role</th>
+                <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[130px]">Enrolled</th>
+                <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[180px]">Avg. progress</th>
+                <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[120px]">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredTrainees.map((t) => (
                 <tr key={t.id} className="hover:bg-slate-50/50">
-                  <td className="py-3.5 pl-1">
+                  <td className="py-4 pl-3 pr-2">
                     <input
                       type="checkbox"
                       className="rounded border-slate-300 text-blue-600 focus:ring-0 w-4 h-4 cursor-pointer"
                     />
                   </td>
-                  <td className="py-3.5 pr-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-700 font-bold text-[11px] flex items-center justify-center shrink-0">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center shrink-0">
                         {t.name
                           .split(' ')
                           .map((n) => n[0])
@@ -187,13 +187,13 @@ export const TraineesPage: React.FC<TraineesPageProps> = () => {
                       </div>
                     </div>
                   </td>
-                  <td className="py-3.5 text-slate-700 font-medium text-[13px]">{t.division}</td>
-                  <td className="py-3.5 text-slate-800 font-semibold tabular-nums text-[13px]">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium text-[13px]">{t.division}</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-800 font-semibold tabular-nums text-[13px]">
                     {t.enrolledCount} courses
                   </td>
-                  <td className="py-3.5">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-20 h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-blue-600 rounded-full"
                           style={{ width: `${t.avgProgress}%` }}
@@ -204,7 +204,7 @@ export const TraineesPage: React.FC<TraineesPageProps> = () => {
                       </span>
                     </div>
                   </td>
-                  <td className="py-3.5">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
                     {t.status === 'Active' ? (
                       <span className="inline-flex items-center gap-1.5 text-emerald-700 font-semibold text-xs">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />

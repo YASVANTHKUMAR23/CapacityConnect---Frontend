@@ -1,9 +1,10 @@
 import React from 'react';
 import { Target, X, LayoutGrid, Award } from 'lucide-react';
+import { ScrollDrivenTable } from './ScrollDrivenTable';
 
 export const CompetencyPage: React.FC = () => {
   return (
-    <div className="space-y-6">
+    <div className="w-full max-w-full min-w-0 space-y-4 sm:space-y-6">
       {/* 4 Top KPI Cards matching 09-competency.png */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
@@ -82,7 +83,7 @@ export const CompetencyPage: React.FC = () => {
       {/* Middle Row: Competency by subject + Skill gap donut */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Left: Competency level by subject (8 cols) */}
-        <div className="lg:col-span-8 bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs">
+        <div className="lg:col-span-8 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs">
           <div className="flex items-center justify-between mb-5">
             <h3 className="font-bold text-slate-900 text-sm">Competency level by subject</h3>
             <div className="flex items-center gap-4 text-xs font-medium text-slate-500">
@@ -171,7 +172,7 @@ export const CompetencyPage: React.FC = () => {
         </div>
 
         {/* Right: Skill gap distribution Donut (4 cols) */}
-        <div className="lg:col-span-4 bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+        <div className="lg:col-span-4 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
           <h3 className="font-bold text-slate-900 text-sm mb-2">Skill gap distribution</h3>
 
           <div className="my-2 flex items-center justify-center">
@@ -222,25 +223,25 @@ export const CompetencyPage: React.FC = () => {
       </div>
 
       {/* Competency Recommendations Table matching 09-competency.png */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+      <div className="w-full max-w-full min-w-0 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs overflow-hidden">
+        <ScrollDrivenTable minWidth="min-w-[780px]">
+          <table className="w-full text-left text-xs min-w-[780px]">
             <thead>
               <tr className="border-b border-slate-100 text-slate-400 font-semibold">
-                <th className="pb-3.5 font-medium">Subject</th>
-                <th className="pb-3.5 font-medium">Matched trainers</th>
-                <th className="pb-3.5 font-medium">Trainees mapped</th>
-                <th className="pb-3.5 font-medium">Avg. level</th>
-                <th className="pb-3.5 font-medium">Gap</th>
-                <th className="pb-3.5 font-medium">Recommendation</th>
+                <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[200px]">Subject</th>
+                <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[130px]">Matched trainers</th>
+                <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[130px]">Trainees mapped</th>
+                <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[160px]">Avg. level</th>
+                <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[110px]">Gap</th>
+                <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[160px]">Recommendation</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               <tr className="hover:bg-slate-50/50">
-                <td className="py-3.5 font-semibold text-slate-900">Cyclone tracking</td>
-                <td className="py-3.5 text-slate-700 font-medium">2</td>
-                <td className="py-3.5 text-slate-700 font-medium">214</td>
-                <td className="py-3.5">
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap font-semibold text-slate-900">Cyclone tracking</td>
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">2</td>
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">214</td>
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
                   <div className="flex items-center gap-2">
                     <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                       <div className="h-full bg-blue-600 w-[49%]" />
@@ -248,20 +249,20 @@ export const CompetencyPage: React.FC = () => {
                     <span className="text-slate-500 font-medium">49%</span>
                   </div>
                 </td>
-                <td className="py-3.5">
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
                   <span className="inline-flex items-center gap-1.5 text-rose-700 font-semibold text-[11px] bg-rose-50 px-2 py-0.5 rounded-full">
                     <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
                     Major
                   </span>
                 </td>
-                <td className="py-3.5 text-slate-700 font-medium">Add trainer</td>
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">Add trainer</td>
               </tr>
 
               <tr className="hover:bg-slate-50/50">
-                <td className="py-3.5 font-semibold text-slate-900">Remote sensing</td>
-                <td className="py-3.5 text-slate-700 font-medium">3</td>
-                <td className="py-3.5 text-slate-700 font-medium">242</td>
-                <td className="py-3.5">
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap font-semibold text-slate-900">Remote sensing</td>
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">3</td>
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">242</td>
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
                   <div className="flex items-center gap-2">
                     <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                       <div className="h-full bg-blue-600 w-[54%]" />
@@ -269,20 +270,20 @@ export const CompetencyPage: React.FC = () => {
                     <span className="text-slate-500 font-medium">54%</span>
                   </div>
                 </td>
-                <td className="py-3.5">
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
                   <span className="inline-flex items-center gap-1.5 text-rose-700 font-semibold text-[11px] bg-rose-50 px-2 py-0.5 rounded-full">
                     <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
                     Major
                   </span>
                 </td>
-                <td className="py-3.5 text-slate-700 font-medium">Run pre-assessment</td>
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">Run pre-assessment</td>
               </tr>
 
               <tr className="hover:bg-slate-50/50">
-                <td className="py-3.5 font-semibold text-slate-900">Radar analysis</td>
-                <td className="py-3.5 text-slate-700 font-medium">3</td>
-                <td className="py-3.5 text-slate-700 font-medium">142</td>
-                <td className="py-3.5">
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap font-semibold text-slate-900">Radar analysis</td>
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">3</td>
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">142</td>
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
                   <div className="flex items-center gap-2">
                     <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                       <div className="h-full bg-blue-600 w-[58%]" />
@@ -290,20 +291,20 @@ export const CompetencyPage: React.FC = () => {
                     <span className="text-slate-500 font-medium">58%</span>
                   </div>
                 </td>
-                <td className="py-3.5">
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
                   <span className="inline-flex items-center gap-1.5 text-amber-700 font-semibold text-[11px] bg-amber-50 px-2 py-0.5 rounded-full">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
                     Minor
                   </span>
                 </td>
-                <td className="py-3.5 text-slate-700 font-medium">Assign mentors</td>
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">Assign mentors</td>
               </tr>
 
               <tr className="hover:bg-slate-50/50">
-                <td className="py-3.5 font-semibold text-slate-900">Forecasting</td>
-                <td className="py-3.5 text-slate-700 font-medium">5</td>
-                <td className="py-3.5 text-slate-700 font-medium">356</td>
-                <td className="py-3.5">
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap font-semibold text-slate-900">Forecasting</td>
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">5</td>
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">356</td>
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
                   <div className="flex items-center gap-2">
                     <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                       <div className="h-full bg-blue-600 w-[72%]" />
@@ -311,20 +312,20 @@ export const CompetencyPage: React.FC = () => {
                     <span className="text-slate-500 font-medium">72%</span>
                   </div>
                 </td>
-                <td className="py-3.5">
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
                   <span className="inline-flex items-center gap-1.5 text-amber-700 font-semibold text-[11px] bg-amber-50 px-2 py-0.5 rounded-full">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
                     Minor
                   </span>
                 </td>
-                <td className="py-3.5 text-slate-700 font-medium">Advanced module</td>
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">Advanced module</td>
               </tr>
 
               <tr className="hover:bg-slate-50/50">
-                <td className="py-3.5 font-semibold text-slate-900">Instrumentation</td>
-                <td className="py-3.5 text-slate-700 font-medium">2</td>
-                <td className="py-3.5 text-slate-700 font-medium">187</td>
-                <td className="py-3.5">
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap font-semibold text-slate-900">Instrumentation</td>
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">2</td>
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">187</td>
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
                   <div className="flex items-center gap-2">
                     <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                       <div className="h-full bg-blue-600 w-[81%]" />
@@ -332,17 +333,17 @@ export const CompetencyPage: React.FC = () => {
                     <span className="text-slate-500 font-medium">81%</span>
                   </div>
                 </td>
-                <td className="py-3.5">
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
                   <span className="inline-flex items-center gap-1.5 text-emerald-700 font-semibold text-[11px] bg-emerald-50 px-2 py-0.5 rounded-full">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                     None
                   </span>
                 </td>
-                <td className="py-3.5 text-slate-700 font-medium">Maintain</td>
+                <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">Maintain</td>
               </tr>
             </tbody>
           </table>
-        </div>
+        </ScrollDrivenTable>
       </div>
     </div>
   );

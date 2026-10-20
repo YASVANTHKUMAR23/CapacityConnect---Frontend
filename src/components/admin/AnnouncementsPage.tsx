@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { AnnouncementItem } from '../../types';
 import { useAdminData } from '../../context/AdminDataContext';
+import { ScrollDrivenTable } from './ScrollDrivenTable';
 
 interface AnnouncementsPageProps {
   showToast: (msg: string) => void;
@@ -111,11 +112,11 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ showToast 
   });
 
   return (
-    <div className="space-y-6">
+    <div className="w-full max-w-full min-w-0 space-y-4 sm:space-y-6">
       {/* Top action row */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* Filter Pills matching 07-announcements.png */}
-        <div className="flex items-center gap-1.5 overflow-x-auto text-xs font-medium">
+        <div className="flex flex-wrap items-center gap-1.5 text-xs font-medium scrollbar-none">
           <button
             type="button"
             onClick={() => setActiveFilter('All')}
@@ -177,7 +178,7 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ showToast 
         <button
           type="button"
           onClick={handleCreateNew}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>Create announcement</span>
@@ -185,18 +186,18 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ showToast 
       </div>
 
       {/* Main 2-column split */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
         {/* Left Column: Announcements Table (8 cols) */}
-        <div className="lg:col-span-8 bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+        <div className="lg:col-span-8 w-full max-w-full min-w-0 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs overflow-hidden">
+          <ScrollDrivenTable minWidth="min-w-[680px]">
+            <table className="w-full text-left text-xs min-w-[680px]">
               <thead>
                 <tr className="border-b border-slate-100 text-slate-400 font-semibold">
-                  <th className="pb-3.5 font-medium">Title</th>
-                  <th className="pb-3.5 font-medium">Type</th>
-                  <th className="pb-3.5 font-medium">Status</th>
-                  <th className="pb-3.5 font-medium">Date</th>
-                  <th className="pb-3.5 font-medium text-right">Actions</th>
+                  <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[240px]">Title</th>
+                  <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[140px]">Type</th>
+                  <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[120px]">Status</th>
+                  <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[120px]">Date</th>
+                  <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[120px] text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -210,7 +211,7 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ showToast 
                         isSelected ? 'bg-blue-50/60' : 'hover:bg-slate-50/60'
                       }`}
                     >
-                      <td className="py-3.5 pr-2">
+                      <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           {item.isPinned && (
                             <span className="w-2 h-2 rounded-full bg-blue-600" title="Pinned to homepage banner" />
@@ -220,34 +221,34 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ showToast 
                           </span>
                         </div>
                       </td>
-                      <td className="py-3.5">
+                      <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700">
                           <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
                           {item.type}
                         </span>
                       </td>
-                      <td className="py-3.5">
+                      <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
                         {item.status === 'Published' && (
-                          <span className="inline-flex items-center gap-1.5 text-emerald-700 font-semibold text-[11px]">
+                          <span className="inline-flex items-center gap-1.5 text-emerald-700 font-semibold text-[11px] bg-emerald-50 px-2 py-0.5 rounded-full">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                             Published
                           </span>
                         )}
                         {item.status === 'Scheduled' && (
-                          <span className="inline-flex items-center gap-1.5 text-amber-700 font-semibold text-[11px]">
+                          <span className="inline-flex items-center gap-1.5 text-amber-700 font-semibold text-[11px] bg-amber-50 px-2 py-0.5 rounded-full">
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
                             Scheduled
                           </span>
                         )}
                         {item.status === 'Draft' && (
-                          <span className="inline-flex items-center gap-1.5 text-slate-500 font-semibold text-[11px]">
+                          <span className="inline-flex items-center gap-1.5 text-slate-500 font-semibold text-[11px] bg-slate-100 px-2 py-0.5 rounded-full">
                             <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
                             Draft
                           </span>
                         )}
                       </td>
-                      <td className="py-3.5 text-slate-500">{item.date}</td>
-                      <td className="py-3.5 text-right relative">
+                      <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-500">{item.date}</td>
+                      <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-right relative">
                         <div className="flex items-center justify-end gap-1.5 text-slate-400">
                           {/* Quick Pin Action */}
                           <button
@@ -375,11 +376,11 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ showToast 
                 })}
               </tbody>
             </table>
-          </div>
+          </ScrollDrivenTable>
         </div>
 
         {/* Right Column: Edit Announcement Panel (4 cols) matching 07-announcements.png */}
-        <div className="lg:col-span-4 bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs space-y-4">
+        <div className="lg:col-span-4 w-full max-w-full min-w-0 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <h3 className="font-bold text-slate-900 text-base">Edit announcement</h3>
             <span

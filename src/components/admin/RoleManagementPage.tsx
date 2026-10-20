@@ -17,9 +17,14 @@ import {
   Calendar,
   GraduationCap,
   Info,
+  SlidersHorizontal,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { useAdminData } from '../../context/AdminDataContext';
 import { PendingApprovalItem, UserDirectoryItem } from '../../types';
+import { MobileStatCards } from './MobileStatCards';
+import { ScrollDrivenTable } from './ScrollDrivenTable';
 
 interface RoleManagementPageProps {
   showToast: (msg: string) => void;
@@ -69,10 +74,13 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
   );
 
   return (
-    <div className="space-y-6">
-      {/* 1. Pending Approvals Card matching 06-role-management.png */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs">
-        <div className="flex items-center justify-between mb-5">
+    <div className="w-full max-w-full min-w-0 space-y-4 sm:space-y-6">
+      {/* Mobile Stat Cards at top strictly matching reference images */}
+      <MobileStatCards />
+
+      {/* 1. Pending Approvals Card */}
+      <div className="w-full max-w-full min-w-0 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs overflow-hidden">
+        <div className="flex items-center justify-between mb-4 sm:mb-5">
           <h2 className="font-bold text-slate-900 text-base">Pending approvals</h2>
           <span className="text-xs font-semibold text-slate-500">
             {pendingApprovals.length > 0
@@ -86,21 +94,21 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
             All pending account approvals have been reviewed.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+          <ScrollDrivenTable minWidth="min-w-[720px]">
+            <table className="w-full text-left text-xs min-w-[720px]">
               <thead>
                 <tr className="border-b border-slate-100 text-slate-400 font-semibold">
-                  <th className="pb-3.5 font-medium">User</th>
-                  <th className="pb-3.5 font-medium">Division</th>
-                  <th className="pb-3.5 font-medium">Role requested</th>
-                  <th className="pb-3.5 font-medium">Submitted</th>
-                  <th className="pb-3.5 font-medium text-right">Actions</th>
+                  <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[220px]">User</th>
+                  <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[150px]">Division</th>
+                  <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[150px]">Role requested</th>
+                  <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[130px]">Submitted</th>
+                  <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[170px] text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {pendingApprovals.map((p) => (
                   <tr key={p.id} className="hover:bg-slate-50/50">
-                    <td className="py-3.5 pr-3">
+                    <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
                       <div>
                         <div className="font-semibold text-slate-900">{p.name}</div>
                         <div className="text-slate-400 text-[11px] font-normal">
@@ -108,14 +116,14 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
                         </div>
                       </div>
                     </td>
-                    <td className="py-3.5 text-slate-700 font-medium">{p.division}</td>
-                    <td className="py-3.5">
+                    <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">{p.division}</td>
+                    <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
                       <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700">
                         {p.roleRequested}
                       </span>
                     </td>
-                    <td className="py-3.5 text-slate-500 font-medium">{p.submitted}</td>
-                    <td className="py-3.5 text-right">
+                    <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-500 font-medium">{p.submitted}</td>
+                    <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-right">
                       <div className="flex items-center justify-end gap-2">
                         {/* Clicking Approve triggers the Profile Summary Pop-up */}
                         <button
@@ -140,13 +148,38 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollDrivenTable>
         )}
       </div>
 
-      {/* 2. All Users Section matching 06-role-management.png */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+      {/* 2. All Users / Members list Card (Scroll-Driven Table on mobile) */}
+      <div className="w-full max-w-full min-w-0 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs overflow-hidden">
+        {/* Mobile Heading and Search+Filter row strictly matching reference image */}
+        <div className="sm:hidden mb-3">
+          <h2 className="font-bold text-slate-900 text-base mb-3">Members list</h2>
+          <div className="flex items-center gap-2.5 mb-1">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search"
+                className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200/90 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600/30 shadow-2xs"
+              />
+            </div>
+            <button
+              type="button"
+              className="px-3.5 py-2.5 rounded-xl border border-slate-200/90 bg-white text-xs font-semibold text-slate-700 flex items-center gap-1.5 shadow-2xs shrink-0 hover:bg-slate-50 transition-colors cursor-pointer"
+            >
+              <SlidersHorizontal className="w-4 h-4 text-slate-600" />
+              <span>Filter</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Desktop Title & Search bar preserved for non-mobile views */}
+        <div className="hidden sm:flex items-center justify-between gap-4 mb-5">
           <div>
             <h2 className="font-bold text-slate-900 text-base">All users</h2>
             <p className="text-xs text-slate-400 mt-0.5">
@@ -165,48 +198,70 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+        {/* Scroll-Driven Users Table */}
+        <ScrollDrivenTable minWidth="min-w-[840px]">
+          <table className="w-full text-left text-[13px] min-w-[840px]">
             <thead>
-              <tr className="border-b border-slate-100 text-slate-400 font-semibold">
-                <th className="pb-3.5 font-medium">User</th>
-                <th className="pb-3.5 font-medium">Current role</th>
-                <th className="pb-3.5 font-medium">Status</th>
-                <th className="pb-3.5 font-medium">Joined</th>
-                <th className="pb-3.5 font-medium text-right">Change role</th>
+              <tr className="border-b border-slate-100 text-slate-400 font-semibold text-[13px]">
+                <th className="py-3.5 pl-3 pr-2 w-10">
+                  <input
+                    type="checkbox"
+                    className="rounded border-slate-300 text-blue-600 focus:ring-0 w-4 h-4 cursor-pointer"
+                  />
+                </th>
+                <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[240px]">Client</th>
+                <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[140px]">Role</th>
+                <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[120px]">Status</th>
+                <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[130px]">Joined</th>
+                <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[160px] text-right">Change role</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredDirectory.map((u) => (
                 <tr key={u.id} className="hover:bg-slate-50/50">
-                  <td className="py-3.5 pr-3">
-                    <div>
-                      <div className="font-semibold text-slate-900">{u.name}</div>
-                      <div className="text-slate-400 text-[11px] font-normal">
-                        {u.email}
+                  <td className="py-4 pl-3 pr-2">
+                    <input
+                      type="checkbox"
+                      className="rounded border-slate-300 text-blue-600 focus:ring-0 w-4 h-4 cursor-pointer"
+                    />
+                  </td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-700 font-bold text-[11px] flex items-center justify-center shrink-0">
+                        {u.name
+                          .split(' ')
+                          .map((n) => n[0])
+                          .slice(0, 2)
+                          .join('')}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-slate-900 text-[13px]">{u.name}</div>
+                        <div className="text-slate-400 text-xs font-normal">
+                          {u.email}
+                        </div>
                       </div>
                     </div>
                   </td>
-                  <td className="py-3.5">
-                    <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700">
                       {u.role}
                     </span>
                   </td>
-                  <td className="py-3.5">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
                     {u.status === 'Active' ? (
-                      <span className="inline-flex items-center gap-1.5 text-emerald-700 font-semibold text-[11px]">
+                      <span className="inline-flex items-center gap-1.5 text-emerald-700 font-semibold text-xs bg-emerald-50 px-2.5 py-1 rounded-full">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                         Active
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 text-rose-700 font-semibold text-[11px]">
+                      <span className="inline-flex items-center gap-1.5 text-rose-700 font-semibold text-xs bg-rose-50 px-2.5 py-1 rounded-full">
                         <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
                         Suspended
                       </span>
                     )}
                   </td>
-                  <td className="py-3.5 text-slate-500 font-medium">{u.joined}</td>
-                  <td className="py-3.5 text-right">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-500 font-medium text-xs">{u.joined}</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-right">
                     <button
                       type="button"
                       onClick={() => {
@@ -226,11 +281,48 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
               ))}
             </tbody>
           </table>
+        </ScrollDrivenTable>
+
+        {/* Mobile Pagination strictly matching reference image */}
+        <div className="sm:hidden flex items-center justify-between pt-4 mt-2 border-t border-slate-100">
+          <button
+            type="button"
+            className="w-9 h-9 rounded-xl border border-slate-200/90 bg-white flex items-center justify-center text-slate-400 hover:text-slate-700 shadow-2xs cursor-pointer"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <div className="flex items-center gap-1.5 text-xs font-semibold">
+            <button
+              type="button"
+              className="w-8 h-8 rounded-xl bg-slate-950 text-white flex items-center justify-center shadow-xs cursor-pointer"
+            >
+              1
+            </button>
+            <button
+              type="button"
+              className="w-8 h-8 rounded-xl text-slate-600 hover:bg-slate-100 flex items-center justify-center cursor-pointer"
+            >
+              2
+            </button>
+            <span className="text-slate-400 px-1">...</span>
+            <button
+              type="button"
+              className="w-8 h-8 rounded-xl text-slate-600 hover:bg-slate-100 flex items-center justify-center cursor-pointer"
+            >
+              10
+            </button>
+          </div>
+          <button
+            type="button"
+            className="w-9 h-9 rounded-xl border border-slate-200/90 bg-white flex items-center justify-center text-slate-600 hover:text-slate-900 shadow-2xs cursor-pointer"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
 
-        {/* Pagination matching 06-role-management.png */}
-        <div className="flex items-center justify-between pt-5 border-t border-slate-100 text-xs text-slate-500">
-          <span>Showing 1-4 of 1,346</span>
+        {/* Desktop Pagination (preserved for non-mobile views) */}
+        <div className="hidden sm:flex items-center justify-between pt-5 border-t border-slate-100 text-xs text-slate-500">
+          <span>Showing 1-{filteredDirectory.length} of 1,346</span>
           <div className="flex items-center gap-2">
             <button
               type="button"

@@ -51,10 +51,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ showToast }) => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <div className="w-full max-w-full min-w-0 space-y-4 sm:space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
         {/* Left Settings Navigation Tabs (3 cols) matching 10-settings.png */}
-        <div className="lg:col-span-3 space-y-1">
+        <div className="lg:col-span-3 flex overflow-x-auto lg:flex-col gap-1.5 lg:gap-0 lg:space-y-1 pb-1 lg:pb-0 scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {(
             [
               'General',
@@ -71,10 +71,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ showToast }) => {
                 key={tab}
                 type="button"
                 onClick={() => setActiveSideTab(tab)}
-                className={`w-full text-left px-4 py-2.5 rounded-xl font-medium text-xs transition-colors cursor-pointer ${
+                className={`whitespace-nowrap w-auto lg:w-full text-left px-3.5 py-2 lg:px-4 lg:py-2.5 rounded-xl font-medium text-xs transition-colors cursor-pointer shrink-0 ${
                   isActive
                     ? 'bg-blue-600 text-white shadow-2xs font-semibold'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                    : 'text-slate-600 hover:text-slate-900 bg-white/80 lg:bg-transparent hover:bg-white border border-slate-200/80 lg:border-transparent'
                 }`}
               >
                 {tab}
@@ -84,9 +84,9 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ showToast }) => {
         </div>
 
         {/* Right Settings Form (9 cols) matching 10-settings.png */}
-        <div className="lg:col-span-9 space-y-6">
+        <div className="lg:col-span-9 w-full max-w-full min-w-0 space-y-4 sm:space-y-6">
           {/* General Section */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs space-y-5">
+          <div className="w-full max-w-full min-w-0 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs space-y-4 sm:space-y-5">
             <h3 className="font-bold text-slate-900 text-sm">General</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
@@ -210,7 +210,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ showToast }) => {
           </div>
 
           {/* Assessments Section */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs space-y-4">
+          <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs space-y-4">
             <h3 className="font-bold text-slate-900 text-sm">Assessments</h3>
 
             <div className="divide-y divide-slate-100 text-xs">

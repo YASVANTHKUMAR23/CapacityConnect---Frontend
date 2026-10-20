@@ -13,6 +13,7 @@ import {
   BarChart2,
   Building2,
 } from 'lucide-react';
+import { ScrollDrivenTable } from './ScrollDrivenTable';
 
 interface AnalyticsPageProps {
   showToast: (msg: string) => void;
@@ -28,7 +29,7 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ showToast }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="w-full max-w-full min-w-0 space-y-4 sm:space-y-6">
       {/* Top Filter and Action Row */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
@@ -162,7 +163,7 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ showToast }) => {
       {/* Middle Row: Line Chart + Bar Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Enrollments and completions (7 cols) */}
-        <div className="lg:col-span-7 bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs">
+        <div className="lg:col-span-7 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-slate-900 text-sm">Enrollments and completions</h3>
             <span className="text-[11px] text-slate-400 font-medium">Monthly</span>
@@ -219,7 +220,7 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ showToast }) => {
         </div>
 
         {/* Average score by subject (5 cols) */}
-        <div className="lg:col-span-5 bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs">
+        <div className="lg:col-span-5 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-slate-900 text-sm">Average score by subject</h3>
             <span className="text-[11px] text-slate-400 font-medium">Percent</span>
@@ -253,7 +254,7 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ showToast }) => {
       {/* Bottom Charts Row: Assessment outcomes + Participation Heatmap */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Assessment outcomes Donut (5 cols) */}
-        <div className="lg:col-span-5 bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs">
+        <div className="lg:col-span-5 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs">
           <h3 className="font-bold text-slate-900 text-sm mb-4">Assessment outcomes</h3>
 
           <div className="flex items-center justify-between gap-4">
@@ -313,7 +314,7 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ showToast }) => {
         </div>
 
         {/* Participation by day and week Heatmap (7 cols) */}
-        <div className="lg:col-span-7 bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs">
+        <div className="lg:col-span-7 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-slate-900 text-sm">Participation by day and week</h3>
             <span className="text-[11px] text-slate-400 font-medium">Last 22 weeks</span>
@@ -353,7 +354,7 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ showToast }) => {
       </div>
 
       {/* Course Detail Analytics Table matching 08-analytics.png */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs overflow-hidden">
+      <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
@@ -464,7 +465,7 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ showToast }) => {
       </div>
 
       {/* 4. Participation by Division (Comprehensive Multi-Analysis Section requested by user) */}
-      <div id="participation-by-division" className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs space-y-6">
+      <div id="participation-by-division" className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs space-y-4 sm:space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
           <div>
             <div className="flex items-center gap-2">
@@ -566,30 +567,30 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ showToast }) => {
             <span className="text-xs text-slate-400 font-medium">Updated today</span>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+          <ScrollDrivenTable minWidth="min-w-[940px]">
+            <table className="w-full text-left text-xs min-w-[940px]">
               <thead>
                 <tr className="border-b border-slate-100 text-slate-400 font-semibold">
-                  <th className="pb-3.5 font-medium">Division</th>
-                  <th className="pb-3.5 font-medium">Zone</th>
-                  <th className="pb-3.5 font-medium">Active Trainees</th>
-                  <th className="pb-3.5 font-medium">Trend</th>
-                  <th className="pb-3.5 font-medium">Completion Rate</th>
-                  <th className="pb-3.5 font-medium">Avg Score</th>
-                  <th className="pb-3.5 font-medium">Certified Trainees</th>
-                  <th className="pb-3.5 font-medium">Status</th>
+                  <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[220px]">Division</th>
+                  <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[100px]">Zone</th>
+                  <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[130px]">Active Trainees</th>
+                  <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[90px]">Trend</th>
+                  <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[170px]">Completion Rate</th>
+                  <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[100px]">Avg Score</th>
+                  <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[140px]">Certified Trainees</th>
+                  <th className="py-3.5 px-5 sm:px-6 font-medium whitespace-nowrap min-w-[110px]">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 <tr className="hover:bg-slate-50/50">
-                  <td className="py-3.5 font-semibold text-slate-900 flex items-center gap-2">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap font-semibold text-slate-900 flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-[#3b41e3]" />
                     Delhi HQ
                   </td>
-                  <td className="py-3.5 text-slate-600 font-medium">North</td>
-                  <td className="py-3.5 text-slate-900 font-bold tabular-nums">417</td>
-                  <td className="py-3.5 text-emerald-600 font-semibold">+8%</td>
-                  <td className="py-3.5">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-600 font-medium">North</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-900 font-bold tabular-nums">417</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-emerald-600 font-semibold">+8%</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                         <div className="h-full bg-blue-600 w-[82%]" />
@@ -597,24 +598,24 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ showToast }) => {
                       <span className="text-slate-600 font-semibold">82%</span>
                     </div>
                   </td>
-                  <td className="py-3.5 text-slate-700 font-medium">79%</td>
-                  <td className="py-3.5 text-slate-700 font-medium">342</td>
-                  <td className="py-3.5">
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">79%</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">342</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
                       On Track
                     </span>
                   </td>
                 </tr>
 
                 <tr className="hover:bg-slate-50/50">
-                  <td className="py-3.5 font-semibold text-slate-900 flex items-center gap-2">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap font-semibold text-slate-900 flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-[#5157ea]" />
                     Pune Met Centre
                   </td>
-                  <td className="py-3.5 text-slate-600 font-medium">West</td>
-                  <td className="py-3.5 text-slate-900 font-bold tabular-nums">281</td>
-                  <td className="py-3.5 text-emerald-600 font-semibold">+5%</td>
-                  <td className="py-3.5">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-600 font-medium">West</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-900 font-bold tabular-nums">281</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-emerald-600 font-semibold">+5%</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                         <div className="h-full bg-blue-600 w-[74%]" />
@@ -622,24 +623,24 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ showToast }) => {
                       <span className="text-slate-600 font-semibold">74%</span>
                     </div>
                   </td>
-                  <td className="py-3.5 text-slate-700 font-medium">75%</td>
-                  <td className="py-3.5 text-slate-700 font-medium">208</td>
-                  <td className="py-3.5">
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">75%</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">208</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
                       On Track
                     </span>
                   </td>
                 </tr>
 
                 <tr className="hover:bg-slate-50/50">
-                  <td className="py-3.5 font-semibold text-slate-900 flex items-center gap-2">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap font-semibold text-slate-900 flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-[#8e93f3]" />
                     Chennai Coastal
                   </td>
-                  <td className="py-3.5 text-slate-600 font-medium">South</td>
-                  <td className="py-3.5 text-slate-900 font-bold tabular-nums">212</td>
-                  <td className="py-3.5 text-rose-600 font-semibold">-2%</td>
-                  <td className="py-3.5">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-600 font-medium">South</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-900 font-bold tabular-nums">212</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-rose-600 font-semibold">-2%</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                         <div className="h-full bg-blue-600 w-[68%]" />
@@ -647,24 +648,24 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ showToast }) => {
                       <span className="text-slate-600 font-semibold">68%</span>
                     </div>
                   </td>
-                  <td className="py-3.5 text-slate-700 font-medium">71%</td>
-                  <td className="py-3.5 text-slate-700 font-medium">144</td>
-                  <td className="py-3.5">
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">71%</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">144</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">
                       Attention
                     </span>
                   </td>
                 </tr>
 
                 <tr className="hover:bg-slate-50/50">
-                  <td className="py-3.5 font-semibold text-slate-900 flex items-center gap-2">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap font-semibold text-slate-900 flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-[#a3a8f6]" />
                     Regional Satellites
                   </td>
-                  <td className="py-3.5 text-slate-600 font-medium">Central</td>
-                  <td className="py-3.5 text-slate-900 font-bold tabular-nums">168</td>
-                  <td className="py-3.5 text-emerald-600 font-semibold">+4%</td>
-                  <td className="py-3.5">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-600 font-medium">Central</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-900 font-bold tabular-nums">168</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-emerald-600 font-semibold">+4%</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                         <div className="h-full bg-blue-600 w-[65%]" />
@@ -672,24 +673,24 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ showToast }) => {
                       <span className="text-slate-600 font-semibold">65%</span>
                     </div>
                   </td>
-                  <td className="py-3.5 text-slate-700 font-medium">68%</td>
-                  <td className="py-3.5 text-slate-700 font-medium">109</td>
-                  <td className="py-3.5">
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">68%</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">109</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
                       On Track
                     </span>
                   </td>
                 </tr>
 
                 <tr className="hover:bg-slate-50/50">
-                  <td className="py-3.5 font-semibold text-slate-900 flex items-center gap-2">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap font-semibold text-slate-900 flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-[#6366f1]" />
                     Kolkata Doppler Unit
                   </td>
-                  <td className="py-3.5 text-slate-600 font-medium">East</td>
-                  <td className="py-3.5 text-slate-900 font-bold tabular-nums">310</td>
-                  <td className="py-3.5 text-emerald-600 font-semibold">+6%</td>
-                  <td className="py-3.5">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-600 font-medium">East</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-900 font-bold tabular-nums">310</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-emerald-600 font-semibold">+6%</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                         <div className="h-full bg-blue-600 w-[78%]" />
@@ -697,24 +698,24 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ showToast }) => {
                       <span className="text-slate-600 font-semibold">78%</span>
                     </div>
                   </td>
-                  <td className="py-3.5 text-slate-700 font-medium">76%</td>
-                  <td className="py-3.5 text-slate-700 font-medium">241</td>
-                  <td className="py-3.5">
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">76%</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">241</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
                       On Track
                     </span>
                   </td>
                 </tr>
 
                 <tr className="hover:bg-slate-50/50">
-                  <td className="py-3.5 font-semibold text-slate-900 flex items-center gap-2">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap font-semibold text-slate-900 flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-[#4338ca]" />
                     Mumbai Western Met Hub
                   </td>
-                  <td className="py-3.5 text-slate-600 font-medium">West</td>
-                  <td className="py-3.5 text-slate-900 font-bold tabular-nums">350</td>
-                  <td className="py-3.5 text-emerald-600 font-semibold">+9%</td>
-                  <td className="py-3.5">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-600 font-medium">West</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-900 font-bold tabular-nums">350</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-emerald-600 font-semibold">+9%</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                         <div className="h-full bg-blue-600 w-[80%]" />
@@ -722,17 +723,17 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ showToast }) => {
                       <span className="text-slate-600 font-semibold">80%</span>
                     </div>
                   </td>
-                  <td className="py-3.5 text-slate-700 font-medium">78%</td>
-                  <td className="py-3.5 text-slate-700 font-medium">280</td>
-                  <td className="py-3.5">
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">78%</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap text-slate-700 font-medium">280</td>
+                  <td className="py-4 px-5 sm:px-6 whitespace-nowrap">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
                       On Track
                     </span>
                   </td>
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollDrivenTable>
         </div>
       </div>
     </div>
