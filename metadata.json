@@ -1,0 +1,6 @@
+{
+  "name": "Capacity Connect - India Meteorological Department",
+  "description": "Training and capacity building portal for the India Meteorological Department, Ministry of Earth Sciences (MoES).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
