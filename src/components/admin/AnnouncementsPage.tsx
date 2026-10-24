@@ -302,7 +302,7 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ showToast 
                             {openActionDropdownId === item.id && (
                               <div
                                 onClick={(e) => e.stopPropagation()}
-                                className="absolute right-0 mt-1 w-48 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-30 text-xs text-left animate-in fade-in zoom-in-95 duration-100"
+                                className="absolute right-0 mt-1 w-48 max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-30 text-xs text-left animate-in fade-in zoom-in-95 duration-100"
                               >
                                 <button
                                   type="button"

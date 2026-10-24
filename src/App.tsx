@@ -55,13 +55,13 @@ export default function App() {
       <div className="min-h-screen text-slate-900 flex flex-col justify-between relative selection:bg-slate-900 selection:text-white">
         {/* Global Toast Notification */}
         {toastMessage && (
-          <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-2xl text-xs font-medium animate-in fade-in slide-in-from-top-3 duration-200">
-            <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>{toastMessage}</span>
+          <div className="fixed top-4 sm:top-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 sm:gap-2.5 bg-slate-900 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl shadow-2xl text-[11px] sm:text-xs font-medium max-w-[calc(100vw-2rem)] w-auto animate-in fade-in slide-in-from-top-3 duration-200">
+            <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400 shrink-0" />
+            <span className="truncate">{toastMessage}</span>
             <button
               type="button"
               onClick={() => setToastMessage(null)}
-              className="text-slate-400 hover:text-white ml-2 cursor-pointer"
+              className="text-slate-400 hover:text-white ml-1.5 sm:ml-2 cursor-pointer shrink-0"
             >
               <X className="w-3.5 h-3.5" />
             </button>

@@ -235,22 +235,60 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                 <Menu className="w-5 h-5 text-slate-700" />
               </button>
 
-              <button
-                type="button"
-                onClick={() => setNotificationsOpen(!notificationsOpen)}
-                className="w-10 h-10 rounded-xl bg-white border border-slate-200/90 shadow-2xs flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer relative"
-                title="Notifications"
-              >
-                <Bell className="w-5 h-5 text-slate-700" />
-                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
-              </button>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNotificationsOpen(!notificationsOpen);
+                    setProfileDropdownOpen(false);
+                  }}
+                  className="w-10 h-10 rounded-xl bg-white border border-slate-200/90 shadow-2xs flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer relative"
+                  title="Notifications"
+                >
+                  <Bell className="w-5 h-5 text-slate-700" />
+                  <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
+                </button>
+
+                {/* Mobile Notification Popover */}
+                {notificationsOpen && (
+                  <div className="sm:hidden absolute left-0 mt-2 w-72 max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-2xl border border-slate-200 p-3 z-50 text-xs animate-in fade-in zoom-in-95 duration-100">
+                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+                      <span className="font-semibold text-slate-800 text-xs">Notifications</span>
+                      <span className="text-[10px] text-blue-600 cursor-pointer font-medium">Mark read</span>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="p-2 rounded-lg bg-blue-50/60">
+                        <p className="font-semibold text-slate-800 text-xs">4 New Account Requests</p>
+                        <p className="text-slate-500 text-[11px] mt-0.5">Kiran Joshi, Sana Ahmed and 2 others awaiting approval.</p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onSelectTab('role-management');
+                            setNotificationsOpen(false);
+                          }}
+                          className="text-blue-600 font-semibold mt-1 inline-block text-[11px]"
+                        >
+                          Review requests →
+                        </button>
+                      </div>
+                      <div className="p-2 rounded-lg hover:bg-slate-50">
+                        <p className="font-semibold text-slate-800 text-xs">Cyclone Training Announcement Pinned</p>
+                        <p className="text-slate-500 text-[11px] mt-0.5">Active on learner homepages.</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Right: Willow Green Profile Pill matching reference images */}
             <div className="relative">
               <button
                 type="button"
-                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                onClick={() => {
+                  setProfileDropdownOpen(!profileDropdownOpen);
+                  setNotificationsOpen(false);
+                }}
                 className="flex items-center gap-2 bg-white border border-slate-200/90 rounded-2xl py-1.5 px-2.5 shadow-2xs hover:border-slate-300 transition-all cursor-pointer select-none"
               >
                 <img
@@ -268,6 +306,39 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                 </div>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-0.5 shrink-0" />
               </button>
+
+              {/* Mobile Profile Dropdown Popover */}
+              {profileDropdownOpen && (
+                <div className="sm:hidden absolute right-0 mt-2 w-52 max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-2xl border border-slate-200 p-2 z-50 text-xs animate-in fade-in zoom-in-95 duration-100">
+                  <div className="px-3 py-1.5 border-b border-slate-100 mb-1">
+                    <p className="font-semibold text-slate-800 text-xs">Willow Green</p>
+                    <p className="text-slate-400 text-[10px]">willow.green@com</p>
+                    <span className="inline-block mt-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                      Administrator
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onSelectTab('settings');
+                      setProfileDropdownOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-700 hover:bg-slate-100 font-medium transition-colors text-left cursor-pointer"
+                  >
+                    <Settings className="w-3.5 h-3.5 text-slate-500" />
+                    <span>Settings</span>
+                  </button>
+                  <div className="my-1 border-t border-slate-100" />
+                  <button
+                    type="button"
+                    onClick={handleSignOut}
+                    className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-red-600 hover:bg-red-50 font-medium transition-colors text-left cursor-pointer"
+                  >
+                    <LogOut className="w-3.5 h-3.5 text-red-500" />
+                    <span>Sign out</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -555,27 +626,27 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 
       {/* Quick Search Dialog */}
       {searchModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
-            <div className="p-4 border-b border-slate-100 flex items-center gap-3">
-              <Search className="w-4 h-4 text-slate-400" />
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-12 sm:pt-20 p-3 sm:p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="w-full max-w-md sm:max-w-lg max-h-[85vh] flex flex-col bg-white rounded-xl sm:rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="p-3 sm:p-4 border-b border-slate-100 flex items-center gap-2.5 sm:gap-3 shrink-0">
+              <Search className="w-4 h-4 text-slate-400 shrink-0" />
               <input
                 type="text"
                 autoFocus
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search courses, trainers, trainees, announcements..."
-                className="w-full text-sm text-slate-900 placeholder:text-slate-400 focus:outline-hidden"
+                className="w-full text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-hidden"
               />
               <button
                 type="button"
                 onClick={() => setSearchModalOpen(false)}
-                className="text-xs text-slate-400 hover:text-slate-600 px-2 py-1 bg-slate-100 rounded-md"
+                className="text-[10px] sm:text-xs text-slate-400 hover:text-slate-600 px-2 py-1 bg-slate-100 rounded-md cursor-pointer shrink-0"
               >
                 ESC
               </button>
             </div>
-            <div className="p-4 max-h-72 overflow-y-auto space-y-2 text-xs">
+            <div className="p-3 sm:p-4 max-h-56 sm:max-h-72 overflow-y-auto space-y-1.5 sm:space-y-2 text-xs flex-1">
               <div className="text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
                 Quick Destinations
               </div>

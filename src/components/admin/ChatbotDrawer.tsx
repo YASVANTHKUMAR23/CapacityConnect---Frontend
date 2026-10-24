@@ -105,10 +105,10 @@ export const ChatbotDrawer: React.FC<ChatbotDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 z-50 w-full sm:w-[480px] bg-white shadow-2xl border-l border-slate-200 flex flex-col justify-between animate-in slide-in-from-right duration-200">
+    <div className="fixed inset-y-0 right-0 z-50 w-full sm:max-w-md sm:w-[480px] bg-white shadow-2xl border-l border-slate-200 flex flex-col justify-between animate-in slide-in-from-right duration-200">
       {/* Toast inside drawer */}
       {toastNote && (
-        <div className="absolute top-16 left-4 right-4 z-50 bg-slate-900 text-white text-xs px-3 py-2 rounded-xl shadow-lg flex items-center justify-between">
+        <div className="absolute top-14 sm:top-16 left-3 right-3 sm:left-4 sm:right-4 z-50 bg-slate-900 text-white text-xs px-3 py-2 rounded-xl shadow-lg flex items-center justify-between">
           <span>{toastNote}</span>
           <button onClick={() => setToastNote(null)}>
             <X className="w-3.5 h-3.5" />
@@ -117,16 +117,16 @@ export const ChatbotDrawer: React.FC<ChatbotDrawerProps> = ({
       )}
 
       {/* Header */}
-      <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-xs">
-            <MessageSquare className="w-5 h-5" />
+      <div className="p-3.5 sm:p-4 border-b border-slate-100 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-xs shrink-0">
+            <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
           <div>
-            <h3 className="font-bold text-slate-900 text-base">
+            <h3 className="font-bold text-slate-900 text-sm sm:text-base">
               Capacity assistant
             </h3>
-            <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+            <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-slate-500 font-medium">
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
               <span>Online · Admin analytics</span>
             </div>
@@ -145,7 +145,7 @@ export const ChatbotDrawer: React.FC<ChatbotDrawerProps> = ({
                 },
               ]);
             }}
-            className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 cursor-pointer"
             title="New conversation"
           >
             <Plus className="w-4 h-4" />
@@ -153,7 +153,7 @@ export const ChatbotDrawer: React.FC<ChatbotDrawerProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 cursor-pointer"
             title="Close assistant"
           >
             <X className="w-4 h-4" />
@@ -162,21 +162,21 @@ export const ChatbotDrawer: React.FC<ChatbotDrawerProps> = ({
       </div>
 
       {/* Context filters bar */}
-      <div className="px-4 py-2.5 bg-slate-50/70 border-b border-slate-100 flex items-center gap-2 overflow-x-auto text-[11px] font-medium text-slate-600 select-none">
+      <div className="px-3 sm:px-4 py-2 sm:py-2.5 bg-slate-50/70 border-b border-slate-100 flex items-center gap-1.5 sm:gap-2 overflow-x-auto text-[10px] sm:text-[11px] font-medium text-slate-600 select-none shrink-0">
         <span className="text-slate-400 font-normal">Context</span>
-        <span className="px-2.5 py-1 rounded-full bg-white border border-slate-200 shadow-2xs">
+        <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-white border border-slate-200 shadow-2xs">
           Courses
         </span>
-        <span className="px-2.5 py-1 rounded-full bg-white border border-slate-200 shadow-2xs">
+        <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-white border border-slate-200 shadow-2xs">
           Last 30 days
         </span>
-        <span className="px-2.5 py-1 rounded-full bg-white border border-slate-200 shadow-2xs">
+        <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-white border border-slate-200 shadow-2xs">
           All divisions
         </span>
       </div>
 
       {/* Message Feed */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4">
         <div className="text-center">
           <span className="text-[10px] text-slate-400 font-medium bg-slate-100 px-2 py-0.5 rounded-full">
             Today, 09:41
@@ -330,32 +330,32 @@ export const ChatbotDrawer: React.FC<ChatbotDrawerProps> = ({
       </div>
 
       {/* Suggested quick chips */}
-      <div className="px-4 py-2 border-t border-slate-100 flex items-center gap-2 overflow-x-auto text-xs">
+      <div className="px-3 sm:px-4 py-1.5 sm:py-2 border-t border-slate-100 flex items-center gap-1.5 sm:gap-2 overflow-x-auto text-[11px] sm:text-xs shrink-0">
         <button
           type="button"
           onClick={() => handleSend('Show competency gaps')}
-          className="whitespace-nowrap px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition-colors"
+          className="whitespace-nowrap px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] sm:text-xs font-medium transition-colors cursor-pointer"
         >
           Competency gaps
         </button>
         <button
           type="button"
           onClick={() => handleSend('Pending approvals')}
-          className="whitespace-nowrap px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition-colors"
+          className="whitespace-nowrap px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] sm:text-xs font-medium transition-colors cursor-pointer"
         >
           Pending approvals
         </button>
         <button
           type="button"
           onClick={() => handleSend('Top trainers')}
-          className="whitespace-nowrap px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition-colors"
+          className="whitespace-nowrap px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] sm:text-xs font-medium transition-colors cursor-pointer"
         >
           Top trainers
         </button>
       </div>
 
       {/* Input box */}
-      <div className="p-4 bg-white border-t border-slate-200/80">
+      <div className="p-3 sm:p-4 bg-white border-t border-slate-200/80 shrink-0">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -376,19 +376,19 @@ export const ChatbotDrawer: React.FC<ChatbotDrawerProps> = ({
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
             placeholder="Ask about courses, trainees, analytics..."
-            className="w-full pl-9 pr-11 py-2.5 bg-slate-50 border border-slate-200 rounded-full text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 transition-all"
+            className="w-full pl-9 pr-10 py-2 sm:py-2.5 bg-slate-50 border border-slate-200 rounded-full text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 transition-all"
           />
 
           <button
             type="submit"
             disabled={!inputVal.trim()}
-            className="absolute right-1.5 w-7 h-7 rounded-full bg-blue-600 disabled:opacity-40 hover:bg-blue-700 text-white flex items-center justify-center transition-colors cursor-pointer"
+            className="absolute right-1 w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-full bg-blue-600 disabled:opacity-40 hover:bg-blue-700 text-white flex items-center justify-center transition-colors cursor-pointer"
           >
             <Send className="w-3.5 h-3.5" />
           </button>
         </form>
 
-        <p className="text-[10px] text-slate-400 text-center mt-2">
+        <p className="text-[10px] text-slate-400 text-center mt-1.5 sm:mt-2">
           Answers use live portal data. Check important figures before sharing.
         </p>
       </div>

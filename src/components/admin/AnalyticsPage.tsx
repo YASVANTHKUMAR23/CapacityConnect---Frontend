@@ -465,7 +465,7 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ showToast }) => {
       </div>
 
       {/* 4. Participation by Division (Comprehensive Multi-Analysis Section requested by user) */}
-      <div id="participation-by-division" className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs space-y-4 sm:space-y-6">
+      <div id="participation-by-division" className="w-full max-w-full min-w-0 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs space-y-4 sm:space-y-6 overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
           <div>
             <div className="flex items-center gap-2">
@@ -559,7 +559,7 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ showToast }) => {
         </div>
 
         {/* Detailed Comparative Table for All Divisions */}
-        <div>
+        <div className="w-full max-w-full min-w-0 overflow-hidden">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-bold text-slate-900 text-sm">
               Complete Division Metrics & Competency Fulfillment

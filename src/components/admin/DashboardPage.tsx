@@ -266,7 +266,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="w-full max-w-full min-w-0 space-y-4 sm:space-y-6">
       {/* Mobile Stat Cards at top strictly matching reference image image_ccbc04a5.png */}
       <MobileStatCards />
 

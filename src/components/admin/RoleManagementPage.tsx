@@ -343,18 +343,21 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
       {/* ======================================================== */}
       {/* 1. TAILGRIDS-STYLE APPROVAL DIALOG (on User Approval)     */}
       {/* ======================================================== */}
+      {/* ======================================================== */}
+      {/* 1. TAILGRIDS-STYLE APPROVAL DIALOG (on User Approval)     */}
+      {/* ======================================================== */}
       {selectedApprovalUser && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
-          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 z-50 animate-in fade-in duration-150">
+          <div className="bg-white rounded-xl sm:rounded-2xl max-w-md sm:max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-150">
             {/* Dialog Header */}
-            <div className="p-6 pb-4 border-b border-slate-100">
-              <div className="flex items-center gap-3">
-                <span className="flex size-10 items-center justify-center rounded-full bg-blue-50 text-blue-600 shrink-0">
-                  <CheckCircle2 className="w-5 h-5" />
+            <div className="p-4 sm:p-6 pb-3 sm:pb-4 border-b border-slate-100 shrink-0">
+              <div className="flex items-center gap-2.5 sm:gap-3">
+                <span className="flex size-9 sm:size-10 items-center justify-center rounded-full bg-blue-50 text-blue-600 shrink-0">
+                  <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
                 </span>
-                <div>
-                  <h3 className="font-bold text-slate-900 text-base">Approve User Profile</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                <div className="min-w-0">
+                  <h3 className="font-bold text-slate-900 text-sm sm:text-base truncate">Approve User Profile</h3>
+                  <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 leading-snug">
                     A new account request is pending. Review profile details before granting portal access.
                   </p>
                 </div>
@@ -362,60 +365,60 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
             </div>
 
             {/* Dialog Body */}
-            <div className="p-6 space-y-4 text-xs">
+            <div className="p-3.5 sm:p-6 space-y-3 sm:space-y-4 text-xs overflow-y-auto flex-1">
               {/* Profile Card */}
-              <div className="rounded-xl bg-slate-50 border border-slate-200/80 p-4">
-                <div className="flex items-center gap-3.5 mb-3">
+              <div className="rounded-xl bg-slate-50 border border-slate-200/80 p-3 sm:p-4">
+                <div className="flex items-center gap-3 mb-2.5 sm:mb-3">
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 ${
+                    className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm shrink-0 ${
                       selectedApprovalUser.avatarBg || 'bg-blue-100 text-blue-800'
                     }`}
                   >
                     {selectedApprovalUser.initials}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-bold text-slate-900 text-sm truncate">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                      <h4 className="font-bold text-slate-900 text-xs sm:text-sm truncate">
                         {selectedApprovalUser.name}
                       </h4>
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-600 text-white">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-600 text-white self-start sm:self-auto">
                         Requested: {selectedApprovalUser.roleRequested}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-500 truncate mt-0.5">{selectedApprovalUser.email}</p>
+                    <p className="text-[11px] sm:text-xs text-slate-500 truncate mt-0.5">{selectedApprovalUser.email}</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-200/60 text-xs">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-2.5 sm:pt-3 border-t border-slate-200/60 text-xs">
                   <div>
                     <span className="text-[10px] uppercase font-bold text-slate-400 block">Division</span>
-                    <span className="font-semibold text-slate-700">{selectedApprovalUser.division}</span>
+                    <span className="font-semibold text-slate-700 text-[11px] sm:text-xs">{selectedApprovalUser.division}</span>
                   </div>
                   <div>
                     <span className="text-[10px] uppercase font-bold text-slate-400 block">Submitted</span>
-                    <span className="font-semibold text-slate-700">{selectedApprovalUser.submitted}</span>
+                    <span className="font-semibold text-slate-700 text-[11px] sm:text-xs">{selectedApprovalUser.submitted}</span>
                   </div>
                   <div>
                     <span className="text-[10px] uppercase font-bold text-slate-400 block">Employee ID</span>
-                    <span className="font-semibold text-slate-700">
+                    <span className="font-semibold text-slate-700 text-[11px] sm:text-xs truncate block">
                       IMD-2026-{selectedApprovalUser.id.replace('app-', '').toUpperCase().padStart(4, '0')}
                     </span>
                   </div>
                   <div>
                     <span className="text-[10px] uppercase font-bold text-slate-400 block">Security Clearance</span>
-                    <span className="font-semibold text-emerald-600 flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Level 2 Verified
+                    <span className="font-semibold text-emerald-600 flex items-center gap-1 text-[11px] sm:text-xs">
+                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> Level 2 Verified
                     </span>
                   </div>
                 </div>
               </div>
 
               {/* Tailgrids-styled Summary Checklist */}
-              <div className="rounded-xl bg-blue-50/60 border border-blue-100 p-4">
-                <h4 className="mb-2 text-sm font-semibold text-slate-900">
+              <div className="rounded-xl bg-blue-50/60 border border-blue-100 p-3 sm:p-4">
+                <h4 className="mb-1.5 sm:mb-2 text-xs sm:text-sm font-semibold text-slate-900">
                   Profile Details & Verification Checklist
                 </h4>
-                <ul className="list-inside list-disc space-y-1.5 text-xs text-slate-600">
+                <ul className="list-inside list-disc space-y-1 sm:space-y-1.5 text-[11px] sm:text-xs text-slate-600">
                   <li>Official Government email domain verified (<b>@imd.gov.in</b>)</li>
                   <li>Scientific Officer credential verified by Head of Division</li>
                   <li>National Meteorology Center security clearance completed</li>
@@ -425,11 +428,11 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
             </div>
 
             {/* Dialog Footer */}
-            <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div className="px-4 py-3 sm:px-6 sm:py-4 border-t border-slate-100 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-0 bg-slate-50/50 shrink-0">
               <button
                 type="button"
                 onClick={() => setSelectedApprovalUser(null)}
-                className="px-4 py-2 border border-slate-200 hover:bg-slate-100 text-slate-600 font-semibold rounded-xl text-xs transition-colors cursor-pointer"
+                className="px-3.5 py-2 sm:px-4 sm:py-2 border border-slate-200 hover:bg-slate-100 text-slate-600 font-semibold rounded-xl text-xs transition-colors cursor-pointer text-center"
               >
                 Remind Me Later
               </button>
@@ -437,17 +440,17 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
                 <button
                   type="button"
                   onClick={() => confirmReject(selectedApprovalUser)}
-                  className="px-3.5 py-2 text-rose-600 hover:bg-rose-50 font-semibold rounded-xl text-xs transition-colors cursor-pointer"
+                  className="flex-1 sm:flex-initial px-3 py-2 text-rose-600 hover:bg-rose-50 font-semibold rounded-xl text-xs transition-colors cursor-pointer text-center"
                 >
                   Reject
                 </button>
                 <button
                   type="button"
                   onClick={() => confirmApprove(selectedApprovalUser)}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-xs transition-colors cursor-pointer shadow-xs"
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 sm:px-4 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-xs transition-colors cursor-pointer shadow-xs"
                 >
-                  <Check className="w-4 h-4" />
-                  <span>Update & Approve Now</span>
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Update & Approve</span>
                 </button>
               </div>
             </div>
@@ -467,16 +470,16 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
           />
 
           {/* Sliding Drawer */}
-          <div className="fixed inset-y-0 right-0 w-full sm:w-[460px] bg-white shadow-2xl flex flex-col justify-between border-l border-slate-200 animate-in slide-in-from-right duration-200 z-50">
+          <div className="fixed inset-y-0 right-0 w-full sm:max-w-md sm:w-[460px] bg-white shadow-2xl flex flex-col justify-between border-l border-slate-200 animate-in slide-in-from-right duration-200 z-50">
             {/* Drawer Header */}
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
-              <div className="flex items-center gap-3">
-                <span className="flex size-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 shrink-0">
-                  <Shield className="w-5 h-5" />
+            <div className="p-4 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/60 shrink-0">
+              <div className="flex items-center gap-2.5 sm:gap-3">
+                <span className="flex size-9 sm:size-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 shrink-0">
+                  <Shield className="w-4 h-4 sm:w-5 sm:h-5" />
                 </span>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-base">Change User Role</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <h3 className="font-bold text-slate-900 text-sm sm:text-base">Change User Role</h3>
+                  <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5">
                     Modify portal authorization and role permissions
                   </p>
                 </div>
@@ -492,30 +495,30 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
             </div>
 
             {/* Drawer Content */}
-            <div className="p-6 overflow-y-auto space-y-5 text-xs flex-1">
+            <div className="p-4 sm:p-6 overflow-y-auto space-y-3.5 sm:space-y-5 text-xs flex-1">
               {/* User Profile Card */}
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center gap-3.5">
+              <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center gap-3">
                 <div
-                  className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-sm shrink-0 shadow-2xs ${
+                  className={`w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm shrink-0 shadow-2xs ${
                     roleDrawerUser.avatarBg || 'bg-blue-100 text-blue-800'
                   }`}
                 >
                   {roleDrawerUser.initials}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-bold text-slate-900 text-sm truncate">{roleDrawerUser.name}</h4>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-200/80 text-slate-700">
+                  <div className="flex items-center justify-between gap-1">
+                    <h4 className="font-bold text-slate-900 text-xs sm:text-sm truncate">{roleDrawerUser.name}</h4>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200/80 text-slate-700 shrink-0">
                       Current: {roleDrawerUser.role}
                     </span>
                   </div>
-                  <p className="text-slate-500 text-xs truncate mt-0.5">{roleDrawerUser.email}</p>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Joined: {roleDrawerUser.joined}</p>
+                  <p className="text-slate-500 text-[11px] sm:text-xs truncate mt-0.5">{roleDrawerUser.email}</p>
+                  <p className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">Joined: {roleDrawerUser.joined}</p>
                 </div>
               </div>
 
               {/* 2 Role Options: Trainee and Trainer only */}
-              <div className="space-y-3">
+              <div className="space-y-2.5 sm:space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                     Select New Role (2 Options)
@@ -530,29 +533,29 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
                     setDrawerTargetRole('Trainee');
                     setDrawerConfirmed(false);
                   }}
-                  className={`w-full text-left p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-start gap-3.5 ${
+                  className={`w-full text-left p-3 sm:p-4 rounded-xl sm:rounded-2xl border-2 transition-all cursor-pointer flex items-start gap-3 ${
                     drawerTargetRole === 'Trainee'
                       ? 'border-blue-600 bg-blue-50/40 shadow-xs'
                       : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50/60'
                   }`}
                 >
                   <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                    className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 ${
                       drawerTargetRole === 'Trainee'
                         ? 'bg-blue-600 text-white'
                         : 'bg-slate-100 text-slate-600'
                     }`}
                   >
-                    <GraduationCap className="w-5 h-5" />
+                    <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-bold text-slate-900 text-sm">Trainee</span>
+                    <div className="flex items-center justify-between mb-0.5 sm:mb-1">
+                      <span className="font-bold text-slate-900 text-xs sm:text-sm">Trainee</span>
                       <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
                         Learner Track
                       </span>
                     </div>
-                    <p className="text-xs text-slate-500 leading-relaxed">
+                    <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed">
                       Access training modules, radar & synoptic weather quizzes, track competency gaps, and participate in divisional sessions.
                     </p>
                   </div>
@@ -565,29 +568,29 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
                     setDrawerTargetRole('Trainer');
                     setDrawerConfirmed(false);
                   }}
-                  className={`w-full text-left p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-start gap-3.5 ${
+                  className={`w-full text-left p-3 sm:p-4 rounded-xl sm:rounded-2xl border-2 transition-all cursor-pointer flex items-start gap-3 ${
                     drawerTargetRole === 'Trainer'
                       ? 'border-blue-600 bg-blue-50/40 shadow-xs'
                       : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50/60'
                   }`}
                 >
                   <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                    className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 ${
                       drawerTargetRole === 'Trainer'
                         ? 'bg-blue-600 text-white'
                         : 'bg-slate-100 text-slate-600'
                     }`}
                   >
-                    <UserCheck className="w-5 h-5" />
+                    <UserCheck className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-bold text-slate-900 text-sm">Trainer</span>
+                    <div className="flex items-center justify-between mb-0.5 sm:mb-1">
+                      <span className="font-bold text-slate-900 text-xs sm:text-sm">Trainer</span>
                       <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
                         Instructor Track
                       </span>
                     </div>
-                    <p className="text-xs text-slate-500 leading-relaxed">
+                    <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed">
                       Manage course curriculums, organize live simulations, score assignments, evaluate trainees, and oversee competency metrics.
                     </p>
                   </div>
@@ -598,7 +601,7 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
               {drawerTargetRole && (
                 <div className="space-y-3 pt-3 border-t border-slate-200/80 animate-in fade-in duration-150">
                   {/* Transition visual */}
-                  <div className="p-3.5 bg-blue-50/60 border border-blue-200/80 rounded-2xl flex items-center justify-between">
+                  <div className="p-3 bg-blue-50/60 border border-blue-200/80 rounded-xl sm:rounded-2xl flex items-center justify-between">
                     <div>
                       <span className="text-[10px] uppercase font-bold text-slate-500 block">From</span>
                       <span className="font-bold text-slate-800 text-xs">{roleDrawerUser.role}</span>
@@ -614,7 +617,7 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
 
                   {/* Justification input */}
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">
+                    <label className="block font-semibold text-slate-700 mb-1 text-[11px] sm:text-xs">
                       Administrative Reason (Audit Log Reference)
                     </label>
                     <input
@@ -627,14 +630,14 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
                   </div>
 
                   {/* Verification Checkbox */}
-                  <label className="flex items-start gap-2.5 p-3 rounded-xl border border-slate-200 bg-slate-50/80 hover:bg-slate-50 cursor-pointer transition-colors">
+                  <label className="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-xl border border-slate-200 bg-slate-50/80 hover:bg-slate-50 cursor-pointer transition-colors">
                     <input
                       type="checkbox"
                       checked={drawerConfirmed}
                       onChange={(e) => setDrawerConfirmed(e.target.checked)}
                       className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                     />
-                    <span className="text-[11.5px] font-medium text-slate-700 leading-snug">
+                    <span className="text-[11px] sm:text-[11.5px] font-medium text-slate-700 leading-snug">
                       I confirm that as an Administrator, I have verified the credentials and authorization to modify <b>{roleDrawerUser.name}</b>'s role to <b>{drawerTargetRole}</b>.
                     </span>
                   </label>
@@ -643,11 +646,11 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
             </div>
 
             {/* Drawer Footer */}
-            <div className="p-6 border-t border-slate-100 flex items-center justify-end gap-2.5 bg-slate-50/50">
+            <div className="p-4 sm:p-6 border-t border-slate-100 flex items-center justify-end gap-2 bg-slate-50/50 shrink-0">
               <button
                 type="button"
                 onClick={() => setRoleDrawerUser(null)}
-                className="px-4 py-2 border border-slate-200 hover:bg-slate-100 text-slate-600 font-semibold rounded-xl text-xs transition-colors cursor-pointer"
+                className="px-3.5 py-2 sm:px-4 sm:py-2 border border-slate-200 hover:bg-slate-100 text-slate-600 font-semibold rounded-xl text-xs transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -655,10 +658,10 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
                 type="button"
                 disabled={!drawerTargetRole || !drawerConfirmed}
                 onClick={handleConfirmDrawerRoleChange}
-                className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-xl text-xs transition-colors cursor-pointer shadow-xs"
+                className="flex items-center gap-1.5 px-3.5 py-2 sm:px-4 sm:py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-xl text-xs transition-colors cursor-pointer shadow-xs"
               >
                 <ShieldCheck className="w-4 h-4" />
-                <span>Confirm & Change Role</span>
+                <span>Confirm Role</span>
               </button>
             </div>
           </div>
