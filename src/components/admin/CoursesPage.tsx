@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Search, ChevronDown, ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react';
 import { useAdminData } from '../../context/AdminDataContext';
 import { ScrollDrivenTable } from './ScrollDrivenTable';
-import { MobileStatCards } from './MobileStatCards';
 
 interface CoursesPageProps {
   showToast?: (msg: string) => void;
@@ -25,9 +24,6 @@ export const CoursesPage: React.FC<CoursesPageProps> = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6 w-full max-w-full min-w-0">
-      {/* Mobile Stat Cards at top matching other admin views */}
-      <MobileStatCards />
-
       {/* Filter Tabs & Search row */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         {/* Filter Tabs matching 05-courses.png */}

@@ -16,6 +16,7 @@ export type TraineeTab =
   | 'dashboard'
   | 'my-courses'
   | 'course-catalog'
+  | 'course-detail'
   | 'assessments'
   | 'my-competency'
   | 'mentors'
@@ -24,7 +25,8 @@ export type TraineeTab =
   | 'assessment-result'
   | 'notifications'
   | 'profile'
-  | 'certificates';
+  | 'certificates'
+  | 'library';
 
 export type TrainerTab =
   | 'dashboard'

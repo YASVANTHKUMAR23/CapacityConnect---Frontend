@@ -339,9 +339,8 @@ export const TraineeCourseCatalogPage: React.FC<TraineeCourseCatalogPageProps> =
                   <button
                     type="button"
                     onClick={() => {
-                      handleEnroll(course);
                       setSelectedCourseId(course.id);
-                      onSelectTab('course-player');
+                      onSelectTab('course-detail');
                     }}
                     className="flex-1 py-2 rounded-xl text-xs font-semibold text-white bg-[#1f5eff] hover:bg-blue-600 transition-colors cursor-pointer text-center shadow-xs flex items-center justify-center gap-1"
                   >

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Search, ChevronDown, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAdminData } from '../../context/AdminDataContext';
-import { MobileStatCards } from './MobileStatCards';
 import { ScrollDrivenTable } from './ScrollDrivenTable';
 
 interface TraineesPageProps {
@@ -29,9 +28,6 @@ export const TraineesPage: React.FC<TraineesPageProps> = () => {
 
   return (
     <div className="w-full max-w-full min-w-0 space-y-4 sm:space-y-6">
-      {/* Mobile Stat Cards at top strictly matching reference image image_e0a499b4.png */}
-      <MobileStatCards />
-
       {/* Filter Tabs matching 04-trainees.png (Desktop preserved) */}
       <div className="hidden sm:flex items-center gap-2">
         <button

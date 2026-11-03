@@ -19,11 +19,13 @@ import {
   Pin,
   Calendar,
   FileText,
+  ShieldCheck,
+  Check,
 } from 'lucide-react';
 import { AdminTab } from '../../types';
 import { useAdminData } from '../../context/AdminDataContext';
 import { ScrollDrivenTable } from './ScrollDrivenTable';
-import { MobileStatCards } from './MobileStatCards';
+import { DashboardAnnouncementCard } from '../common/DashboardAnnouncementCard';
 
 interface DashboardPageProps {
   onNavigateTab: (tab: AdminTab) => void;
@@ -104,7 +106,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   onNavigateTab,
   showToast,
 }) => {
-  const { pinnedAnnouncement, announcements } = useAdminData();
+  const { pinnedAnnouncement, announcements, pendingApprovals, approveUser, rejectUser } = useAdminData();
   const [enrollmentTimeframe, setEnrollmentTimeframe] = useState('This year');
   const [enrollmentMenuOpen, setEnrollmentMenuOpen] = useState(false);
   const [competencyTimeframe, setCompetencyTimeframe] = useState('Today');
@@ -297,163 +299,132 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
   return (
     <div className="w-full max-w-full min-w-0 space-y-4 sm:space-y-6">
-      {/* Mobile Stat Cards at top strictly matching reference image image_ccbc04a5.png */}
-      <MobileStatCards />
-
       {/* ======================================================== */}
       {/* 1. TOP SECTION: Announcement Card (Left) + Management (Right) */}
       {/* Layout strictly conforms to Screenshot_2026-10-19_204608_6bbe42ed.png */}
       {/* ======================================================== */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-stretch">
         {/* Left: Large Announcement Card (7 cols) with Multiple Announcements Carousel & Looping */}
-        <div className="lg:col-span-7 bg-white rounded-2xl p-5 sm:p-7 border border-slate-200/90 shadow-2xs flex flex-col justify-between relative overflow-hidden group">
-          {/* Subtle background glow */}
-          <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-bl from-blue-50/80 via-indigo-50/30 to-transparent rounded-full -mr-16 -mt-16 pointer-events-none" />
+        <DashboardAnnouncementCard
+          onViewAnnouncement={() => onNavigateTab('announcements')}
+          showToast={showToast}
+          className="lg:col-span-7"
+        />
 
-          <div>
-            {/* Top Badge, Carousel Indicator & Date Row */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 mb-3.5 sm:mb-4">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200/60">
-                  <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
-                  Official Announcement
-                </span>
-                {heroAnn?.isPinned && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/60">
-                    <Pin className="w-3 h-3 fill-amber-500 text-amber-600" />
-                    Pinned
-                  </span>
-                )}
-                {/* Carousel counter & dot pills */}
-                {activeAnnouncements.length > 1 && (
-                  <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200/60">
-                    <RotateCw className="w-3 h-3 text-blue-600 animate-spin-slow" />
-                    <span>{((announcementIndex % activeAnnouncements.length) + 1)} of {activeAnnouncements.length}</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Prev / Next loop buttons */}
+        {/* Right: Role Management Updates Card (Top) + 3 Management Cards (5 cols) */}
+        <div className="lg:col-span-5 flex flex-col justify-between gap-3.5 sm:gap-4">
+          {/* Top Card: Role Management Updates for Faster Approval */}
+          <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs">
+            <div className="flex items-center justify-between mb-2.5">
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={handlePrevAnnouncement}
-                    className="w-7 h-7 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
-                    title="Previous announcement"
-                  >
-                    <ChevronLeft className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleNextAnnouncement}
-                    className="w-7 h-7 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
-                    title="Next announcement (loops)"
-                  >
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
+                <div className="w-8 h-8 rounded-xl bg-indigo-50 text-[#3b41e3] flex items-center justify-center font-bold text-xs">
+                  <ShieldCheck className="w-4 h-4" />
                 </div>
-                <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium ml-1">
-                  <Calendar className="w-3.5 h-3.5" />
-                  <span>Published {heroAnn?.date || 'Today'}</span>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">
+                    Role Management Updates
+                  </h3>
+                  <span className="text-[11px] text-slate-400 font-normal">
+                    Pending elevation & clearance requests
+                  </span>
                 </div>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                  {pendingApprovals.length} Pending
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onNavigateTab('role-management')}
+                  className="text-slate-400 hover:text-slate-600 p-1 rounded-md transition-colors cursor-pointer"
+                  title="Open Role Management"
+                >
+                  <Maximize2 className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
 
-            {/* Optional Attached Media Thumbnail */}
-            {heroAnn?.imageUrl && (
-              <div className="mb-3.5 rounded-xl overflow-hidden aspect-[21/9] max-h-40 w-full relative border border-slate-200/80 bg-slate-900 group/img">
-                <img
-                  src={heroAnn.imageUrl}
-                  alt={heroAnn.title}
-                  className="w-full h-full object-cover group-hover/img:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent flex items-end p-3">
-                  <span className="text-[11px] text-white/90 font-medium">
-                    National Weather & Radar Operational Network
+            {/* Quick Approval Drawer/List item */}
+            {pendingApprovals.length > 0 ? (
+              <div className="space-y-2 pt-1">
+                {pendingApprovals.slice(0, 1).map((req) => (
+                  <div
+                    key={req.id}
+                    className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-xs font-bold text-slate-800">{req.name}</span>
+                        <span className="text-[10px] text-slate-400 font-normal">({req.division})</span>
+                        <span className="text-[10px] font-semibold px-1.5 py-0.2 bg-blue-100/70 text-blue-700 rounded">
+                          Req: {req.roleRequested}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 mt-0.5 truncate">
+                        {req.email} · {req.submitted}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 self-end sm:self-center shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          rejectUser(req.id, 'Deferred by Administrator');
+                          showToast(`Declined elevation for ${req.name}.`);
+                        }}
+                        className="px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer border border-slate-200"
+                      >
+                        Reject
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          approveUser(req.id);
+                          showToast(`Approved ${req.name} as ${req.roleRequested}. Portal access granted.`);
+                        }}
+                        className="px-3 py-1 text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-2xs cursor-pointer flex items-center gap-1"
+                      >
+                        <Check className="w-3 h-3" />
+                        <span>Approve</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                <div className="flex items-center justify-between pt-1 text-[11px]">
+                  <span className="text-slate-400">
+                    {pendingApprovals.length > 1
+                      ? `+${pendingApprovals.length - 1} more officers awaiting review`
+                      : 'Priority request ready for approval'}
                   </span>
+                  <button
+                    type="button"
+                    onClick={() => onNavigateTab('role-management')}
+                    className="font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>View all in Role Management</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
                 </div>
+              </div>
+            ) : (
+              <div className="p-3 rounded-xl bg-emerald-50/60 border border-emerald-100 flex items-center justify-between text-xs text-emerald-800">
+                <span className="font-medium">All role privileges are verified and up to date.</span>
+                <button
+                  type="button"
+                  onClick={() => onNavigateTab('role-management')}
+                  className="font-semibold underline text-emerald-900 cursor-pointer"
+                >
+                  Manage Roles
+                </button>
               </div>
             )}
-
-            {/* Announcement Headline */}
-            <h2 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight leading-snug mb-2.5 sm:mb-3">
-              {heroAnn?.title || 'Severe Cyclone Early Warning Protocol: Specialized Doppler Radar Simulation'}
-            </h2>
-
-            {/* Message Body */}
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-3 mb-4 sm:mb-5">
-              {heroAnn?.message ||
-                'Comprehensive operational training deployed across Coastal & Regional Meteorological Centers. Specialized modules cover high-resolution wind-shear detection, automated coastal storm-surge alerts, and emergency advisory dissemination.'}
-            </p>
-
-            {/* Quick Metrics / Key Highlights */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 mb-5 sm:mb-6 text-xs">
-              <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50/80 border border-slate-100 flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs shrink-0">
-                  142
-                </div>
-                <div>
-                  <span className="font-semibold text-slate-800 block">Duty Officers Enrolled</span>
-                  <span className="text-[11px] text-slate-400">Class-I & II Meteorologists</span>
-                </div>
-              </div>
-
-              <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50/80 border border-slate-100 flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs shrink-0">
-                  98%
-                </div>
-                <div>
-                  <span className="font-semibold text-slate-800 block">Divisional Readiness</span>
-                  <span className="text-[11px] text-slate-400">National Radar Network</span>
-                </div>
-              </div>
-            </div>
           </div>
 
-          {/* Bottom Actions with Loop Button */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 pt-3.5 sm:pt-4 border-t border-slate-100">
-            <div className="flex items-center gap-2 flex-wrap">
-              <button
-                type="button"
-                onClick={() => onNavigateTab('announcements')}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
-              >
-                <span>View full announcement</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-
-              {/* Loop to next announcement button */}
-              <button
-                type="button"
-                onClick={handleNextAnnouncement}
-                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-xs font-semibold border border-blue-200/80 transition-colors cursor-pointer"
-                title="Cycles to next announcement on a loop"
-              >
-                <span>Next announcement</span>
-                <RotateCw className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                showToast('Official meteorology bulletin downloaded as PDF.');
-              }}
-              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-medium border border-slate-200/80 transition-colors cursor-pointer"
-            >
-              <FileText className="w-3.5 h-3.5 text-slate-500" />
-              <span>Operational Bulletin (PDF)</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Right: 3 Management Cards (5 cols) matching Screenshot_2026-10-19_204608_6bbe42ed.png */}
-        <div className="lg:col-span-5 flex flex-col justify-between gap-3.5 sm:gap-4">
           {/* Top 2 Cards: Course Management & Trainer Management */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
             {/* 1. Course Management */}
-            <div className="bg-white rounded-2xl p-5 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[13px] text-slate-500 font-normal">Course management</span>
                 <button
@@ -466,7 +437,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 </button>
               </div>
               <div className="my-1.5 sm:my-2">
-                <div className="text-[26px] sm:text-[32px] font-semibold text-slate-900 tracking-tight leading-none">
+                <div className="text-[24px] sm:text-[30px] font-semibold text-slate-900 tracking-tight leading-none">
                   36 <span className="text-sm font-normal text-slate-400">/ 48</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-xs mt-2">
@@ -481,7 +452,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             </div>
 
             {/* 2. Trainer Management */}
-            <div className="bg-white rounded-2xl p-5 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[13px] text-slate-500 font-normal">Trainer management</span>
                 <button
@@ -494,7 +465,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 </button>
               </div>
               <div className="my-1.5 sm:my-2">
-                <div className="text-[26px] sm:text-[32px] font-semibold text-slate-900 tracking-tight leading-none">
+                <div className="text-[24px] sm:text-[30px] font-semibold text-slate-900 tracking-tight leading-none">
                   54 <span className="text-sm font-normal text-slate-400">/ 62</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-xs mt-2">
@@ -510,7 +481,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
 
           {/* Bottom Card: Trainee Management (spans across both columns) */}
-          <div className="bg-white rounded-2xl p-5 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between flex-1">
+          <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[13px] text-slate-500 font-normal">Trainee management</span>
               <button
@@ -523,7 +494,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               </button>
             </div>
             <div className="my-1.5 sm:my-2">
-              <div className="text-[26px] sm:text-[32px] font-semibold text-slate-900 tracking-tight leading-none">
+              <div className="text-[24px] sm:text-[30px] font-semibold text-slate-900 tracking-tight leading-none">
                 1,096 <span className="text-sm font-normal text-slate-400">/ 1,284</span>
               </div>
               <div className="flex items-center justify-between text-xs mt-2">
@@ -543,12 +514,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       </div>
 
       {/* ======================================================== */}
-      {/* 2. Four KTG Metric Cards (Desktop preserved: hidden sm:grid) */}
+      {/* 2. Four KTG Metric Cards (Responsive across all viewports: mobile, tablet, and desktop) */}
       {/* Project-specific IMD Meteorological Capacity Building Metrics */}
       {/* ======================================================== */}
-      <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 lg:gap-5 w-full">
         {/* Card 1: Active Trainee Meteorologists */}
-        <div className="bg-white rounded-2xl p-4 sm:p-5 lg:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 lg:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between min-h-[160px] sm:min-h-[175px] w-full hover:border-slate-300 transition-all">
           <div className="flex items-start justify-between">
             <span className="text-[13px] sm:text-[14px] text-slate-500 font-normal">Active Trainee Officers</span>
             <div className="w-9 h-9 sm:w-[40px] sm:h-[40px] rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
@@ -567,7 +538,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         </div>
 
         {/* Card 2: Certified Competency Rate */}
-        <div className="bg-white rounded-2xl p-4 sm:p-5 lg:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 lg:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between min-h-[160px] sm:min-h-[175px] w-full hover:border-slate-300 transition-all">
           <div className="flex items-start justify-between">
             <span className="text-[13px] sm:text-[14px] text-slate-500 font-normal">Certified Competency Rate</span>
             <div className="w-9 h-9 sm:w-[40px] sm:h-[40px] rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
@@ -586,7 +557,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         </div>
 
         {/* Card 3: Evaluations & Assessments Cleared */}
-        <div className="bg-white rounded-2xl p-4 sm:p-5 lg:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 lg:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between min-h-[160px] sm:min-h-[175px] w-full hover:border-slate-300 transition-all">
           <div className="flex items-start justify-between">
             <span className="text-[13px] sm:text-[14px] text-slate-500 font-normal">Evaluations Cleared</span>
             <div className="w-9 h-9 sm:w-[40px] sm:h-[40px] rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
@@ -605,7 +576,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         </div>
 
         {/* Card 4: Operational Radar Network Readiness */}
-        <div className="bg-white rounded-2xl p-4 sm:p-5 lg:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 lg:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between min-h-[160px] sm:min-h-[175px] w-full hover:border-slate-300 transition-all">
           <div className="flex items-start justify-between">
             <span className="text-[13px] sm:text-[14px] text-slate-500 font-normal">Operational Radar Readiness</span>
             <div className="w-9 h-9 sm:w-[40px] sm:h-[40px] rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">

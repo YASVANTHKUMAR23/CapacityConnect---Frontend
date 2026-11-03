@@ -484,16 +484,6 @@ export const TrainerLayout: React.FC<TrainerLayoutProps> = ({
 
             {/* Right Header Controls */}
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-              {/* Quick Action Button */}
-              {currentTab === 'dashboard' && (
-                <button
-                  type="button"
-                  onClick={() => onSelectTab('assessments')}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-3 sm:px-4 py-2 rounded-xl shadow-xs transition-colors cursor-pointer hidden sm:flex items-center gap-1.5"
-                >
-                  <span>New assessment</span>
-                </button>
-              )}
 
               {/* Search Icon Button */}
               <button

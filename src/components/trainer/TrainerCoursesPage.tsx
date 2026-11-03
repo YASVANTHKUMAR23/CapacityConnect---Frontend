@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useTrainerData } from '../../context/TrainerDataContext';
 import { TrainerCourse, TrainerCourseModule } from '../../types';
+import { TrainerCreateCourseWizard } from './TrainerCreateCourseWizard';
 
 interface TrainerCoursesPageProps {
   showToast: (msg: string) => void;
@@ -41,6 +42,7 @@ export const TrainerCoursesPage: React.FC<TrainerCoursesPageProps> = ({ showToas
 
   // View state: 'list' | 'detail' | 'create'
   const [viewState, setViewState] = useState<'list' | 'detail' | 'create'>('list');
+  const [courseToEdit, setCourseToEdit] = useState<TrainerCourse | null>(null);
   const [filterTab, setFilterTab] = useState<'All' | 'Active' | 'Draft' | 'Inactive'>('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
@@ -179,7 +181,10 @@ export const TrainerCoursesPage: React.FC<TrainerCoursesPageProps> = ({ showToas
             </div>
             <button
               type="button"
-              onClick={() => setViewState('create')}
+              onClick={() => {
+                setCourseToEdit(null);
+                setViewState('create');
+              }}
               className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs sm:text-sm font-semibold transition-colors shadow-xs flex items-center justify-center gap-2 cursor-pointer self-start sm:self-auto"
             >
               <Plus className="w-4 h-4" />
@@ -325,6 +330,22 @@ export const TrainerCoursesPage: React.FC<TrainerCoursesPageProps> = ({ showToas
                     {course.modulesCount} modules · {course.duration}
                   </span>
                   <div className="flex items-center gap-2">
+                    {(course.status === 'Draft' || course.completionRate < 100) && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCourseToEdit(course);
+                          setViewState('create');
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                        className="px-3 py-1.5 text-xs font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200/90 rounded-xl transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
+                        title="Resume editing in course creation wizard"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                        <span>{course.status === 'Draft' ? 'Edit Draft' : 'Edit in Creator'}</span>
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => handleOpenDetail(course.id)}
@@ -355,6 +376,20 @@ export const TrainerCoursesPage: React.FC<TrainerCoursesPageProps> = ({ showToas
               <span>Back to My Courses</span>
             </button>
             <div className="flex items-center gap-2">
+              {(selectedCourse.status === 'Draft' || selectedCourse.completionRate < 100) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCourseToEdit(selectedCourse);
+                    setViewState('create');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="px-3 py-1.5 text-xs font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200/90 rounded-xl transition-colors shadow-2xs cursor-pointer flex items-center gap-1.5"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                  <span>Edit in Course Creator</span>
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setIsAddModuleOpen(true)}
@@ -589,160 +624,29 @@ export const TrainerCoursesPage: React.FC<TrainerCoursesPageProps> = ({ showToas
         </div>
       )}
 
-      {/* VIEW: CREATE COURSE (t05-create-course) */}
+      {/* VIEW: CREATE COURSE - REDESIGNED 3-STEP COURSE CREATION WIZARD (image_19f552a6.png) */}
       {viewState === 'create' && (
-        <div className="space-y-6 animate-in fade-in duration-200">
-          <div className="flex items-center justify-between">
-            <button
-              type="button"
-              onClick={() => setViewState('list')}
-              className="text-xs font-semibold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 cursor-pointer"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Cancel & Back</span>
-            </button>
-            <span className="text-xs text-slate-400 font-medium">New Course Builder</span>
-          </div>
-
-          <form onSubmit={handleCreateCourseSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left 2 Cols: Main details form */}
-            <div className="lg:col-span-2 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/90 shadow-2xs space-y-4">
-              <h2 className="text-base font-bold text-slate-900">Course Information</h2>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Course Title <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newCourseTitle}
-                  onChange={(e) => setNewCourseTitle(e.target.value)}
-                  placeholder="e.g. Advanced Doppler Weather Radar Nowcasting"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-hidden focus:border-blue-600"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Course Code</label>
-                  <input
-                    type="text"
-                    value={newCourseCode}
-                    onChange={(e) => setNewCourseCode(e.target.value)}
-                    placeholder="e.g. MET-420"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-hidden focus:border-blue-600"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Category</label>
-                  <select
-                    value={newCourseCategory}
-                    onChange={(e) => setNewCourseCategory(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-hidden focus:border-blue-600 cursor-pointer"
-                  >
-                    <option value="Tropical Meteorology">Tropical Meteorology</option>
-                    <option value="Observational Meteorology">Observational Meteorology</option>
-                    <option value="Synoptic Meteorology">Synoptic Meteorology</option>
-                    <option value="Remote Sensing">Remote Sensing</option>
-                    <option value="Computational Met">Computational Met</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Proficiency Level</label>
-                  <select
-                    value={newCourseLevel}
-                    onChange={(e) => setNewCourseLevel(e.target.value as any)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-hidden focus:border-blue-600 cursor-pointer"
-                  >
-                    <option value="Beginner">Beginner (Level 1)</option>
-                    <option value="Intermediate">Intermediate (Level 2)</option>
-                    <option value="Advanced">Advanced (Level 3)</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Estimated Duration</label>
-                  <input
-                    type="text"
-                    value={newCourseDuration}
-                    onChange={(e) => setNewCourseDuration(e.target.value)}
-                    placeholder="e.g. 5 Weeks (30 hrs)"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-hidden focus:border-blue-600"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Short Description & Objectives</label>
-                <textarea
-                  rows={4}
-                  value={newCourseDesc}
-                  onChange={(e) => setNewCourseDesc(e.target.value)}
-                  placeholder="Outline syllabus, target forecaster cadres, and expected operational competencies..."
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-hidden focus:border-blue-600 resize-none"
-                />
-              </div>
-            </div>
-
-            {/* Right 1 Col: Publishing & Cover Upload */}
-            <div className="space-y-4">
-              <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-4">
-                <h3 className="text-sm font-bold text-slate-900">Publishing Settings</h3>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Initial Status</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setNewCourseStatus('Draft')}
-                      className={`py-2 px-3 rounded-xl text-xs font-medium border cursor-pointer ${
-                        newCourseStatus === 'Draft'
-                          ? 'bg-amber-50 border-amber-300 text-amber-800'
-                          : 'border-slate-200 text-slate-600'
-                      }`}
-                    >
-                      Save Draft
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setNewCourseStatus('Active')}
-                      className={`py-2 px-3 rounded-xl text-xs font-medium border cursor-pointer ${
-                        newCourseStatus === 'Active'
-                          ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
-                          : 'border-slate-200 text-slate-600'
-                      }`}
-                    >
-                      Publish Active
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Cover Artwork</label>
-                  <div className="border-2 border-dashed border-slate-200 hover:border-blue-400 rounded-xl p-4 text-center cursor-pointer bg-slate-50/50">
-                    <Upload className="w-6 h-6 text-slate-400 mx-auto" />
-                    <span className="text-xs font-medium text-slate-700 block mt-2">
-                      Upload course banner
-                    </span>
-                    <span className="text-[10px] text-slate-400 block mt-0.5">PNG, JPG up to 5MB</span>
-                  </div>
-                </div>
-
-                <div className="pt-2">
-                  <button
-                    type="submit"
-                    className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
-                  >
-                    Complete & Save Course
-                  </button>
-                </div>
-              </div>
-            </div>
-          </form>
-        </div>
+        <TrainerCreateCourseWizard
+          initialCourse={courseToEdit}
+          onCancel={() => {
+            setCourseToEdit(null);
+            setViewState('list');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onCourseCreated={(newCourse) => {
+            addCourse(newCourse);
+            setCourseToEdit(null);
+            setViewState('list');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onCourseUpdated={(updatedCourse) => {
+            updateCourse(updatedCourse.id, updatedCourse);
+            setCourseToEdit(null);
+            setViewState('list');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          showToast={showToast}
+        />
       )}
 
       {/* ADD MODULE POPUP MODAL (t17-add-module-popup) */}

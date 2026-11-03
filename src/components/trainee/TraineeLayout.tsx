@@ -19,6 +19,8 @@ import {
   User,
   Globe,
   BookMarked,
+  ChevronsLeft,
+  FolderGit2,
 } from 'lucide-react';
 import { Screen, TraineeTab } from '../../types';
 import { useTraineeData } from '../../context/TraineeDataContext';
@@ -83,6 +85,7 @@ export const TraineeLayout: React.FC<TraineeLayoutProps> = ({
       section: 'LEARN',
       items: [
         { id: 'assessments', label: 'Assessments', icon: FileCheck },
+        { id: 'library', label: 'Course Library', icon: FolderGit2 },
         { id: 'my-competency', label: 'My competency', icon: Target },
         { id: 'mentors', label: 'Mentors', icon: Users },
       ],
@@ -101,7 +104,7 @@ export const TraineeLayout: React.FC<TraineeLayoutProps> = ({
 
       {/* Sidebar - Matching Capacity Connect Portal Design */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-[#e6e9f2] flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`w-64 bg-white border-r border-[#e6e9f2] flex flex-col justify-between shrink-0 fixed top-0 bottom-0 left-0 z-40 overflow-y-auto transition-transform duration-300 ease-in-out ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -123,9 +126,10 @@ export const TraineeLayout: React.FC<TraineeLayoutProps> = ({
             <button
               type="button"
               onClick={() => setIsSidebarOpen(false)}
-              className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+              title="Collapse sidebar"
             >
-              <X className="w-5 h-5" />
+              <ChevronsLeft className="w-4 h-4" />
             </button>
           </div>
 
@@ -139,7 +143,7 @@ export const TraineeLayout: React.FC<TraineeLayoutProps> = ({
                 <div className="space-y-1">
                   {group.items.map((item) => {
                     const Icon = item.icon;
-                    const isActive = currentTab === item.id;
+                    const isActive = currentTab === item.id || (item.id === 'course-catalog' && currentTab === 'course-detail');
                     return (
                       <button
                         key={item.id}
@@ -220,14 +224,19 @@ export const TraineeLayout: React.FC<TraineeLayoutProps> = ({
         {/* Top Header Navbar */}
         <header className="sticky top-0 z-40 bg-[#f4f6fb]/90 backdrop-blur-md px-4 sm:px-6 lg:px-8 py-3.5 border-b border-[#e6e9f2]">
           <div className="flex items-center justify-between">
-            {/* Left Hamburger for Mobile */}
+            {/* Left Hamburger for Mobile & Chevrons Toggle for Desktop */}
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => setIsSidebarOpen(true)}
-                className="lg:hidden w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="p-2 rounded-xl bg-white border border-[#e6e9f2] text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all shadow-2xs cursor-pointer flex items-center justify-center shrink-0"
+                title={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
               >
-                <Menu className="w-5 h-5" />
+                <ChevronsLeft
+                  className={`w-4 h-4 transition-transform duration-300 ${
+                    !isSidebarOpen ? 'rotate-180' : ''
+                  }`}
+                />
               </button>
               <div className="hidden sm:block">
                 <span className="text-xs font-semibold text-[#5b6478]">
@@ -456,15 +465,15 @@ export const TraineeLayout: React.FC<TraineeLayoutProps> = ({
         </main>
       </div>
 
-      {/* Floating Action Button (Matches the bright blue circle in bottom-right of mockups!) */}
+      {/* Floating Action Button (Matches admin module chatbot MessageSquare icon) */}
       <button
         type="button"
         onClick={() => setIsChatbotOpen(true)}
-        className="fixed bottom-6 right-6 w-13 h-13 rounded-full bg-[#1f5eff] hover:bg-blue-600 active:scale-95 text-white shadow-xl flex items-center justify-center z-30 transition-all cursor-pointer group"
+        className="fixed bottom-6 right-6 w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-[#1f5eff] hover:bg-blue-600 active:scale-95 text-white shadow-xl flex items-center justify-center z-30 transition-all cursor-pointer group"
         title="Ask Assistant"
         aria-label="Ask Assistant"
       >
-        <Sparkles className="w-6 h-6 group-hover:scale-110 transition-transform" />
+        <MessageSquare className="w-5.5 h-5.5 group-hover:scale-110 transition-transform" />
       </button>
 
       {/* Trainee Chatbot Drawer */}

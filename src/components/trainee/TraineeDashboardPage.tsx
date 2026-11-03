@@ -20,6 +20,7 @@ import {
   X,
   Megaphone,
 } from 'lucide-react';
+import { DashboardAnnouncementCard } from '../common/DashboardAnnouncementCard';
 
 interface TraineeDashboardPageProps {
   onSelectTab: (tab: TraineeTab) => void;
@@ -82,66 +83,101 @@ export const TraineeDashboardPage: React.FC<TraineeDashboardPageProps> = ({
         </p>
       </div>
 
-      {/* Admin Announcement Banner (Maintains exact Trainee Dashboard card dimensions & style) */}
-      <div className="p-5 sm:p-6 rounded-[14px] bg-[#e8efff]/70 border border-[#1f5eff]/30 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden">
-        <div className="flex-1 min-w-0 pr-0 md:pr-4">
-          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-            <span className="text-[10px] font-bold tracking-wider text-[#1d4ed8] uppercase bg-blue-100/80 px-2 py-0.5 rounded-md inline-flex items-center gap-1">
-              <Megaphone className="w-3 h-3 text-[#1f5eff]" />
-              {currentAnnouncement.type?.toUpperCase() || 'ADMIN ANNOUNCEMENT'}
-            </span>
-            {activeAnnouncements.length > 1 && (
-              <span className="text-[10px] font-semibold text-slate-500 bg-white/70 px-2 py-0.5 rounded-full border border-blue-200/50">
-                {announcementIndex + 1} of {activeAnnouncements.length}
+      {/* Top Section matching image_f1e6357e.png: Announcement Card (Left) + 4 Metric Cards (2x2 Grid Right) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-stretch">
+        {/* Left: Large Announcement Card (7 cols) identical across Admin, Trainer, Trainee */}
+        <DashboardAnnouncementCard
+          onViewAnnouncement={() => setAnnouncementModalOpen(true)}
+          showToast={showToast}
+          className="lg:col-span-7"
+        />
+
+        {/* Right: 4 Metric Cards in a 2x2 Grid (5 cols) matching image_f1e6357e.png */}
+        <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+          {/* Card 1: Completion */}
+          <div className="p-4 sm:p-5 rounded-[14px] bg-white border border-[#e6e9f2] shadow-2xs flex flex-col justify-between h-[200px] mt-[45px]">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-[#5b6478]">Completion</span>
+              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
+                <CheckCircle2 className="w-4 h-4" />
+              </div>
+            </div>
+            <div>
+              <span className="text-xl sm:text-2xl font-bold text-[#1c2333] block">
+                53%
               </span>
-            )}
-            <span className="text-[11px] text-[#5b6478]">
-              {currentAnnouncement.publishOn || currentAnnouncement.date}
-            </span>
+              <span className="text-[11px] font-semibold text-[#15803d] mt-1 flex items-center gap-1">
+                <span>↗ 4.1% vs last 30 days</span>
+              </span>
+            </div>
+            <div className="w-full bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden">
+              <div className="bg-blue-600 h-full rounded-full" style={{ width: '53%' }} />
+            </div>
           </div>
 
-          <h2 className="text-base sm:text-lg font-bold text-[#1c2333] truncate sm:whitespace-normal">
-            {currentAnnouncement.title}
-          </h2>
-          <p className="text-xs sm:text-sm text-[#5b6478] mt-1 line-clamp-2">
-            {currentAnnouncement.message}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 self-start md:self-center shrink-0 flex-wrap">
-          {activeAnnouncements.length > 1 && (
-            <div className="flex items-center gap-1 bg-white/80 border border-blue-200/60 p-1 rounded-xl">
-              <button
-                type="button"
-                onClick={handlePrevAnnouncement}
-                className="p-1 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-blue-50 transition-colors cursor-pointer"
-                title="Previous announcement"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={handleNextAnnouncement}
-                className="p-1 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-blue-50 transition-colors cursor-pointer"
-                title="Next announcement"
-              >
-                <RotateCw className="w-3.5 h-3.5" />
-              </button>
+          {/* Card 2: Average score */}
+          <div className="p-4 sm:p-5 rounded-[14px] bg-white border border-[#e6e9f2] shadow-2xs flex flex-col justify-between h-[200px] mt-[45px]">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-[#5b6478]">Average score</span>
+              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                <Award className="w-4 h-4" />
+              </div>
             </div>
-          )}
+            <div>
+              <span className="text-xl sm:text-2xl font-bold text-[#1c2333] block">
+                71%
+              </span>
+              <span className="text-[11px] font-semibold text-[#15803d] mt-1 flex items-center gap-1">
+                <span>↗ 2.8% vs last 30 days</span>
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">Passing benchmark: 60%</p>
+          </div>
 
-          <button
-            type="button"
-            onClick={() => setAnnouncementModalOpen(true)}
-            className="h-10 px-4 sm:px-5 bg-[#1f5eff] hover:bg-blue-600 text-white rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-xs shrink-0 flex items-center gap-1.5"
+          {/* Card 3: Competency level */}
+          <div
+            onClick={() => onSelectTab('my-competency')}
+            className="p-4 sm:p-5 pt-5 rounded-[14px] bg-white border border-[#e6e9f2] shadow-2xs cursor-pointer hover:border-blue-200 transition-colors flex flex-col justify-between h-[200px] mt-0 mb-0 ml-0"
           >
-            <span>View announcement</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-[#5b6478]">Competency level</span>
+              <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
+                <TrendingUp className="w-4 h-4" />
+              </div>
+            </div>
+            <div>
+              <span className="text-xl sm:text-2xl font-bold text-[#1c2333] block">
+                66%
+              </span>
+              <span className="text-[11px] font-semibold text-[#15803d] mt-1 flex items-center gap-1">
+                <span>↗ 5.2% vs last 30 days</span>
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">Level 2 Operational Met</p>
+          </div>
+
+          {/* Card 4: Study streak */}
+          <div className="p-4 sm:p-5 rounded-[14px] bg-white border border-[#e6e9f2] shadow-2xs flex flex-col justify-between h-[200px] mt-0">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-[#5b6478]">Study streak</span>
+              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+                <Flame className="w-4 h-4 text-amber-600" />
+              </div>
+            </div>
+            <div>
+              <span className="text-xl sm:text-2xl font-bold text-[#1c2333] block">
+                9 days
+              </span>
+              <span className="text-[11px] font-semibold text-[#15803d] mt-1 flex items-center gap-1">
+                <span>↗ 3 days</span>
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">Active weekly streak</p>
+          </div>
         </div>
       </div>
 
-      {/* 3 Summary KPI Cards */}
+      {/* 3 Summary KPI Cards: My courses, Assessments due, Certificates */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* My courses */}
         <div
@@ -192,56 +228,6 @@ export const TraineeDashboardPage: React.FC<TraineeDashboardPageProps> = ({
           <div className="w-12 h-12 rounded-xl bg-[#e7f7ee] flex items-center justify-center text-[#15803d] group-hover:scale-105 transition-transform">
             <Award className="w-6 h-6" />
           </div>
-        </div>
-      </div>
-
-      {/* 4 Metric Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Completion */}
-        <div className="p-4 sm:p-5 rounded-[14px] bg-white border border-[#e6e9f2] shadow-2xs">
-          <span className="text-xs font-medium text-[#5b6478] block">Completion</span>
-          <span className="text-xl sm:text-2xl font-bold text-[#1c2333] mt-1 block">
-            53%
-          </span>
-          <span className="text-[11px] font-semibold text-[#15803d] mt-1 flex items-center gap-1">
-            <span>↗ 4.1% vs last 30 days</span>
-          </span>
-        </div>
-
-        {/* Average score */}
-        <div className="p-4 sm:p-5 rounded-[14px] bg-white border border-[#e6e9f2] shadow-2xs">
-          <span className="text-xs font-medium text-[#5b6478] block">Average score</span>
-          <span className="text-xl sm:text-2xl font-bold text-[#1c2333] mt-1 block">
-            71%
-          </span>
-          <span className="text-[11px] font-semibold text-[#15803d] mt-1 flex items-center gap-1">
-            <span>↗ 2.8% vs last 30 days</span>
-          </span>
-        </div>
-
-        {/* Competency level */}
-        <div
-          onClick={() => onSelectTab('my-competency')}
-          className="p-4 sm:p-5 rounded-[14px] bg-white border border-[#e6e9f2] shadow-2xs cursor-pointer hover:border-blue-200 transition-colors"
-        >
-          <span className="text-xs font-medium text-[#5b6478] block">Competency level</span>
-          <span className="text-xl sm:text-2xl font-bold text-[#1c2333] mt-1 block">
-            66%
-          </span>
-          <span className="text-[11px] font-semibold text-[#15803d] mt-1 flex items-center gap-1">
-            <span>↗ 5.2% vs last 30 days</span>
-          </span>
-        </div>
-
-        {/* Study streak */}
-        <div className="p-4 sm:p-5 rounded-[14px] bg-white border border-[#e6e9f2] shadow-2xs">
-          <span className="text-xs font-medium text-[#5b6478] block">Study streak</span>
-          <span className="text-xl sm:text-2xl font-bold text-[#1c2333] mt-1 block">
-            9 days
-          </span>
-          <span className="text-[11px] font-semibold text-[#15803d] mt-1 flex items-center gap-1">
-            <span>↗ 3 days</span>
-          </span>
         </div>
       </div>
 

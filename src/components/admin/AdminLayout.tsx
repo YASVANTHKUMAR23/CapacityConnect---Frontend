@@ -292,7 +292,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
               </div>
             </div>
 
-            {/* Right: Willow Green Profile Pill matching reference images */}
+            {/* Right: Admin User Profile Pill */}
             <div className="relative">
               <button
                 type="button"
@@ -302,17 +302,15 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                 }}
                 className="flex items-center gap-2 bg-white border border-slate-200/90 rounded-2xl py-1.5 px-2.5 shadow-2xs hover:border-slate-300 transition-all cursor-pointer select-none"
               >
-                <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80"
-                  alt="Willow Green"
-                  className="w-8 h-8 rounded-full object-cover shrink-0 ring-1 ring-slate-100"
-                />
+                <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
+                  AU
+                </div>
                 <div className="text-left">
                   <div className="text-xs font-semibold text-slate-900 leading-tight">
-                    Willow Green
+                    Admin
                   </div>
                   <div className="text-[10px] text-slate-400 font-normal leading-tight">
-                    willow.green@com
+                    admin@imd.gov.in
                   </div>
                 </div>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-0.5 shrink-0" />
@@ -322,10 +320,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
               {profileDropdownOpen && (
                 <div className="sm:hidden absolute right-0 mt-2 w-52 max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-2xl border border-slate-200 p-2 z-50 text-xs animate-in fade-in zoom-in-95 duration-100">
                   <div className="px-3 py-1.5 border-b border-slate-100 mb-1">
-                    <p className="font-semibold text-slate-800 text-xs">Willow Green</p>
-                    <p className="text-slate-400 text-[10px]">willow.green@com</p>
+                    <p className="font-semibold text-slate-800 text-xs">Administrator</p>
+                    <p className="text-slate-400 text-[10px]">admin@imd.gov.in</p>
                     <span className="inline-block mt-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-                      Administrator
+                      IMD Headquarters
                     </span>
                   </div>
                   <button

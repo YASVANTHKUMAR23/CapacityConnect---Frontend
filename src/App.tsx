@@ -41,6 +41,7 @@ import { TrainerNotificationsPage } from './components/trainer/TrainerNotificati
 import { TraineeLayout } from './components/trainee/TraineeLayout';
 import { TraineeDashboardPage } from './components/trainee/TraineeDashboardPage';
 import { TraineeCourseCatalogPage } from './components/trainee/TraineeCourseCatalogPage';
+import { TraineeCourseDetailPage } from './components/trainee/TraineeCourseDetailPage';
 import { TraineeMyCoursesPage } from './components/trainee/TraineeMyCoursesPage';
 import { TraineeCoursePlayerPage } from './components/trainee/TraineeCoursePlayerPage';
 import { TraineeCourseFeedbackPage } from './components/trainee/TraineeCourseFeedbackPage';
@@ -52,6 +53,7 @@ import { TraineeMentorsPage } from './components/trainee/TraineeMentorsPage';
 import { TraineeNotificationsPage } from './components/trainee/TraineeNotificationsPage';
 import { TraineeProfilePage } from './components/trainee/TraineeProfilePage';
 import { TraineeCertificatesPage } from './components/trainee/TraineeCertificatesPage';
+import { TraineeLibraryPage } from './components/trainee/TraineeLibraryPage';
 import { TraineeSetupModal } from './components/trainee/TraineeSetupModal';
 
 import { Check, X } from 'lucide-react';
@@ -200,6 +202,9 @@ export default function App() {
                 {currentTraineeTab === 'course-catalog' && (
                   <TraineeCourseCatalogPage onSelectTab={setCurrentTraineeTab} showToast={showToast} />
                 )}
+                {currentTraineeTab === 'course-detail' && (
+                  <TraineeCourseDetailPage onSelectTab={setCurrentTraineeTab} showToast={showToast} />
+                )}
                 {currentTraineeTab === 'my-courses' && (
                   <TraineeMyCoursesPage onSelectTab={setCurrentTraineeTab} showToast={showToast} />
                 )}
@@ -236,6 +241,9 @@ export default function App() {
                 )}
                 {currentTraineeTab === 'certificates' && (
                   <TraineeCertificatesPage onSelectTab={setCurrentTraineeTab} showToast={showToast} />
+                )}
+                {currentTraineeTab === 'library' && (
+                  <TraineeLibraryPage onSelectTab={setCurrentTraineeTab} showToast={showToast} />
                 )}
               </TraineeLayout>
             ) : (

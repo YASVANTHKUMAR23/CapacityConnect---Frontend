@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTraineeData } from '../../context/TraineeDataContext';
 import { TraineeTab } from '../../types';
+import { HeroVideoDialog } from '../magicui/hero-video-dialog';
 import {
   ArrowLeft,
   Bookmark,
@@ -34,6 +35,7 @@ import {
   Eye,
   Radio,
   Tv,
+  FolderGit2,
 } from 'lucide-react';
 
 interface TraineeCoursePlayerPageProps {
@@ -600,6 +602,7 @@ export const TraineeCoursePlayerPage: React.FC<TraineeCoursePlayerPageProps> = (
   // Resource panel state: 'materials' | 'notes' | 'discussion'
   const [resourceTab, setResourceTab] = useState<'materials' | 'notes' | 'discussion'>('materials');
   const [isResourceCollapsed, setIsResourceCollapsed] = useState<boolean>(false);
+  const [isModuleSidebarCollapsed, setIsModuleSidebarCollapsed] = useState<boolean>(false);
 
   // Notes state for this course/lesson
   const [userNotes, setUserNotes] = useState<string>(
@@ -739,29 +742,19 @@ export const TraineeCoursePlayerPage: React.FC<TraineeCoursePlayerPageProps> = (
             <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-[#1f5eff]' : ''}`} />
           </button>
 
-          {/* Notification bell with red badge */}
+          {/* Quick Access to Course Library files */}
           <button
             type="button"
-            onClick={() => onSelectTab('notifications')}
-            className="p-2 rounded-xl bg-white border border-[#e6e9f2] text-slate-500 hover:text-slate-800 relative cursor-pointer"
-            title="Notifications"
+            onClick={() => {
+              setSelectedCourseId(currentCourse.id);
+              onSelectTab('library');
+            }}
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold border border-blue-200 transition-colors cursor-pointer"
+            title="Open Course Library files"
           >
-            <Bell className="w-4 h-4" />
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full grid place-items-center">
-              3
-            </span>
+            <FolderGit2 className="w-3.5 h-3.5" />
+            <span>Course Library</span>
           </button>
-
-          {/* User Avatar pill */}
-          <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-            <div className="w-8 h-8 rounded-full bg-blue-100 text-[#1f5eff] font-bold text-xs grid place-items-center">
-              AV
-            </div>
-            <div className="hidden sm:block text-left text-xs leading-tight">
-              <span className="font-bold text-[#1c2333] block">Asha Verma</span>
-              <span className="text-[10px] text-[#5b6478]">Trainee - New Delhi</span>
-            </div>
-          </div>
 
           {/* Course Overall Progress Indicator */}
           <div className="flex items-center gap-2 pl-3 border-l border-slate-200">
@@ -783,21 +776,109 @@ export const TraineeCoursePlayerPage: React.FC<TraineeCoursePlayerPageProps> = (
       {/* ======================================================== */}
       <div
         className={`grid gap-4 items-start ${
-          isResourceCollapsed
-            ? 'grid-cols-1 lg:grid-cols-[290px_1fr]'
+          isModuleSidebarCollapsed && isResourceCollapsed
+            ? 'grid-cols-1'
+            : isModuleSidebarCollapsed && !isResourceCollapsed
+            ? 'grid-cols-1 lg:grid-cols-[1fr_310px]'
+            : !isModuleSidebarCollapsed && isResourceCollapsed
+            ? 'grid-cols-1 lg:grid-cols-[280px_1fr]'
             : 'grid-cols-1 lg:grid-cols-[280px_1fr_310px]'
         }`}
       >
         {/* ======================================================== */}
-        {/* COL 1: COURSE CONTENT SIDEBAR (Left) */}
+        {/* COL 1: COURSE CONTENT SIDEBAR (Horizontal when collapsed) */}
         {/* ======================================================== */}
-        <aside className="bg-white rounded-2xl border border-[#e6e9f2] shadow-2xs p-3.5 sm:p-4 space-y-3">
-          <div>
-            <h2 className="text-sm font-bold text-[#1c2333]">Course content</h2>
-            <p className="text-[11px] text-[#5b6478] mt-0.5">
-              {curriculum.modules.length} Modules · {totalLessons} Lessons
-            </p>
-          </div>
+        {isModuleSidebarCollapsed ? (
+          <aside className="col-span-full w-full bg-white rounded-2xl border border-[#e6e9f2] shadow-2xs p-2.5 sm:px-4 sm:py-2.5 flex flex-row items-center justify-between gap-3 overflow-x-auto no-scrollbar transition-all">
+            <div className="flex flex-row items-center gap-2.5 overflow-x-auto no-scrollbar min-w-0 flex-1">
+              {/* Expand Button */}
+              <button
+                type="button"
+                onClick={() => setIsModuleSidebarCollapsed(false)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-[#1f5eff] hover:bg-blue-100 font-bold text-xs transition-colors cursor-pointer shrink-0"
+                title="Expand course modules"
+                aria-label="Expand course modules"
+              >
+                <ChevronRight className="w-4 h-4" />
+                <span>Modules</span>
+                <span className="text-[10px] text-blue-600/70 font-semibold hidden sm:inline">
+                  ({curriculum.modules.length})
+                </span>
+              </button>
+
+              <div className="w-px h-6 bg-slate-200 shrink-0" />
+
+              {/* Horizontal Module Pills */}
+              <div className="flex flex-row items-center gap-2 overflow-x-auto no-scrollbar py-0.5 min-w-0">
+                {curriculum.modules.map((mod, mIdx) => {
+                  const isModActive = mIdx === activeModuleIdx;
+                  const isModCompleted = mod.completedCount === mod.lessons.length;
+                  return (
+                    <button
+                      key={mod.code}
+                      type="button"
+                      onClick={() => {
+                        handleSelectLesson(mIdx, 0);
+                      }}
+                      title={`${mod.code}: ${mod.title} (${mod.completedCount}/${mod.lessons.length} lessons completed)`}
+                      className={`h-8 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 whitespace-nowrap ${
+                        isModActive
+                          ? 'bg-[#1f5eff] text-white shadow-xs'
+                          : isModCompleted
+                          ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                          : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/80'
+                      }`}
+                    >
+                      <span className="font-extrabold">{mod.code}</span>
+                      <span className="font-medium text-[11px] truncate max-w-[120px] sm:max-w-[180px]">
+                        {mod.title}
+                      </span>
+                      {isModCompleted ? (
+                        <Check className={`w-3 h-3 ${isModActive ? 'text-white' : 'text-emerald-600'}`} />
+                      ) : (
+                        <span className="text-[10px] font-semibold opacity-75">
+                          {mod.completedCount}/{mod.lessons.length}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Quick status on right */}
+            <div className="hidden md:flex items-center gap-2 shrink-0 text-xs text-[#5b6478] pl-2 border-l border-slate-200">
+              <span className="text-[11px] font-semibold text-slate-500">
+                Active: <strong className="text-slate-800">{currentModule.code}</strong>
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsModuleSidebarCollapsed(false)}
+                className="text-[11px] font-bold text-[#1f5eff] hover:underline cursor-pointer"
+              >
+                View syllabus
+              </button>
+            </div>
+          </aside>
+        ) : (
+          <aside className="bg-white rounded-2xl border border-[#e6e9f2] shadow-2xs p-3.5 sm:p-4 space-y-3">
+            <div className="flex items-center justify-between pb-1 border-b border-slate-100">
+              <div>
+                <h2 className="text-sm font-bold text-[#1c2333]">Course content</h2>
+                <p className="text-[11px] text-[#5b6478] mt-0.5">
+                  {curriculum.modules.length} Modules · {totalLessons} Lessons
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsModuleSidebarCollapsed(true)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                title="Close course modules sidebar"
+                aria-label="Close course modules sidebar"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
           {/* Accordion list */}
           <div className="space-y-2">
@@ -921,144 +1002,37 @@ export const TraineeCoursePlayerPage: React.FC<TraineeCoursePlayerPageProps> = (
             })}
           </div>
         </aside>
+      )}
 
         {/* ======================================================== */}
         {/* COL 2: MAIN LESSON STAGE (Center) */}
         {/* ======================================================== */}
         <section className="bg-white rounded-2xl border border-[#e6e9f2] shadow-2xs p-4 sm:p-6 space-y-4 min-w-0">
-          {/* A. If Video Lesson: Video Player Screen matching image_ee9f16cc.png */}
+          {/* A. If Video Lesson: Video Player with Magic UI HeroVideoDialog */}
           {currentLesson.type === 'video' ? (
             <div className="space-y-3">
-              {/* Switch between interactive simulation and live YouTube player */}
               <div className="flex items-center justify-between text-xs pb-1">
                 <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
-                  IMD Learning Media · Track forecasting
+                  IMD Learning Media · {currentLesson.title}
                 </span>
 
-                <button
-                  type="button"
-                  onClick={() => setUseYouTubeIframe(!useYouTubeIframe)}
-                  className="text-slate-500 hover:text-slate-800 text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
-                >
+                <span className="text-slate-500 text-[11px] font-semibold flex items-center gap-1">
                   <Tv className="w-3.5 h-3.5 text-blue-600" />
-                  <span>{useYouTubeIframe ? 'Switch to Simulation HUD' : 'Watch on YouTube Player'}</span>
-                </button>
+                  <span>Duration: {currentLesson.duration} min</span>
+                </span>
               </div>
 
-              {/* Video Player Display */}
-              {useYouTubeIframe && currentLesson.youtubeId ? (
-                <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-black shadow-lg border border-slate-800">
-                  <iframe
-                    className="w-full h-full"
-                    src={`https://www.youtube-nocookie.com/embed/${currentLesson.youtubeId}?autoplay=1&rel=0`}
-                    title={currentLesson.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
-              ) : (
-                /* Simulated Player HUD matching image_ee9f16cc.png */
-                <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-[#0c1322] shadow-md border border-slate-800 flex items-center justify-center group select-none">
-                  {/* Cyclone Spiral Radial Satellite Image Backdrop */}
-                  <img
-                    src="https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=1200&auto=format&fit=crop&q=80"
-                    alt="Satellite Cyclone Spiral"
-                    className="absolute inset-0 w-full h-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-0 bg-radial-at-center from-black/20 via-black/40 to-black/80" />
-
-                  {/* Play Button In Center matching mockup */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsPlaying(!isPlaying);
-                      showToast(isPlaying ? 'Video paused' : 'Video playing');
-                    }}
-                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/30 backdrop-blur-md hover:bg-white/40 border border-white/60 text-white flex items-center justify-center shadow-2xl transition-all cursor-pointer z-10 active:scale-95"
-                    aria-label={isPlaying ? 'Pause' : 'Play'}
-                  >
-                    {isPlaying ? (
-                      <Pause className="w-8 h-8 fill-white" />
-                    ) : (
-                      <Play className="w-8 h-8 fill-white ml-1" />
-                    )}
-                  </button>
-
-                  {/* Top HUD Tag */}
-                  <div className="absolute top-3 left-4 z-10 text-[10px] font-mono text-white/90 bg-black/60 px-2.5 py-1 rounded-md border border-white/10 backdrop-blur-xs">
-                    IMD-RSMC-HQ · LIVE FEED
-                  </div>
-
-                  {/* Bottom Controls Bar matching mockup */}
-                  <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 bg-gradient-to-t from-black/95 via-black/70 to-transparent z-10 text-white text-xs">
-                    {/* Blue Seekbar */}
-                    <div className="w-full bg-white/30 h-1.5 rounded-full mb-3 cursor-pointer overflow-hidden">
-                      <div className="bg-[#1f5eff] h-full w-[35%] rounded-full shadow-xs" />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      {/* Play time tracker: ▶ 08:24 / 24:15 */}
-                      <div className="flex items-center gap-3">
-                        <button
-                          type="button"
-                          onClick={() => setIsPlaying(!isPlaying)}
-                          className="hover:text-blue-400 cursor-pointer"
-                        >
-                          {isPlaying ? (
-                            <Pause className="w-4 h-4 fill-white" />
-                          ) : (
-                            <Play className="w-4 h-4 fill-white" />
-                          )}
-                        </button>
-                        <span className="font-mono text-xs text-white/90">
-                          {currentLesson.videoTime || '08:24 / 24:15'}
-                        </span>
-                      </div>
-
-                      {/* Right icons: 1x, CC, Gear, Fullscreen */}
-                      <div className="flex items-center gap-3 text-white/80">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const speeds = ['1x', '1.25x', '1.5x', '0.75x'];
-                            const next = speeds[(speeds.indexOf(playbackSpeed) + 1) % speeds.length];
-                            setPlaybackSpeed(next);
-                            showToast(`Playback speed set to ${next}`);
-                          }}
-                          className="hover:text-white font-bold cursor-pointer"
-                        >
-                          {playbackSpeed}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => showToast('Subtitles (CC) enabled')}
-                          className="hover:text-white cursor-pointer"
-                          title="Subtitles"
-                        >
-                          <Subtitles className="w-4 h-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => showToast('Video quality: 1080p HD')}
-                          className="hover:text-white cursor-pointer"
-                          title="Settings"
-                        >
-                          <Settings className="w-4 h-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setUseYouTubeIframe(true)}
-                          className="hover:text-white cursor-pointer"
-                          title="Fullscreen / YouTube view"
-                        >
-                          <Maximize2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+              {/* Magic UI HeroVideoDialog in course video player */}
+              <div className="w-full rounded-2xl overflow-hidden bg-black shadow-md border border-slate-800">
+                <HeroVideoDialog
+                  className="w-full"
+                  animationStyle="from-center"
+                  videoSrc={`https://www.youtube.com/embed/${currentLesson.youtubeId || 'qh3NGpYRG3I'}?si=4rb-zSdDkVK9qxxb`}
+                  thumbnailSrc="https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=1200&auto=format&fit=crop&q=80"
+                  thumbnailAlt={currentLesson.title}
+                />
+              </div>
             </div>
           ) : (
             /* B. If Text Lesson: Rich formatted view matching image_c48c9581.png */

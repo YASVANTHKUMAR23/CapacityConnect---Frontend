@@ -23,7 +23,6 @@ import {
 } from 'lucide-react';
 import { useAdminData } from '../../context/AdminDataContext';
 import { PendingApprovalItem, UserDirectoryItem } from '../../types';
-import { MobileStatCards } from './MobileStatCards';
 import { ScrollDrivenTable } from './ScrollDrivenTable';
 
 interface RoleManagementPageProps {
@@ -96,9 +95,6 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
 
   return (
     <div className="w-full max-w-full min-w-0 space-y-4 sm:space-y-6">
-      {/* Mobile Stat Cards at top strictly matching reference images */}
-      <MobileStatCards />
-
       {/* 1. Pending Approvals Card */}
       <div className="w-full max-w-full min-w-0 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs overflow-hidden">
         <div className="flex items-center justify-between mb-4 sm:mb-5">
