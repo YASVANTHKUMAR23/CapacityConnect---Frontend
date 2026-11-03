@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TraineeTab } from '../../types';
 import { useTraineeData } from '../../context/TraineeDataContext';
+import { useAdminData } from '../../context/AdminDataContext';
 import {
   BookOpen,
   FileCheck,
@@ -9,12 +10,15 @@ import {
   TrendingUp,
   Clock,
   Sparkles,
+  ChevronLeft,
   ChevronRight,
+  RotateCw,
   ExternalLink,
   Flame,
   CheckCircle2,
   Calendar,
   X,
+  Megaphone,
 } from 'lucide-react';
 
 interface TraineeDashboardPageProps {
@@ -27,9 +31,44 @@ export const TraineeDashboardPage: React.FC<TraineeDashboardPageProps> = ({
   showToast,
 }) => {
   const { courses, assessments, earnedCertificates } = useTraineeData();
+  const { announcements } = useAdminData();
   const [announcementModalOpen, setAnnouncementModalOpen] = useState(false);
   const [hoveredProgressMonth, setHoveredProgressMonth] = useState<number | null>(5); // Oct default
   const [hoveredStudyDay, setHoveredStudyDay] = useState<number | null>(3); // Thu default
+
+  // Shared announcement loop
+  const [announcementIndex, setAnnouncementIndex] = useState(0);
+  const activeAnnouncements = announcements.length > 0 ? announcements : [];
+  const currentAnnouncement = activeAnnouncements.length > 0
+    ? activeAnnouncements[announcementIndex % activeAnnouncements.length]
+    : {
+        id: 'default',
+        type: 'Announcement',
+        title: 'Cyclone season training begins 1 Nov',
+        message: 'Complete pending modules before the season briefing. Dr. Ravi Menon leading live radar sessions.',
+        date: 'Today',
+        publishOn: '24 Oct 2026',
+        isPinned: true,
+        imageUrl: '',
+      };
+
+  const handleNextAnnouncement = () => {
+    if (activeAnnouncements.length <= 1) return;
+    setAnnouncementIndex((prev) => (prev + 1) % activeAnnouncements.length);
+  };
+
+  const handlePrevAnnouncement = () => {
+    if (activeAnnouncements.length <= 1) return;
+    setAnnouncementIndex((prev) => (prev - 1 + activeAnnouncements.length) % activeAnnouncements.length);
+  };
+
+  useEffect(() => {
+    if (activeAnnouncements.length <= 1) return;
+    const timer = setInterval(() => {
+      setAnnouncementIndex((prev) => (prev + 1) % activeAnnouncements.length);
+    }, 7000);
+    return () => clearInterval(timer);
+  }, [activeAnnouncements.length]);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -43,27 +82,63 @@ export const TraineeDashboardPage: React.FC<TraineeDashboardPageProps> = ({
         </p>
       </div>
 
-      {/* Admin Announcement Banner (Matches 05-dashboard) */}
-      <div className="p-5 sm:p-6 rounded-[14px] bg-[#e8efff]/70 border border-[#1f5eff]/30 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <span className="text-[10px] font-bold tracking-wider text-[#1d4ed8] uppercase block mb-1">
-            ADMIN ANNOUNCEMENT
-          </span>
-          <h2 className="text-base sm:text-lg font-bold text-[#1c2333]">
-            Cyclone season training begins 1 Nov
+      {/* Admin Announcement Banner (Maintains exact Trainee Dashboard card dimensions & style) */}
+      <div className="p-5 sm:p-6 rounded-[14px] bg-[#e8efff]/70 border border-[#1f5eff]/30 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden">
+        <div className="flex-1 min-w-0 pr-0 md:pr-4">
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+            <span className="text-[10px] font-bold tracking-wider text-[#1d4ed8] uppercase bg-blue-100/80 px-2 py-0.5 rounded-md inline-flex items-center gap-1">
+              <Megaphone className="w-3 h-3 text-[#1f5eff]" />
+              {currentAnnouncement.type?.toUpperCase() || 'ADMIN ANNOUNCEMENT'}
+            </span>
+            {activeAnnouncements.length > 1 && (
+              <span className="text-[10px] font-semibold text-slate-500 bg-white/70 px-2 py-0.5 rounded-full border border-blue-200/50">
+                {announcementIndex + 1} of {activeAnnouncements.length}
+              </span>
+            )}
+            <span className="text-[11px] text-[#5b6478]">
+              {currentAnnouncement.publishOn || currentAnnouncement.date}
+            </span>
+          </div>
+
+          <h2 className="text-base sm:text-lg font-bold text-[#1c2333] truncate sm:whitespace-normal">
+            {currentAnnouncement.title}
           </h2>
-          <p className="text-xs sm:text-sm text-[#5b6478] mt-0.5">
-            Complete pending modules before the season briefing.
+          <p className="text-xs sm:text-sm text-[#5b6478] mt-1 line-clamp-2">
+            {currentAnnouncement.message}
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setAnnouncementModalOpen(true)}
-          className="h-10 px-5 bg-[#1f5eff] hover:bg-blue-600 text-white rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
-        >
-          View full announcement
-        </button>
+        <div className="flex items-center gap-2 self-start md:self-center shrink-0 flex-wrap">
+          {activeAnnouncements.length > 1 && (
+            <div className="flex items-center gap-1 bg-white/80 border border-blue-200/60 p-1 rounded-xl">
+              <button
+                type="button"
+                onClick={handlePrevAnnouncement}
+                className="p-1 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-blue-50 transition-colors cursor-pointer"
+                title="Previous announcement"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={handleNextAnnouncement}
+                className="p-1 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-blue-50 transition-colors cursor-pointer"
+                title="Next announcement"
+              >
+                <RotateCw className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setAnnouncementModalOpen(true)}
+            className="h-10 px-4 sm:px-5 bg-[#1f5eff] hover:bg-blue-600 text-white rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-xs shrink-0 flex items-center gap-1.5"
+          >
+            <span>View announcement</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
       {/* 3 Summary KPI Cards */}
@@ -772,53 +847,65 @@ export const TraineeDashboardPage: React.FC<TraineeDashboardPageProps> = ({
       {/* Full Announcement Modal */}
       {announcementModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 animate-in zoom-in-95 duration-150">
-            <div className="flex items-start justify-between">
-              <div>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#e8efff] text-[#1d4ed8]">
-                  ADMIN ANNOUNCEMENT
-                </span>
-                <h3 className="text-lg font-bold text-[#1c2333] mt-2">
-                  Cyclone Season Operational Training 2026
-                </h3>
-                <p className="text-xs text-[#5b6478] mt-0.5">
-                  Published by IMD HQ Training Directorate · 24 Oct 2026
-                </p>
+          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-150">
+            {currentAnnouncement.imageUrl && (
+              <div className="relative aspect-[21/9] w-full overflow-hidden bg-slate-950">
+                <img
+                  src={currentAnnouncement.imageUrl}
+                  alt={currentAnnouncement.title}
+                  className="w-full h-full object-cover"
+                />
               </div>
-              <button
-                type="button"
-                onClick={() => setAnnouncementModalOpen(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+            )}
+            <div className="p-5 sm:p-6">
+              <div className="flex items-start justify-between">
+                <div>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#e8efff] text-[#1d4ed8]">
+                    {currentAnnouncement.type?.toUpperCase() || 'ADMIN ANNOUNCEMENT'}
+                  </span>
+                  <h3 className="text-lg font-bold text-[#1c2333] mt-2">
+                    {currentAnnouncement.title}
+                  </h3>
+                  <p className="text-xs text-[#5b6478] mt-0.5">
+                    {currentAnnouncement.publishOn ? `Published ${currentAnnouncement.publishOn}` : currentAnnouncement.date} · IMD Training Directorate
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAnnouncementModalOpen(false)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
 
-            <div className="mt-4 text-xs sm:text-sm text-slate-700 space-y-3 leading-relaxed border-t border-slate-100 pt-4">
-              <p>
-                In preparation for the Post-Monsoon Cyclone Season (North Indian Ocean, Bay of Bengal and Arabian Sea), all regional meteorologists, duty officers, and radar technicians must complete:
-              </p>
-              <ul className="list-disc pl-5 space-y-1 text-slate-600">
-                <li>Cyclone Track Analysis — Module 3 (Track forecasting methods)</li>
-                <li>Radar Data Quality — Velocity dealiasing and clutter QC</li>
-                <li>Mandatory mid-term assessment before 24 Oct deadline</li>
-              </ul>
-              <p>
-                Dr. Ravi Menon will host an interactive Doppler Radar session for operational staff on Thursday at 15:00 IST.
-              </p>
-            </div>
+              <div className="mt-4 text-xs sm:text-sm text-slate-700 space-y-3 leading-relaxed border-t border-slate-100 pt-4">
+                <p>{currentAnnouncement.message}</p>
+                <div className="p-3 bg-blue-50/60 rounded-xl border border-blue-100 text-xs text-blue-900">
+                  <span className="font-semibold block mb-0.5">Notice to All IMD Personnel</span>
+                  Please review updated operational guidelines before next shift briefing.
+                </div>
+              </div>
 
-            <div className="mt-6 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setAnnouncementModalOpen(false);
-                  onSelectTab('course-player');
-                }}
-                className="px-4 py-2 bg-[#1f5eff] hover:bg-blue-600 text-white font-semibold text-xs rounded-xl shadow-xs cursor-pointer"
-              >
-                Open Cyclone Module
-              </button>
+              <div className="mt-6 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setAnnouncementModalOpen(false)}
+                  className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs rounded-xl cursor-pointer"
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAnnouncementModalOpen(false);
+                    onSelectTab('course-player');
+                  }}
+                  className="px-4 py-2 bg-[#1f5eff] hover:bg-blue-600 text-white font-semibold text-xs rounded-xl shadow-xs cursor-pointer"
+                >
+                  Open Course Player
+                </button>
+              </div>
             </div>
           </div>
         </div>

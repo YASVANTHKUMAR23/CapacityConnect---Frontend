@@ -20,6 +20,7 @@ import {
   Radio,
 } from 'lucide-react';
 import { useTrainerData } from '../../context/TrainerDataContext';
+import { useAdminData } from '../../context/AdminDataContext';
 import { TrainerTab } from '../../types';
 
 interface TrainerDashboardPageProps {
@@ -99,27 +100,49 @@ export const TrainerDashboardPage: React.FC<TrainerDashboardPageProps> = ({
   showToast,
 }) => {
   const { trainees, courses, setSelectedTraineeId, sendReminder, setIsChatbotOpen, notifications } = useTrainerData();
+  const { announcements: adminAnnouncements } = useAdminData();
   const [showNotice, setShowNotice] = useState(true);
+
+  // Map shared admin announcements to trainer format, falling back to initial presets
+  const activeAnnouncementsList = adminAnnouncements.length > 0
+    ? adminAnnouncements.map((ann, idx) => ({
+        id: ann.id,
+        badge: ann.type ? `${ann.type} Notice` : 'Directorate Bulletin',
+        isPinned: ann.isPinned,
+        date: ann.publishOn ? `Published ${ann.publishOn}` : `Published ${ann.date}`,
+        title: ann.title,
+        body: ann.message,
+        dispatchedBy: 'Training Directorate (IMD New Delhi)',
+        highlights: [
+          { num: '142', label: 'Duty Officers Enrolled', sub: 'Class-I & II Meteorologists' },
+          { num: '98%', label: 'Divisional Readiness', sub: '32 Coastal Radar Stations' },
+          { num: '31 Oct', label: 'Question Bank Deadline', sub: 'Cycle 4 Winter Intake' },
+        ],
+        actionLabel: idx % 2 === 0 ? 'Review question bank' : 'View trainee roster',
+        actionTab: (idx % 2 === 0 ? 'assessments' : 'trainees') as TrainerTab,
+      }))
+    : TRAINER_ANNOUNCEMENTS;
 
   // Multi-announcement carousel with automated looping
   const [announcementIndex, setAnnouncementIndex] = useState(0);
-  const currentAnnouncement = TRAINER_ANNOUNCEMENTS[announcementIndex % TRAINER_ANNOUNCEMENTS.length];
+  const currentAnnouncement = activeAnnouncementsList[announcementIndex % activeAnnouncementsList.length];
 
   const handleNextAnnouncement = () => {
-    setAnnouncementIndex((prev) => (prev + 1) % TRAINER_ANNOUNCEMENTS.length);
+    setAnnouncementIndex((prev) => (prev + 1) % activeAnnouncementsList.length);
   };
 
   const handlePrevAnnouncement = () => {
-    setAnnouncementIndex((prev) => (prev - 1 + TRAINER_ANNOUNCEMENTS.length) % TRAINER_ANNOUNCEMENTS.length);
+    setAnnouncementIndex((prev) => (prev - 1 + activeAnnouncementsList.length) % activeAnnouncementsList.length);
   };
 
   // Auto-advance loop every 7 seconds
   useEffect(() => {
+    if (activeAnnouncementsList.length <= 1) return;
     const timer = setInterval(() => {
-      setAnnouncementIndex((prev) => (prev + 1) % TRAINER_ANNOUNCEMENTS.length);
+      setAnnouncementIndex((prev) => (prev + 1) % activeAnnouncementsList.length);
     }, 7000);
     return () => clearInterval(timer);
-  }, []);
+  }, [activeAnnouncementsList.length]);
 
   // Hover state for interactive SVG chart tooltip
   const [hoveredMonthIndex, setHoveredMonthIndex] = useState<number | null>(4); // default Oct
@@ -172,7 +195,7 @@ export const TrainerDashboardPage: React.FC<TrainerDashboardPageProps> = ({
                 )}
                 {/* Active index pill */}
                 <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full tabular-nums">
-                  {announcementIndex + 1} of {TRAINER_ANNOUNCEMENTS.length}
+                  {announcementIndex + 1} of {activeAnnouncementsList.length}
                 </span>
               </div>
 
@@ -188,7 +211,7 @@ export const TrainerDashboardPage: React.FC<TrainerDashboardPageProps> = ({
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   <div className="flex items-center gap-1 px-1">
-                    {TRAINER_ANNOUNCEMENTS.map((_, idx) => (
+                    {activeAnnouncementsList.map((_, idx) => (
                       <button
                         key={idx}
                         type="button"

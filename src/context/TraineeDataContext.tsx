@@ -46,6 +46,12 @@ interface TraineeDataContextType {
   sendChatMessage: (text: string) => void;
   // Feedback
   submitCourseFeedback: (courseId: string, rating: number, metrics: Record<string, number>, comment: string) => void;
+  // Course Player selection & Saved courses
+  selectedCourseId: string;
+  setSelectedCourseId: (courseId: string) => void;
+  savedCourseIds: string[];
+  toggleSaveCourse: (courseId: string) => void;
+  isCourseSaved: (courseId: string) => boolean;
 }
 
 const TraineeDataContext = createContext<TraineeDataContextType | undefined>(undefined);
@@ -712,6 +718,18 @@ export const TraineeDataProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }, 450);
   };
 
+  // Course Player selection & Saved Courses
+  const [selectedCourseId, setSelectedCourseId] = useState<string>('course-1');
+  const [savedCourseIds, setSavedCourseIds] = useState<string[]>(['course-6', 'course-8']);
+
+  const toggleSaveCourse = (courseId: string) => {
+    setSavedCourseIds((prev) =>
+      prev.includes(courseId) ? prev.filter((id) => id !== courseId) : [...prev, courseId]
+    );
+  };
+
+  const isCourseSaved = (courseId: string) => savedCourseIds.includes(courseId);
+
   const submitCourseFeedback = (
     courseId: string,
     rating: number,
@@ -749,6 +767,11 @@ export const TraineeDataProvider: React.FC<{ children: React.ReactNode }> = ({ c
         chatMessages,
         sendChatMessage,
         submitCourseFeedback,
+        selectedCourseId,
+        setSelectedCourseId,
+        savedCourseIds,
+        toggleSaveCourse,
+        isCourseSaved,
       }}
     >
       {children}

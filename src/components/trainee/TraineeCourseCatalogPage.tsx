@@ -28,7 +28,7 @@ export const TraineeCourseCatalogPage: React.FC<TraineeCourseCatalogPageProps> =
   onSelectTab,
   showToast,
 }) => {
-  const { courses, enrollCourse } = useTraineeData();
+  const { courses, enrollCourse, setSelectedCourseId } = useTraineeData();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('All');
   const [selectedLanguage, setSelectedLanguage] = useState('All');
@@ -314,6 +314,7 @@ export const TraineeCourseCatalogPage: React.FC<TraineeCourseCatalogPageProps> =
                     <button
                       type="button"
                       onClick={() => {
+                        setSelectedCourseId(course.id);
                         onSelectTab('course-player');
                         showToast(`Resuming "${course.title}"`);
                       }}
@@ -327,14 +328,21 @@ export const TraineeCourseCatalogPage: React.FC<TraineeCourseCatalogPageProps> =
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => setPreviewCourse(course)}
+                    onClick={() => {
+                      setSelectedCourseId(course.id);
+                      setPreviewCourse(course);
+                    }}
                     className="flex-1 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer text-center"
                   >
                     Syllabus
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleEnroll(course)}
+                    onClick={() => {
+                      handleEnroll(course);
+                      setSelectedCourseId(course.id);
+                      onSelectTab('course-player');
+                    }}
                     className="flex-1 py-2 rounded-xl text-xs font-semibold text-white bg-[#1f5eff] hover:bg-blue-600 transition-colors cursor-pointer text-center shadow-xs flex items-center justify-center gap-1"
                   >
                     <span>Enroll Free</span>
@@ -433,15 +441,27 @@ export const TraineeCourseCatalogPage: React.FC<TraineeCourseCatalogPageProps> =
                 </div>
               </div>
 
-              {/* Instructor Card */}
-              <div className="p-4 rounded-xl border border-slate-200 bg-blue-50/40 flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-full bg-blue-600 text-white font-bold grid place-items-center text-sm shrink-0">
-                  {previewCourse.trainer.split(' ').map((n) => n[0]).join('').slice(0, 2)}
-                </div>
+              {/* Instructor Card matching image_ad664f06.png */}
+              <div className="p-3.5 sm:p-4 rounded-xl border border-slate-200 bg-blue-50/30 flex items-center gap-3.5">
+                <img
+                  src="/public/assets/aistudio/image_ad664f06.png"
+                  alt={previewCourse.trainer}
+                  className="w-12 h-12 rounded-full object-cover shrink-0 border border-slate-200 shadow-2xs bg-white"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src =
+                      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80';
+                  }}
+                />
                 <div>
-                  <h5 className="font-bold text-slate-900 text-xs">{previewCourse.trainer}</h5>
-                  <p className="text-[11px] text-blue-700 font-medium">{previewCourse.institution}</p>
-                  <p className="text-[10.5px] text-slate-500 mt-0.5">Senior Faculty at National Meteorological Training Institute</p>
+                  <div className="text-xs text-slate-600 font-medium">
+                    Instructor: <strong className="text-slate-900 font-bold">{previewCourse.trainer}</strong>
+                  </div>
+                  <div className="text-[11px] text-slate-500 font-medium">
+                    Senior Scientist, IMD
+                  </div>
+                  <div className="text-[10.5px] text-blue-700 mt-0.5">
+                    {previewCourse.institution} · Senior Faculty at National Meteorological Training Institute
+                  </div>
                 </div>
               </div>
             </div>
@@ -459,6 +479,7 @@ export const TraineeCourseCatalogPage: React.FC<TraineeCourseCatalogPageProps> =
                 <button
                   type="button"
                   onClick={() => {
+                    setSelectedCourseId(previewCourse.id);
                     setPreviewCourse(null);
                     onSelectTab('course-player');
                   }}
@@ -471,7 +492,9 @@ export const TraineeCourseCatalogPage: React.FC<TraineeCourseCatalogPageProps> =
                   type="button"
                   onClick={() => {
                     handleEnroll(previewCourse);
+                    setSelectedCourseId(previewCourse.id);
                     setPreviewCourse(null);
+                    onSelectTab('course-player');
                   }}
                   className="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-[#1f5eff] hover:bg-blue-600 cursor-pointer shadow-xs"
                 >
