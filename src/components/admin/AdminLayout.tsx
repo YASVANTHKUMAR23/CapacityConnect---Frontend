@@ -220,8 +220,19 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           isSidebarOpen ? 'lg:ml-64' : 'ml-0'
         }`}
       >
+        {/* Backdrop for closing popups when clicking anywhere on screen */}
+        {(notificationsOpen || profileDropdownOpen) && (
+          <div
+            className="fixed inset-0 z-30"
+            onClick={() => {
+              setNotificationsOpen(false);
+              setProfileDropdownOpen(false);
+            }}
+          />
+        )}
+
         {/* Top Header */}
-        <header className="sticky top-0 z-20 bg-[#f3f4f8]/90 backdrop-blur-md px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 border-b border-slate-200/40">
+        <header className="sticky top-0 z-40 bg-[#f3f4f8]/90 backdrop-blur-md px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 border-b border-slate-200/40">
           {/* Mobile Header Strictly Matching Reference Images (sm:hidden) */}
           <div className="flex sm:hidden items-center justify-between w-full">
             {/* Left Controls: Hamburger Menu + Bell with dot */}
@@ -626,8 +637,14 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 
       {/* Quick Search Dialog */}
       {searchModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-12 sm:pt-20 p-3 sm:p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="w-full max-w-md sm:max-w-lg max-h-[85vh] flex flex-col bg-white rounded-xl sm:rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div
+          className="fixed inset-0 z-50 flex items-start justify-center pt-12 sm:pt-20 p-3 sm:p-4 bg-slate-900/40 backdrop-blur-xs"
+          onClick={() => setSearchModalOpen(false)}
+        >
+          <div
+            className="w-full max-w-md sm:max-w-lg max-h-[85vh] flex flex-col bg-white rounded-xl sm:rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="p-3 sm:p-4 border-b border-slate-100 flex items-center gap-2.5 sm:gap-3 shrink-0">
               <Search className="w-4 h-4 text-slate-400 shrink-0" />
               <input

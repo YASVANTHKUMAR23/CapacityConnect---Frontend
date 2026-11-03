@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Users,
   Award,
@@ -11,6 +11,9 @@ import {
   Megaphone,
   Plus,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  RotateCw,
   X,
   ArrowRight,
   Pin,
@@ -103,15 +106,42 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 }) => {
   const { pinnedAnnouncement, announcements } = useAdminData();
   const [enrollmentTimeframe, setEnrollmentTimeframe] = useState('This year');
+  const [enrollmentMenuOpen, setEnrollmentMenuOpen] = useState(false);
+  const [competencyTimeframe, setCompetencyTimeframe] = useState('Today');
+  const [competencyMenuOpen, setCompetencyMenuOpen] = useState(false);
   const [courseFilter, setCourseFilter] = useState('This month');
+  const [courseMenuOpen, setCourseMenuOpen] = useState(false);
   const [activeTooltipIndex, setActiveTooltipIndex] = useState<number | null>(3); // Default to Aug as in snippet
+
+  // Multiple announcements carousel with looping functionality
+  const [announcementIndex, setAnnouncementIndex] = useState(0);
+  const activeAnnouncements = announcements.length > 0 ? announcements : (pinnedAnnouncement ? [pinnedAnnouncement] : []);
+  const heroAnn = activeAnnouncements.length > 0
+    ? activeAnnouncements[announcementIndex % activeAnnouncements.length]
+    : pinnedAnnouncement || announcements[0];
+
+  const handleNextAnnouncement = () => {
+    if (activeAnnouncements.length <= 1) return;
+    setAnnouncementIndex((prev) => (prev + 1) % activeAnnouncements.length);
+  };
+
+  const handlePrevAnnouncement = () => {
+    if (activeAnnouncements.length <= 1) return;
+    setAnnouncementIndex((prev) => (prev - 1 + activeAnnouncements.length) % activeAnnouncements.length);
+  };
+
+  // Automated one-to-one loop interval
+  useEffect(() => {
+    if (activeAnnouncements.length <= 1) return;
+    const timer = setInterval(() => {
+      setAnnouncementIndex((prev) => (prev + 1) % activeAnnouncements.length);
+    }, 6500);
+    return () => clearInterval(timer);
+  }, [activeAnnouncements.length]);
 
   // Dynamic divisions state for participation bubbles
   const [divisions, setDivisions] = useState<DivisionItem[]>(INITIAL_DIVISIONS);
   const [hoveredDivisionId, setHoveredDivisionId] = useState<string | null>(null);
-
-  // Active announcement displayed in hero card (connected to AdminDataContext)
-  const heroAnn = pinnedAnnouncement || announcements[0];
 
   // SVG Chart Dimensions
   const W = 560;
@@ -275,15 +305,15 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       {/* Layout strictly conforms to Screenshot_2026-10-19_204608_6bbe42ed.png */}
       {/* ======================================================== */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-stretch">
-        {/* Left: Large Announcement Card (7 cols) */}
+        {/* Left: Large Announcement Card (7 cols) with Multiple Announcements Carousel & Looping */}
         <div className="lg:col-span-7 bg-white rounded-2xl p-5 sm:p-7 border border-slate-200/90 shadow-2xs flex flex-col justify-between relative overflow-hidden group">
           {/* Subtle background glow */}
           <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-bl from-blue-50/80 via-indigo-50/30 to-transparent rounded-full -mr-16 -mt-16 pointer-events-none" />
 
           <div>
-            {/* Top Badge & Date Row */}
+            {/* Top Badge, Carousel Indicator & Date Row */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 mb-3.5 sm:mb-4">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200/60">
                   <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
                   Official Announcement
@@ -294,12 +324,57 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                     Pinned
                   </span>
                 )}
+                {/* Carousel counter & dot pills */}
+                {activeAnnouncements.length > 1 && (
+                  <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200/60">
+                    <RotateCw className="w-3 h-3 text-blue-600 animate-spin-slow" />
+                    <span>{((announcementIndex % activeAnnouncements.length) + 1)} of {activeAnnouncements.length}</span>
+                  </div>
+                )}
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-                <Calendar className="w-3.5 h-3.5" />
-                <span>Published {heroAnn?.date || 'Today'}</span>
+
+              {/* Prev / Next loop buttons */}
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={handlePrevAnnouncement}
+                    className="w-7 h-7 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+                    title="Previous announcement"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleNextAnnouncement}
+                    className="w-7 h-7 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+                    title="Next announcement (loops)"
+                  >
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium ml-1">
+                  <Calendar className="w-3.5 h-3.5" />
+                  <span>Published {heroAnn?.date || 'Today'}</span>
+                </div>
               </div>
             </div>
+
+            {/* Optional Attached Media Thumbnail */}
+            {heroAnn?.imageUrl && (
+              <div className="mb-3.5 rounded-xl overflow-hidden aspect-[21/9] max-h-40 w-full relative border border-slate-200/80 bg-slate-900 group/img">
+                <img
+                  src={heroAnn.imageUrl}
+                  alt={heroAnn.title}
+                  className="w-full h-full object-cover group-hover/img:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent flex items-end p-3">
+                  <span className="text-[11px] text-white/90 font-medium">
+                    National Weather & Radar Operational Network
+                  </span>
+                </div>
+              </div>
+            )}
 
             {/* Announcement Headline */}
             <h2 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight leading-snug mb-2.5 sm:mb-3">
@@ -336,16 +411,29 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             </div>
           </div>
 
-          {/* Bottom Actions */}
+          {/* Bottom Actions with Loop Button */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 pt-3.5 sm:pt-4 border-t border-slate-100">
-            <button
-              type="button"
-              onClick={() => onNavigateTab('announcements')}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
-            >
-              <span>View full announcement</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={() => onNavigateTab('announcements')}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+              >
+                <span>View full announcement</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+
+              {/* Loop to next announcement button */}
+              <button
+                type="button"
+                onClick={handleNextAnnouncement}
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-xs font-semibold border border-blue-200/80 transition-colors cursor-pointer"
+                title="Cycles to next announcement on a loop"
+              >
+                <span>Next announcement</span>
+                <RotateCw className="w-3.5 h-3.5" />
+              </button>
+            </div>
 
             <button
               type="button"
@@ -456,82 +544,82 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
       {/* ======================================================== */}
       {/* 2. Four KTG Metric Cards (Desktop preserved: hidden sm:grid) */}
-      {/* Visual strictly matching image_a88f9ff2.png with 40px icon */}
+      {/* Project-specific IMD Meteorological Capacity Building Metrics */}
       {/* ======================================================== */}
       <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5">
-        {/* Card 1: User Signups / Enrollments */}
+        {/* Card 1: Active Trainee Meteorologists */}
         <div className="bg-white rounded-2xl p-4 sm:p-5 lg:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
           <div className="flex items-start justify-between">
-            <span className="text-[13px] sm:text-[14px] text-slate-500 font-normal">User Signups</span>
-            <div className="w-9 h-9 sm:w-[40px] sm:h-[40px] rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center shrink-0">
+            <span className="text-[13px] sm:text-[14px] text-slate-500 font-normal">Active Trainee Officers</span>
+            <div className="w-9 h-9 sm:w-[40px] sm:h-[40px] rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
               <Users className="w-5 h-5 sm:w-[26px] sm:h-[26px]" />
             </div>
           </div>
           <div className="my-1.5 sm:my-2">
             <div className="text-2xl sm:text-[32px] lg:text-[36px] font-semibold text-slate-900 tracking-tight leading-none">
-              450
+              1,096
             </div>
           </div>
           <div className="flex items-center gap-1.5 text-xs">
-            <span className="text-emerald-600 font-medium">↗ 10%</span>
-            <span className="text-slate-400 font-normal">vs last 30 days</span>
+            <span className="text-emerald-600 font-medium">↗ 12%</span>
+            <span className="text-slate-400 font-normal">across 36 Regional Centers</span>
           </div>
         </div>
 
-        {/* Card 2: Churn Rate / Issuance */}
+        {/* Card 2: Certified Competency Rate */}
         <div className="bg-white rounded-2xl p-4 sm:p-5 lg:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
           <div className="flex items-start justify-between">
-            <span className="text-[13px] sm:text-[14px] text-slate-500 font-normal">Churn Rate</span>
-            <div className="w-9 h-9 sm:w-[40px] sm:h-[40px] rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+            <span className="text-[13px] sm:text-[14px] text-slate-500 font-normal">Certified Competency Rate</span>
+            <div className="w-9 h-9 sm:w-[40px] sm:h-[40px] rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
               <Award className="w-5 h-5 sm:w-[26px] sm:h-[26px]" />
             </div>
           </div>
           <div className="my-1.5 sm:my-2">
             <div className="text-2xl sm:text-[32px] lg:text-[36px] font-semibold text-slate-900 tracking-tight leading-none">
-              2.3%
+              84.6%
             </div>
           </div>
           <div className="flex items-center gap-1.5 text-xs">
-            <span className="text-rose-500 font-medium">↘ 10%</span>
-            <span className="text-slate-400 font-normal">vs last 30 days</span>
+            <span className="text-emerald-600 font-medium">↗ 6.2%</span>
+            <span className="text-slate-400 font-normal">vs MoES national benchmark</span>
           </div>
         </div>
 
-        {/* Card 3: Customer Support Tickets / Assessments */}
+        {/* Card 3: Evaluations & Assessments Cleared */}
         <div className="bg-white rounded-2xl p-4 sm:p-5 lg:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
           <div className="flex items-start justify-between">
-            <span className="text-[13px] sm:text-[14px] text-slate-500 font-normal">Customer Support Tickets</span>
-            <div className="w-9 h-9 sm:w-[40px] sm:h-[40px] rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <span className="text-[13px] sm:text-[14px] text-slate-500 font-normal">Evaluations Cleared</span>
+            <div className="w-9 h-9 sm:w-[40px] sm:h-[40px] rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
               <CheckCircle2 className="w-5 h-5 sm:w-[26px] sm:h-[26px]" />
             </div>
           </div>
           <div className="my-1.5 sm:my-2">
             <div className="text-2xl sm:text-[32px] lg:text-[36px] font-semibold text-slate-900 tracking-tight leading-none">
-              120
+              348
             </div>
           </div>
           <div className="flex items-center gap-1.5 text-xs">
-            <span className="text-emerald-600 font-medium">↗ 10%</span>
-            <span className="text-slate-400 font-normal">vs last 30 days</span>
+            <span className="text-emerald-600 font-medium">↗ 18%</span>
+            <span className="text-slate-400 font-normal">Doppler & NWP tests passed</span>
           </div>
         </div>
 
-        {/* Card 4: Active Subscriptions / Participation */}
+        {/* Card 4: Operational Radar Network Readiness */}
         <div className="bg-white rounded-2xl p-4 sm:p-5 lg:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
           <div className="flex items-start justify-between">
-            <span className="text-[13px] sm:text-[14px] text-slate-500 font-normal">Active Subscriptions</span>
-            <div className="w-9 h-9 sm:w-[40px] sm:h-[40px] rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+            <span className="text-[13px] sm:text-[14px] text-slate-500 font-normal">Operational Radar Readiness</span>
+            <div className="w-9 h-9 sm:w-[40px] sm:h-[40px] rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
               <TrendingUp className="w-5 h-5 sm:w-[26px] sm:h-[26px]" />
             </div>
           </div>
           <div className="my-1.5 sm:my-2">
             <div className="text-2xl sm:text-[32px] lg:text-[36px] font-semibold text-slate-900 tracking-tight leading-none">
-              1,250
+              98.4%
             </div>
           </div>
           <div className="flex items-center gap-1.5 text-xs">
-            <span className="text-emerald-600 font-medium">↗ 10%</span>
-            <span className="text-slate-400 font-normal">vs last 30 days</span>
+            <span className="text-emerald-600 font-medium">↗ 2.1%</span>
+            <span className="text-slate-400 font-normal">32 Coastal Doppler Stations</span>
           </div>
         </div>
       </div>
@@ -549,15 +637,37 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 Track learner activity by <b className="font-medium text-[#3b41e3]">month</b>
               </p>
             </div>
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 bg-[#f1f2fb] hover:bg-[#e7e9f7] rounded-[12px] px-3 py-2 text-[12px] font-medium text-[#14162b] transition-colors cursor-pointer select-none"
-            >
-              <span>{enrollmentTimeframe}</span>
-              <svg className="w-2.5 h-2.5" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
-                <path d="M2 3.5l3 3 3-3" />
-              </svg>
-            </button>
+            {/* Functional Timeframe Dropdown */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setEnrollmentMenuOpen(!enrollmentMenuOpen)}
+                className="inline-flex items-center gap-2 bg-[#f1f2fb] hover:bg-[#e7e9f7] rounded-[12px] px-3 py-2 text-[12px] font-medium text-[#14162b] transition-colors cursor-pointer select-none"
+              >
+                <span>{enrollmentTimeframe}</span>
+                <ChevronDown className={`w-3 h-3 text-[#6b6f8a] transition-transform ${enrollmentMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {enrollmentMenuOpen && (
+                <div className="absolute right-0 mt-1.5 w-36 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-40 text-xs animate-in fade-in zoom-in-95 duration-100">
+                  {['This year', 'Last 6 months', 'All time'].map((tf) => (
+                    <button
+                      key={tf}
+                      type="button"
+                      onClick={() => {
+                        setEnrollmentTimeframe(tf);
+                        setEnrollmentMenuOpen(false);
+                        showToast(`Filtered enrollment data for ${tf}.`);
+                      }}
+                      className={`w-full text-left px-3 py-1.5 hover:bg-slate-50 transition-colors cursor-pointer ${
+                        enrollmentTimeframe === tf ? 'font-bold text-blue-600 bg-blue-50/50' : 'text-slate-700'
+                      }`}
+                    >
+                      {tf}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex gap-4 my-4 mb-2 text-[#6b6f8a] text-[12px]">
@@ -692,15 +802,37 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               </h2>
               <p className="mt-[3px] text-[#6b6f8a] text-[12px]">Current level by subject</p>
             </div>
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 bg-[#f1f2fb] hover:bg-[#e7e9f7] rounded-[12px] px-3 py-2 text-[12px] font-medium text-[#14162b] transition-colors cursor-pointer select-none"
-            >
-              <span>Today</span>
-              <svg className="w-2.5 h-2.5" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
-                <path d="M2 3.5l3 3 3-3" />
-              </svg>
-            </button>
+            {/* Functional Competency Timeframe Dropdown */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setCompetencyMenuOpen(!competencyMenuOpen)}
+                className="inline-flex items-center gap-2 bg-[#f1f2fb] hover:bg-[#e7e9f7] rounded-[12px] px-3 py-2 text-[12px] font-medium text-[#14162b] transition-colors cursor-pointer select-none"
+              >
+                <span>{competencyTimeframe}</span>
+                <ChevronDown className={`w-3 h-3 text-[#6b6f8a] transition-transform ${competencyMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {competencyMenuOpen && (
+                <div className="absolute right-0 mt-1.5 w-32 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-40 text-xs animate-in fade-in zoom-in-95 duration-100">
+                  {['Today', 'This week', 'This month'].map((tf) => (
+                    <button
+                      key={tf}
+                      type="button"
+                      onClick={() => {
+                        setCompetencyTimeframe(tf);
+                        setCompetencyMenuOpen(false);
+                        showToast(`Competency level filtered by ${tf}.`);
+                      }}
+                      className={`w-full text-left px-3 py-1.5 hover:bg-slate-50 transition-colors cursor-pointer ${
+                        competencyTimeframe === tf ? 'font-bold text-blue-600 bg-blue-50/50' : 'text-slate-700'
+                      }`}
+                    >
+                      {tf}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Triple-Ring 270deg Gauge opening at the bottom */}
@@ -824,15 +956,43 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               </h2>
               <p className="mt-[3px] text-[#6b6f8a] text-[12px]">Active courses that need attention first</p>
             </div>
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 bg-[#f1f2fb] hover:bg-[#e7e9f7] rounded-[12px] px-3 py-2 text-[12px] font-medium text-[#14162b] transition-colors cursor-pointer select-none"
-            >
-              <span>{courseFilter}</span>
-              <svg className="w-2.5 h-2.5" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
-                <path d="M2 3.5l3 3 3-3" />
-              </svg>
-            </button>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setCourseMenuOpen((prev) => !prev)}
+                className="inline-flex items-center gap-2 bg-[#f1f2fb] hover:bg-[#e7e9f7] rounded-[12px] px-3 py-2 text-[12px] font-medium text-[#14162b] transition-colors cursor-pointer select-none"
+              >
+                <span>{courseFilter}</span>
+                <svg className="w-2.5 h-2.5" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+                  <path d="M2 3.5l3 3 3-3" />
+                </svg>
+              </button>
+              {courseMenuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-20"
+                    onClick={() => setCourseMenuOpen(false)}
+                  />
+                  <div className="absolute right-0 top-full mt-1.5 w-36 bg-white rounded-xl shadow-lg border border-slate-200 py-1.5 z-30 animate-in fade-in zoom-in-95 duration-100">
+                    {['This month', 'Needs attention', 'All courses', 'Quarter to date'].map((opt) => (
+                      <button
+                        key={opt}
+                        type="button"
+                        onClick={() => {
+                          setCourseFilter(opt);
+                          setCourseMenuOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-1.5 text-xs font-medium transition-colors ${
+                          courseFilter === opt ? 'bg-indigo-50 text-[#3b41e3]' : 'text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
             <ScrollDrivenTable className="mt-3.5" minWidth="min-w-[680px]">
@@ -981,15 +1141,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               <p className="mt-[3px] text-[#6b6f8a] text-[12px]">Active trainees per region</p>
             </div>
             <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={handleQuickNextArrival}
-                className="text-[11px] font-semibold bg-[#eef0fc] hover:bg-[#e0e3fa] text-[#3b41e3] px-2 py-1 rounded-full flex items-center gap-1 transition-colors cursor-pointer select-none"
-                title="Simulate 1 new division arriving"
-              >
-                <Plus className="w-3 h-3" />
-                <span>+ Arrive</span>
-              </button>
               <span className="text-[11px] font-semibold bg-[#f1f2fb] text-[#3b41e3] px-2.5 py-1 rounded-full select-none">
                 {divisions.length} Divisions
               </span>

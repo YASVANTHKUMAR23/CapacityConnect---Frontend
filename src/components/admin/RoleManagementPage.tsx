@@ -31,13 +31,21 @@ interface RoleManagementPageProps {
 }
 
 export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToast }) => {
-  const { pendingApprovals, approveUser, rejectUser, userDirectory, updateUserRole } =
+  const { pendingApprovals, approveUser, rejectUser, rejectedRecords, userDirectory, updateUserRole } =
     useAdminData();
 
   const [searchQuery, setSearchQuery] = useState('');
 
   // Tailgrids-style Approval Dialog
   const [selectedApprovalUser, setSelectedApprovalUser] = useState<PendingApprovalItem | null>(null);
+
+  // Rejection with Reason Modal state
+  const [rejectionTargetUser, setRejectionTargetUser] = useState<PendingApprovalItem | null>(null);
+  const [selectedRejectionReason, setSelectedRejectionReason] = useState<string>(
+    'Official IMD / MoES department email required'
+  );
+  const [customRejectionNote, setCustomRejectionNote] = useState<string>('');
+  const [showRejectedLogModal, setShowRejectedLogModal] = useState<boolean>(false);
 
   // Role Change Drawer state
   const [roleDrawerUser, setRoleDrawerUser] = useState<UserDirectoryItem | null>(null);
@@ -51,10 +59,23 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
     setSelectedApprovalUser(null);
   };
 
-  const confirmReject = (p: PendingApprovalItem) => {
-    rejectUser(p.id);
-    showToast(`Rejected account request for ${p.name}.`);
-    setSelectedApprovalUser(null);
+  const handleOpenReject = (p: PendingApprovalItem) => {
+    setRejectionTargetUser(p);
+    setSelectedRejectionReason('Official IMD / MoES department email required');
+    setCustomRejectionNote('');
+  };
+
+  const handleConfirmRejectionWithReason = () => {
+    if (!rejectionTargetUser) return;
+    const finalReason =
+      selectedRejectionReason === 'Other' && customRejectionNote.trim()
+        ? customRejectionNote.trim()
+        : selectedRejectionReason;
+
+    rejectUser(rejectionTargetUser.id, finalReason);
+    showToast(`Rejected registration for ${rejectionTargetUser.name}. Reason: ${finalReason}`);
+    setRejectionTargetUser(null);
+    setCustomRejectionNote('');
   };
 
   const handleConfirmDrawerRoleChange = () => {
@@ -81,12 +102,23 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
       {/* 1. Pending Approvals Card */}
       <div className="w-full max-w-full min-w-0 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs overflow-hidden">
         <div className="flex items-center justify-between mb-4 sm:mb-5">
-          <h2 className="font-bold text-slate-900 text-base">Pending approvals</h2>
-          <span className="text-xs font-semibold text-slate-500">
-            {pendingApprovals.length > 0
-              ? `${pendingApprovals.length} waiting`
-              : '0 waiting'}
-          </span>
+          <div className="flex items-center gap-3">
+            <h2 className="font-bold text-slate-900 text-base">Pending approvals</h2>
+            <span className="text-xs font-semibold text-slate-500">
+              {pendingApprovals.length > 0
+                ? `${pendingApprovals.length} waiting`
+                : '0 waiting'}
+            </span>
+          </div>
+          {rejectedRecords.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowRejectedLogModal(true)}
+              className="text-xs font-medium text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition-colors cursor-pointer flex items-center gap-1.5"
+            >
+              <span>Rejected log ({rejectedRecords.length})</span>
+            </button>
+          )}
         </div>
 
         {pendingApprovals.length === 0 ? (
@@ -137,8 +169,9 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
                         </button>
                         <button
                           type="button"
-                          onClick={() => confirmReject(p)}
+                          onClick={() => handleOpenReject(p)}
                           className="text-rose-600 hover:text-rose-700 font-semibold px-3 py-1.5 rounded-xl text-xs hover:bg-rose-50 transition-colors cursor-pointer"
+                          title="Reject with administrative reason"
                         >
                           Reject
                         </button>
@@ -439,7 +472,10 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => confirmReject(selectedApprovalUser)}
+                  onClick={() => {
+                    handleOpenReject(selectedApprovalUser);
+                    setSelectedApprovalUser(null);
+                  }}
                   className="flex-1 sm:flex-initial px-3 py-2 text-rose-600 hover:bg-rose-50 font-semibold rounded-xl text-xs transition-colors cursor-pointer text-center"
                 >
                   Reject
@@ -662,6 +698,172 @@ export const RoleManagementPage: React.FC<RoleManagementPageProps> = ({ showToas
               >
                 <ShieldCheck className="w-4 h-4" />
                 <span>Confirm Role</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 4. Rejection with Reason Modal */}
+      {rejectionTargetUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="p-5 sm:p-6 pb-4 border-b border-slate-100 flex items-start justify-between bg-rose-50/40">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center shrink-0">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-base">
+                    Reject {rejectionTargetUser.roleRequested} Registration
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {rejectionTargetUser.name} · {rejectionTargetUser.email}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setRejectionTargetUser(null)}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-5 sm:p-6 space-y-4 text-xs">
+              <div className="p-3 bg-amber-50 border border-amber-200/80 rounded-xl text-amber-800 text-xs flex items-start gap-2.5">
+                <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <p>
+                  Please specify the departmental reason for rejection. This notification is archived in the IMD administration log and forwarded to the regional coordinator.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-800 mb-2">
+                  Select Administrative Reason
+                </label>
+                <div className="space-y-2">
+                  {[
+                    'Official IMD / MoES department email required',
+                    'Incomplete educational or meteorological training credentials',
+                    'Division designation mismatch with regional training roster',
+                    'Duplicate registration request detected',
+                    'Other',
+                  ].map((reason) => (
+                    <label
+                      key={reason}
+                      className={`flex items-center gap-2.5 p-2.5 rounded-xl border cursor-pointer transition-colors ${
+                        selectedRejectionReason === reason
+                          ? 'border-rose-400 bg-rose-50/50 text-slate-900 font-medium'
+                          : 'border-slate-200 bg-slate-50/40 hover:bg-slate-50 text-slate-700'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="rejectionReason"
+                        value={reason}
+                        checked={selectedRejectionReason === reason}
+                        onChange={(e) => setSelectedRejectionReason(e.target.value)}
+                        className="text-rose-600 focus:ring-rose-500 cursor-pointer"
+                      />
+                      <span>{reason}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {selectedRejectionReason === 'Other' && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Specific Reason / Directive Note
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={customRejectionNote}
+                    onChange={(e) => setCustomRejectionNote(e.target.value)}
+                    placeholder="Provide specific justification (e.g. Jurisdiction reassigned to New Delhi HQ)..."
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-rose-500/30"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 sm:p-6 pt-3 border-t border-slate-100 flex items-center justify-end gap-2 bg-slate-50/50">
+              <button
+                type="button"
+                onClick={() => setRejectionTargetUser(null)}
+                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmRejectionWithReason}
+                className="px-4 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-xs transition-colors cursor-pointer flex items-center gap-1.5"
+              >
+                <X className="w-3.5 h-3.5" />
+                <span>Confirm Rejection</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 5. Rejected Applications Log Modal */}
+      {showRejectedLogModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-150">
+            <div className="p-5 sm:p-6 pb-4 border-b border-slate-100 flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-slate-900 text-base">Rejected Registrations Log</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Audit trail of declined trainer and trainee applications with stated reasons
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowRejectedLogModal(false)}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-5 sm:p-6 max-h-[60vh] overflow-y-auto divide-y divide-slate-100 text-xs">
+              {rejectedRecords.length === 0 ? (
+                <div className="text-center py-8 text-slate-400">No rejected applications recorded.</div>
+              ) : (
+                rejectedRecords.map((r) => (
+                  <div key={r.id} className="py-3.5 first:pt-0 last:pb-0 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-slate-900">{r.name}</span>
+                        <span className="text-[11px] text-slate-400">({r.email})</span>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-700">
+                          {r.roleRequested}
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-slate-400">{r.rejectedDate}</span>
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 text-slate-700">
+                      <span className="font-semibold text-slate-800">Reason:</span> {r.reason}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="p-4 sm:p-6 pt-3 border-t border-slate-100 flex items-center justify-end bg-slate-50/50">
+              <button
+                type="button"
+                onClick={() => setShowRejectedLogModal(false)}
+                className="px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors cursor-pointer"
+              >
+                Close
               </button>
             </div>
           </div>

@@ -11,6 +11,9 @@ import {
   Copy,
   Globe,
   Eye,
+  Image as ImageIcon,
+  Upload,
+  X,
 } from 'lucide-react';
 import { AnnouncementItem } from '../../types';
 import { useAdminData } from '../../context/AdminDataContext';
@@ -43,6 +46,7 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ showToast 
   const [formMessage, setFormMessage] = useState(currentAnn?.message || '');
   const [formPublishOn, setFormPublishOn] = useState(currentAnn?.publishOn || '25 Oct 2026, 09:00');
   const [formIsPinned, setFormIsPinned] = useState(currentAnn?.isPinned || false);
+  const [formImageUrl, setFormImageUrl] = useState<string>(currentAnn?.imageUrl || '');
 
   // Sync form when selected announcement changes
   const handleSelectAnnouncement = (item: AnnouncementItem) => {
@@ -52,6 +56,7 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ showToast 
     setFormMessage(item.message);
     setFormPublishOn(item.publishOn);
     setFormIsPinned(item.isPinned);
+    setFormImageUrl(item.imageUrl || '');
   };
 
   const handleCreateNew = () => {
@@ -63,6 +68,7 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ showToast 
       message: 'Draft bulletin details regarding upcoming training curriculum.',
       publishOn: '28 Oct 2026, 10:00',
       isPinned: false,
+      imageUrl: 'https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=800&auto=format&fit=crop&q=80',
     };
     addAnnouncement(newItem);
     showToast('New announcement draft created.');
@@ -76,6 +82,7 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ showToast 
       message: formMessage,
       publishOn: formPublishOn,
       isPinned: formIsPinned,
+      imageUrl: formImageUrl,
       status: 'Published',
       date: 'Today',
     });
@@ -90,6 +97,7 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ showToast 
       message: formMessage,
       publishOn: formPublishOn,
       isPinned: formIsPinned,
+      imageUrl: formImageUrl,
       status: 'Draft',
     });
     showToast('Saved announcement as draft.');
@@ -452,6 +460,82 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ showToast 
                   className="w-full pl-3 pr-9 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-blue-600/30"
                 />
                 <Calendar className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2" />
+              </div>
+            </div>
+
+            {/* Media Attachment / Image Field (Featured Banner) */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                  <ImageIcon className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Cover Image / Media Capture</span>
+                </label>
+                {formImageUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setFormImageUrl('')}
+                    className="text-[10px] text-rose-500 hover:text-rose-700 font-medium cursor-pointer"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+
+              {/* Preview Box if image present */}
+              {formImageUrl ? (
+                <div className="relative rounded-xl overflow-hidden border border-slate-200 mb-2 group aspect-[16/9] max-h-36 bg-slate-900">
+                  <img
+                    src={formImageUrl}
+                    alt="Announcement banner"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    onError={() => setFormImageUrl('')}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-2.5">
+                    <span className="text-[10px] text-white/90 font-medium truncate">
+                      Attached media banner
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="border border-dashed border-slate-300 rounded-xl p-3 text-center bg-slate-50/60 mb-2">
+                  <Upload className="w-5 h-5 text-slate-400 mx-auto mb-1" />
+                  <p className="text-[11px] text-slate-500 font-medium">
+                    No image attached. Select a preset or paste image URL.
+                  </p>
+                </div>
+              )}
+
+              {/* URL Input */}
+              <input
+                type="url"
+                value={formImageUrl}
+                onChange={(e) => setFormImageUrl(e.target.value)}
+                placeholder="Paste image URL (https://...)"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-blue-600/30 text-xs font-mono"
+              />
+
+              {/* Quick Meteorological Presets */}
+              <div className="mt-2">
+                <span className="text-[10px] text-slate-400 font-medium block mb-1">
+                  IMD Presets:
+                </span>
+                <div className="flex flex-wrap gap-1">
+                  {[
+                    { label: 'Cyclone Radar', url: 'https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=800&auto=format&fit=crop&q=80' },
+                    { label: 'Doppler Tower', url: 'https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?w=800&auto=format&fit=crop&q=80' },
+                    { label: 'INSAT Satellite', url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop&q=80' },
+                    { label: 'AWS Weather Station', url: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&auto=format&fit=crop&q=80' },
+                  ].map((preset) => (
+                    <button
+                      key={preset.label}
+                      type="button"
+                      onClick={() => setFormImageUrl(preset.url)}
+                      className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-600 transition-colors cursor-pointer"
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 

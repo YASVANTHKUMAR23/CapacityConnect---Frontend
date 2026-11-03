@@ -4,6 +4,7 @@ import {
   CourseItem,
   PendingApprovalItem,
   PortalSettings,
+  RejectedUserRecord,
   TraineeItem,
   TrainerItem,
   UserDirectoryItem,
@@ -20,7 +21,8 @@ interface AdminDataContextType {
 
   pendingApprovals: PendingApprovalItem[];
   approveUser: (id: string) => void;
-  rejectUser: (id: string) => void;
+  rejectUser: (id: string, reason?: string) => void;
+  rejectedRecords: RejectedUserRecord[];
 
   userDirectory: UserDirectoryItem[];
   updateUserRole: (id: string, role: 'Trainer' | 'Trainee' | 'Admin') => void;
@@ -50,6 +52,7 @@ const initialAnnouncements: AnnouncementItem[] = [
       'New cyclone tracking modules open to all trainees on 1 November. Enroll before 30 November to receive your certificate.',
     publishOn: '25 Oct 2026, 09:00',
     isPinned: true,
+    imageUrl: 'https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=800&auto=format&fit=crop&q=80',
   },
   {
     id: 'ann-2',
@@ -61,6 +64,7 @@ const initialAnnouncements: AnnouncementItem[] = [
       'S-band radar interpretation lessons have been refreshed with the latest Doppler dataset from Chennai and Kolkata radars.',
     publishOn: '16 Oct 2026, 11:30',
     isPinned: false,
+    imageUrl: 'https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?w=800&auto=format&fit=crop&q=80',
   },
   {
     id: 'ann-3',
@@ -72,6 +76,7 @@ const initialAnnouncements: AnnouncementItem[] = [
       'Over 500 meteorologists across all IMD Regional Centres have completed the INSAT-3DR satellite imagery interpretation track.',
     publishOn: '12 Oct 2026, 14:00',
     isPinned: false,
+    imageUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop&q=80',
   },
   {
     id: 'ann-4',
@@ -83,6 +88,7 @@ const initialAnnouncements: AnnouncementItem[] = [
       'Portal services will undergo routine database optimization and backup between 02:00 AM and 05:00 AM IST on Sunday.',
     publishOn: '25 Oct 2026, 02:00',
     isPinned: false,
+    imageUrl: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&auto=format&fit=crop&q=80',
   },
   {
     id: 'ann-5',
@@ -94,6 +100,7 @@ const initialAnnouncements: AnnouncementItem[] = [
       'Early preview of Western Disturbances forecasting and fog density detection modules for northern plain divisions.',
     publishOn: '28 Oct 2026, 10:00',
     isPinned: false,
+    imageUrl: 'https://images.unsplash.com/photo-1483921020237-2ff51e8e4b22?w=800&auto=format&fit=crop&q=80',
   },
 ];
 
@@ -557,6 +564,18 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
+  const [rejectedRecords, setRejectedRecords] = useState<RejectedUserRecord[]>([
+    {
+      id: 'rej-1',
+      name: 'Ramesh Sundaram',
+      email: 'ramesh.s@external-corp.in',
+      division: 'Kolkata',
+      roleRequested: 'Trainer',
+      rejectedDate: '18 Oct 2026',
+      reason: 'Official IMD / MoES domain email required for trainer credential verification.',
+    },
+  ]);
+
   const approveUser = (id: string) => {
     const item = pendingApprovals.find((p) => p.id === id);
     if (!item) return;
@@ -577,7 +596,22 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     ]);
   };
 
-  const rejectUser = (id: string) => {
+  const rejectUser = (id: string, reason?: string) => {
+    const item = pendingApprovals.find((p) => p.id === id);
+    if (item) {
+      setRejectedRecords((prev) => [
+        {
+          id: `rej-${Date.now()}`,
+          name: item.name,
+          email: item.email,
+          division: item.division,
+          roleRequested: item.roleRequested,
+          rejectedDate: 'Today',
+          reason: reason || 'Administrative decision per MoES departmental guidelines.',
+        },
+        ...prev,
+      ]);
+    }
     setPendingApprovals((prev) => prev.filter((p) => p.id !== id));
   };
 
@@ -617,6 +651,7 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         pendingApprovals,
         approveUser,
         rejectUser,
+        rejectedRecords,
 
         userDirectory,
         updateUserRole,
