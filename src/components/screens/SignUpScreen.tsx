@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { Screen, UserAccount, UserRole } from '../../types';
+import { useUnifiedData } from '../../context/UnifiedDataContext';
 
 interface SignUpScreenProps {
   onNavigate: (screen: Screen) => void;
@@ -13,6 +14,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
   setCurrentUser,
   showToast,
 }) => {
+  const unified = useUnifiedData();
   const [role, setRole] = useState<UserRole>('trainee');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -49,18 +51,16 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
 
     setTimeout(() => {
       setIsLoading(false);
-      const newUser: UserAccount = {
+      const newUser = unified.registerNewProfile({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         email: email.trim(),
         organization: organization.trim() || 'Regional Meteorological Centre',
         role: role,
-        status: 'pending',
-        submittedDate: '19 Oct 2026',
-      };
+      });
 
       setCurrentUser(newUser);
-      showToast('Registration submitted. Admin approval is pending.');
+      showToast(`Registration submitted for ${role}. Awaiting administrator approval.`);
       onNavigate('pending-approval');
     }, 450);
   };

@@ -31,11 +31,26 @@ export const TraineeDashboardPage: React.FC<TraineeDashboardPageProps> = ({
   onSelectTab,
   showToast,
 }) => {
-  const { courses, assessments, earnedCertificates } = useTraineeData();
+  const { courses, assessments, earnedCertificates, monthlyProgress, weeklyEngagement, setSelectedCourseId } = useTraineeData();
   const { announcements } = useAdminData();
   const [announcementModalOpen, setAnnouncementModalOpen] = useState(false);
   const [hoveredProgressMonth, setHoveredProgressMonth] = useState<number | null>(5); // Oct default
   const [hoveredStudyDay, setHoveredStudyDay] = useState<number | null>(3); // Thu default
+
+  // Dynamic calculations from live application store
+  const inProgressCourses = courses.filter((c) => c.status === 'Enrolled' || c.status === 'Completed');
+  const overallCompletion = inProgressCourses.length > 0
+    ? Math.round(inProgressCourses.reduce((sum, c) => sum + (c.progress || 0), 0) / inProgressCourses.length)
+    : 53;
+
+  const completedAssessments = assessments.filter((a) => a.score !== undefined);
+  const overallAvgScore = completedAssessments.length > 0
+    ? Math.round(completedAssessments.reduce((sum, a) => sum + (a.score || 0), 0) / completedAssessments.length)
+    : 71;
+
+  const activeCourseCount = courses.filter((c) => c.status === 'Enrolled').length || 3;
+  const dueAssessmentsCount = assessments.filter((a) => a.status === 'Live' || a.status === 'Upcoming').length || 2;
+  const certificatesCount = earnedCertificates.length || 4;
 
   // Shared announcement loop
   const [announcementIndex, setAnnouncementIndex] = useState(0);
@@ -90,6 +105,8 @@ export const TraineeDashboardPage: React.FC<TraineeDashboardPageProps> = ({
           onViewAnnouncement={() => setAnnouncementModalOpen(true)}
           showToast={showToast}
           className="lg:col-span-7"
+          hidePinnedBadge
+          targetRole="trainee"
         />
 
         {/* Right: 4 Metric Cards in a 2x2 Grid (5 cols) matching image_f1e6357e.png */}
@@ -104,14 +121,14 @@ export const TraineeDashboardPage: React.FC<TraineeDashboardPageProps> = ({
             </div>
             <div>
               <span className="text-xl sm:text-2xl font-bold text-[#1c2333] block">
-                53%
+                {overallCompletion}%
               </span>
               <span className="text-[11px] font-semibold text-[#15803d] mt-1 flex items-center gap-1">
                 <span>↗ 4.1% vs last 30 days</span>
               </span>
             </div>
             <div className="w-full bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden">
-              <div className="bg-blue-600 h-full rounded-full" style={{ width: '53%' }} />
+              <div className="bg-blue-600 h-full rounded-full" style={{ width: `${overallCompletion}%` }} />
             </div>
           </div>
 
@@ -125,7 +142,7 @@ export const TraineeDashboardPage: React.FC<TraineeDashboardPageProps> = ({
             </div>
             <div>
               <span className="text-xl sm:text-2xl font-bold text-[#1c2333] block">
-                71%
+                {overallAvgScore}%
               </span>
               <span className="text-[11px] font-semibold text-[#15803d] mt-1 flex items-center gap-1">
                 <span>↗ 2.8% vs last 30 days</span>
@@ -187,7 +204,7 @@ export const TraineeDashboardPage: React.FC<TraineeDashboardPageProps> = ({
           <div>
             <span className="text-xs font-medium text-[#5b6478] block">My courses</span>
             <span className="text-2xl sm:text-3xl font-bold text-[#1c2333] mt-1 block">
-              3
+              {activeCourseCount}
             </span>
             <span className="text-xs text-[#5b6478] mt-0.5 block">in progress</span>
           </div>
@@ -204,7 +221,7 @@ export const TraineeDashboardPage: React.FC<TraineeDashboardPageProps> = ({
           <div>
             <span className="text-xs font-medium text-[#5b6478] block">Assessments due</span>
             <span className="text-2xl sm:text-3xl font-bold text-[#1c2333] mt-1 block">
-              2
+              {dueAssessmentsCount}
             </span>
             <span className="text-xs text-[#5b6478] mt-0.5 block">next: 24 Oct</span>
           </div>
@@ -221,7 +238,7 @@ export const TraineeDashboardPage: React.FC<TraineeDashboardPageProps> = ({
           <div>
             <span className="text-xs font-medium text-[#5b6478] block">Certificates</span>
             <span className="text-2xl sm:text-3xl font-bold text-[#1c2333] mt-1 block">
-              4
+              {certificatesCount}
             </span>
             <span className="text-xs text-[#5b6478] mt-0.5 block">earned</span>
           </div>
@@ -233,329 +250,305 @@ export const TraineeDashboardPage: React.FC<TraineeDashboardPageProps> = ({
 
       {/* Middle Row: Two High-Modern Visual Graphs (Max 2 graphs per requirement) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Graph 1: High Modern Visual Spline Line Chart */}
-        <div className="p-5 sm:p-6 rounded-[14px] bg-white border border-[#e6e9f2] shadow-2xs flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between">
+        {/* Graph 1: High Modern Visual Spline Line Chart rendered dynamically from monthlyProgress */}
+        {(() => {
+          const maxMod = Math.max(...monthlyProgress.map((m) => m.mod), 16);
+          const xStepProgress = monthlyProgress.length > 1 ? 440 / (monthlyProgress.length - 1) : 88;
+          const splinePoints = monthlyProgress.map((pt, idx) => ({
+            cx: Math.round(40 + idx * xStepProgress),
+            cy: Math.round(120 - (pt.mod / maxMod) * 106),
+            m: pt.m,
+            mod: pt.mod,
+            score: pt.score,
+            idx,
+          }));
+
+          let splinePath = splinePoints.length > 0 ? `M ${splinePoints[0].cx},${splinePoints[0].cy}` : 'M 40,110';
+          for (let i = 0; i < splinePoints.length - 1; i++) {
+            const p0 = splinePoints[i];
+            const p1 = splinePoints[i + 1];
+            const cp1x = p0.cx + (p1.cx - p0.cx) / 2;
+            splinePath += ` C ${cp1x},${p0.cy} ${cp1x},${p1.cy} ${p1.cx},${p1.cy}`;
+          }
+          const lastPt = splinePoints[splinePoints.length - 1] || { cx: 480, cy: 14 };
+          const firstPt = splinePoints[0] || { cx: 40, cy: 110 };
+          const areaPath = `${splinePath} L ${lastPt.cx},120 L ${firstPt.cx},120 Z`;
+
+          return (
+            <div className="p-5 sm:p-6 rounded-[14px] bg-white border border-[#e6e9f2] shadow-2xs flex flex-col justify-between">
               <div>
-                <h3 className="text-sm font-bold text-[#1c2333]">
-                  Learning progress & module mastery
-                </h3>
-                <p className="text-xs text-[#5b6478] mt-0.5">
-                  Cumulative modules completed across 2026 cycles
-                </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-bold text-[#1c2333]">
+                      Learning progress & module mastery
+                    </h3>
+                    <p className="text-xs text-[#5b6478] mt-0.5">
+                      Cumulative modules completed across 2026 cycles
+                    </p>
+                  </div>
+                  <span className="text-[11px] font-semibold text-[#15803d] bg-[#e7f7ee] px-2.5 py-1 rounded-full border border-[#15803d]/20">
+                    ↗ +38% velocity
+                  </span>
+                </div>
+
+                {/* Active Hover Month Status Pill */}
+                {hoveredProgressMonth !== null && monthlyProgress[hoveredProgressMonth] && (
+                  <div className="mt-3.5 flex items-center justify-between bg-blue-50/60 border border-blue-100 rounded-xl px-3 py-1.5 text-xs">
+                    <span className="font-semibold text-slate-700">
+                      {monthlyProgress[hoveredProgressMonth].m} 2026
+                    </span>
+                    <span className="font-bold text-[#1f5eff]">
+                      {monthlyProgress[hoveredProgressMonth].mod} Modules Cleared
+                    </span>
+                    <span className="text-emerald-700 font-semibold bg-emerald-100/80 px-2 py-0.5 rounded text-[10.5px]">
+                      Avg Score: {monthlyProgress[hoveredProgressMonth].score}
+                    </span>
+                  </div>
+                )}
               </div>
-              <span className="text-[11px] font-semibold text-[#15803d] bg-[#e7f7ee] px-2.5 py-1 rounded-full border border-[#15803d]/20">
-                ↗ +38% velocity
-              </span>
-            </div>
 
-            {/* Active Hover Month Status Pill */}
-            {hoveredProgressMonth !== null && (
-              <div className="mt-3.5 flex items-center justify-between bg-blue-50/60 border border-blue-100 rounded-xl px-3 py-1.5 text-xs">
-                <span className="font-semibold text-slate-700">
-                  {[
-                    { m: 'May', mod: 2, score: '68%' },
-                    { m: 'Jun', mod: 4, score: '72%' },
-                    { m: 'Jul', mod: 6, score: '74%' },
-                    { m: 'Aug', mod: 9, score: '76%' },
-                    { m: 'Sep', mod: 12, score: '79%' },
-                    { m: 'Oct', mod: 16, score: '84%' },
-                  ][hoveredProgressMonth]?.m} 2026
-                </span>
-                <span className="font-bold text-[#1f5eff]">
-                  {[
-                    { m: 'May', mod: 2, score: '68%' },
-                    { m: 'Jun', mod: 4, score: '72%' },
-                    { m: 'Jul', mod: 6, score: '74%' },
-                    { m: 'Aug', mod: 9, score: '76%' },
-                    { m: 'Sep', mod: 12, score: '79%' },
-                    { m: 'Oct', mod: 16, score: '84%' },
-                  ][hoveredProgressMonth]?.mod} Modules Cleared
-                </span>
-                <span className="text-emerald-700 font-semibold bg-emerald-100/80 px-2 py-0.5 rounded text-[10.5px]">
-                  Avg Score: {[
-                    { m: 'May', mod: 2, score: '68%' },
-                    { m: 'Jun', mod: 4, score: '72%' },
-                    { m: 'Jul', mod: 6, score: '74%' },
-                    { m: 'Aug', mod: 9, score: '76%' },
-                    { m: 'Sep', mod: 12, score: '79%' },
-                    { m: 'Oct', mod: 16, score: '84%' },
-                  ][hoveredProgressMonth]?.score}
-                </span>
-              </div>
-            )}
-          </div>
+              {/* High-Modern Visual Curved Spline SVG */}
+              <div className="mt-4 pt-1">
+                <div className="h-44 w-full relative">
+                  <svg className="w-full h-full" viewBox="0 0 520 140">
+                    <defs>
+                      <linearGradient id="traineeLineGrad" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#3b82f6" />
+                        <stop offset="50%" stopColor="#1f5eff" />
+                        <stop offset="100%" stopColor="#6366f1" />
+                      </linearGradient>
+                      <linearGradient id="traineeAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#1f5eff" stopOpacity="0.22" />
+                        <stop offset="60%" stopColor="#3b82f6" stopOpacity="0.06" />
+                        <stop offset="100%" stopColor="#ffffff" stopOpacity="0.0" />
+                      </linearGradient>
+                      <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="3" result="blur" />
+                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                      </filter>
+                    </defs>
 
-          {/* High-Modern Visual Curved Spline SVG */}
-          <div className="mt-4 pt-1">
-            <div className="h-44 w-full relative">
-              <svg className="w-full h-full" viewBox="0 0 520 140">
-                <defs>
-                  <linearGradient id="traineeLineGrad" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="#3b82f6" />
-                    <stop offset="50%" stopColor="#1f5eff" />
-                    <stop offset="100%" stopColor="#6366f1" />
-                  </linearGradient>
-                  <linearGradient id="traineeAreaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#1f5eff" stopOpacity="0.22" />
-                    <stop offset="60%" stopColor="#3b82f6" stopOpacity="0.06" />
-                    <stop offset="100%" stopColor="#ffffff" stopOpacity="0.0" />
-                  </linearGradient>
-                  <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="3" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                  </filter>
-                </defs>
+                    {/* Horizontal Dashed Guidelines */}
+                    {[0, 4, 8, 12, 16].map((val) => {
+                      const y = 120 - (val / 16) * 100;
+                      return (
+                        <g key={val}>
+                          <line
+                            x1="30"
+                            y1={y}
+                            x2="500"
+                            y2={y}
+                            stroke="#f1f5f9"
+                            strokeDasharray={val === 0 ? '0' : '3 3'}
+                            strokeWidth="1"
+                          />
+                          <text x="24" y={y + 3.5} fill="#94a3b8" fontSize="9" textAnchor="end" className="font-mono">
+                            {val}
+                          </text>
+                        </g>
+                      );
+                    })}
 
-                {/* Horizontal Dashed Guidelines */}
-                {[0, 4, 8, 12, 16].map((val) => {
-                  const y = 120 - (val / 16) * 100;
-                  return (
-                    <g key={val}>
-                      <line
-                        x1="30"
-                        y1={y}
-                        x2="500"
-                        y2={y}
-                        stroke="#f1f5f9"
-                        strokeDasharray={val === 0 ? '0' : '3 3'}
-                        strokeWidth="1"
-                      />
-                      <text x="24" y={y + 3.5} fill="#94a3b8" fontSize="9" textAnchor="end" className="font-mono">
-                        {val}
-                      </text>
-                    </g>
-                  );
-                })}
+                    {/* Spline Area Fill */}
+                    <path
+                      d={areaPath}
+                      fill="url(#traineeAreaGrad)"
+                    />
 
-                {/* Spline Area Fill */}
-                <path
-                  d="M 40,110 C 100,102 140,88 200,80 C 260,72 300,54 360,42 C 410,32 450,22 480,14 L 480,120 L 40,120 Z"
-                  fill="url(#traineeAreaGrad)"
-                />
+                    {/* Main Curved Spline Line */}
+                    <path
+                      d={splinePath}
+                      fill="none"
+                      stroke="url(#traineeLineGrad)"
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                      filter="url(#glow)"
+                    />
 
-                {/* Main Curved Spline Line */}
-                <path
-                  d="M 40,110 C 100,102 140,88 200,80 C 260,72 300,54 360,42 C 410,32 450,22 480,14"
-                  fill="none"
-                  stroke="url(#traineeLineGrad)"
-                  strokeWidth="3.5"
-                  strokeLinecap="round"
-                  filter="url(#glow)"
-                />
+                    {/* Glowing Nodes & Interaction Circles */}
+                    {splinePoints.map((pt) => {
+                      const isHovered = hoveredProgressMonth === pt.idx;
+                      const isLast = pt.idx === splinePoints.length - 1;
+                      return (
+                        <g
+                          key={pt.m}
+                          className="cursor-pointer"
+                          onMouseEnter={() => setHoveredProgressMonth(pt.idx)}
+                        >
+                          {/* Pulse on active last node */}
+                          {isLast && (
+                            <circle cx={pt.cx} cy={pt.cy} r="10" fill="#1f5eff" fillOpacity="0.2" className="animate-ping" />
+                          )}
+                          <circle
+                            cx={pt.cx}
+                            cy={pt.cy}
+                            r={isHovered ? 6 : 4}
+                            fill="#ffffff"
+                            stroke="#1f5eff"
+                            strokeWidth={isHovered ? 3.5 : 2.5}
+                            className="transition-all duration-150"
+                          />
+                        </g>
+                      );
+                    })}
+                  </svg>
+                </div>
 
-                {/* Glowing Nodes & Interaction Circles */}
-                {[
-                  { cx: 40, cy: 110, m: 'May', mod: 2, idx: 0 },
-                  { cx: 128, cy: 98, m: 'Jun', mod: 4, idx: 1 },
-                  { cx: 216, cy: 78, m: 'Jul', mod: 6, idx: 2 },
-                  { cx: 304, cy: 62, m: 'Aug', mod: 9, idx: 3 },
-                  { cx: 392, cy: 40, m: 'Sep', mod: 12, idx: 4 },
-                  { cx: 480, cy: 14, m: 'Oct', mod: 16, idx: 5 },
-                ].map((pt) => {
-                  const isHovered = hoveredProgressMonth === pt.idx;
-                  return (
-                    <g
-                      key={pt.m}
-                      className="cursor-pointer"
-                      onMouseEnter={() => setHoveredProgressMonth(pt.idx)}
+                {/* X-Axis Months */}
+                <div className="flex items-center justify-between text-[11px] font-medium text-[#5b6478] mt-2 px-3">
+                  {monthlyProgress.map((item, idx) => (
+                    <button
+                      key={item.m}
+                      type="button"
+                      onClick={() => setHoveredProgressMonth(idx)}
+                      className={`hover:text-[#1f5eff] transition-colors cursor-pointer ${
+                        hoveredProgressMonth === idx ? 'text-[#1f5eff] font-bold' : ''
+                      }`}
                     >
-                      {/* Pulse on active last node */}
-                      {pt.idx === 5 && (
-                        <circle cx={pt.cx} cy={pt.cy} r="10" fill="#1f5eff" fillOpacity="0.2" className="animate-ping" />
-                      )}
-                      <circle
-                        cx={pt.cx}
-                        cy={pt.cy}
-                        r={isHovered ? 6 : 4}
-                        fill="#ffffff"
-                        stroke="#1f5eff"
-                        strokeWidth={isHovered ? 3.5 : 2.5}
-                        className="transition-all duration-150"
-                      />
-                    </g>
-                  );
-                })}
-              </svg>
+                      {item.m}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-
-            {/* X-Axis Months */}
-            <div className="flex items-center justify-between text-[11px] font-medium text-[#5b6478] mt-2 px-3">
-              {['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'].map((month, idx) => (
-                <button
-                  key={month}
-                  type="button"
-                  onClick={() => setHoveredProgressMonth(idx)}
-                  className={`hover:text-[#1f5eff] transition-colors cursor-pointer ${
-                    hoveredProgressMonth === idx ? 'text-[#1f5eff] font-bold' : ''
-                  }`}
-                >
-                  {month}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+          );
+        })()}
 
         {/* Graph 2: Weekly Study Hours & Learning Velocity (Requested second graph) */}
-        <div className="p-5 sm:p-6 rounded-[14px] bg-white border border-[#e6e9f2] shadow-2xs flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between">
+        {(() => {
+          const totalWeeklyHours = weeklyEngagement.reduce((sum, item) => sum + item.h, 0).toFixed(1);
+          const maxStudyHours = Math.max(...weeklyEngagement.map((item) => item.h), 3.2);
+          const weeklyPct = Math.round((Number(totalWeeklyHours) / 12) * 100);
+          const targetY = Math.round(120 - (2.0 / maxStudyHours) * 105);
+
+          return (
+            <div className="p-5 sm:p-6 rounded-[14px] bg-white border border-[#e6e9f2] shadow-2xs flex flex-col justify-between">
               <div>
-                <h3 className="text-sm font-bold text-[#1c2333]">
-                  Weekly study hours & velocity
-                </h3>
-                <p className="text-xs text-[#5b6478] mt-0.5">
-                  Daily active learning engagement (target: 2.0 hrs/day)
-                </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-bold text-[#1c2333]">
+                      Weekly study hours & velocity
+                    </h3>
+                    <p className="text-xs text-[#5b6478] mt-0.5">
+                      Daily active learning engagement (target: 2.0 hrs/day)
+                    </p>
+                  </div>
+                  <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200">
+                    {totalWeeklyHours} hrs total ({weeklyPct}%)
+                  </span>
+                </div>
+
+                {/* Hover Day Detail Info */}
+                {hoveredStudyDay !== null && weeklyEngagement[hoveredStudyDay] && (
+                  <div className="mt-3.5 flex items-center justify-between bg-emerald-50/70 border border-emerald-100 rounded-xl px-3 py-1.5 text-xs">
+                    <span className="font-semibold text-slate-700">
+                      {weeklyEngagement[hoveredStudyDay].d}:
+                    </span>
+                    <span className="font-bold text-emerald-700">
+                      {weeklyEngagement[hoveredStudyDay].h} Hours
+                    </span>
+                    <span className="text-slate-500 text-[11px] truncate max-w-[170px]">
+                      {weeklyEngagement[hoveredStudyDay].topic}
+                    </span>
+                  </div>
+                )}
               </div>
-              <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200">
-                14.2 hrs total (118%)
-              </span>
-            </div>
 
-            {/* Hover Day Detail Info */}
-            {hoveredStudyDay !== null && (
-              <div className="mt-3.5 flex items-center justify-between bg-emerald-50/70 border border-emerald-100 rounded-xl px-3 py-1.5 text-xs">
-                <span className="font-semibold text-slate-700">
-                  {[
-                    { d: 'Mon', h: 1.8, topic: 'Atmospheric Physics Video' },
-                    { d: 'Tue', h: 2.4, topic: 'Cyclone Track Simulator' },
-                    { d: 'Wed', h: 2.8, topic: 'Dvorak Technique Practice' },
-                    { d: 'Thu', h: 2.1, topic: 'Doppler Radar Assessment' },
-                    { d: 'Fri', h: 1.9, topic: 'Monsoon Synoptic Case Study' },
-                    { d: 'Sat', h: 2.2, topic: 'Satellite Data Analysis' },
-                    { d: 'Sun', h: 1.0, topic: 'Weekly Practice Quiz' },
-                  ][hoveredStudyDay]?.d}:
-                </span>
-                <span className="font-bold text-emerald-700">
-                  {[
-                    { d: 'Mon', h: 1.8, topic: 'Atmospheric Physics Video' },
-                    { d: 'Tue', h: 2.4, topic: 'Cyclone Track Simulator' },
-                    { d: 'Wed', h: 2.8, topic: 'Dvorak Technique Practice' },
-                    { d: 'Thu', h: 2.1, topic: 'Doppler Radar Assessment' },
-                    { d: 'Fri', h: 1.9, topic: 'Monsoon Synoptic Case Study' },
-                    { d: 'Sat', h: 2.2, topic: 'Satellite Data Analysis' },
-                    { d: 'Sun', h: 1.0, topic: 'Weekly Practice Quiz' },
-                  ][hoveredStudyDay]?.h} Hours
-                </span>
-                <span className="text-slate-500 text-[11px] truncate max-w-[170px]">
-                  {[
-                    { d: 'Mon', h: 1.8, topic: 'Atmospheric Physics Video' },
-                    { d: 'Tue', h: 2.4, topic: 'Cyclone Track Simulator' },
-                    { d: 'Wed', h: 2.8, topic: 'Dvorak Technique Practice' },
-                    { d: 'Thu', h: 2.1, topic: 'Doppler Radar Assessment' },
-                    { d: 'Fri', h: 1.9, topic: 'Monsoon Synoptic Case Study' },
-                    { d: 'Sat', h: 2.2, topic: 'Satellite Data Analysis' },
-                    { d: 'Sun', h: 1.0, topic: 'Weekly Practice Quiz' },
-                  ][hoveredStudyDay]?.topic}
-                </span>
+              {/* SVG Bar Chart with Target Line */}
+              <div className="mt-4 pt-1">
+                <div className="h-44 w-full relative">
+                  <svg className="w-full h-full select-none" viewBox="0 0 520 140">
+                    <defs>
+                      <linearGradient id="studyBarGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#10b981" />
+                        <stop offset="100%" stopColor="#059669" />
+                      </linearGradient>
+                      <linearGradient id="studyBarGradActive" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#1f5eff" />
+                        <stop offset="100%" stopColor="#1d4ed8" />
+                      </linearGradient>
+                    </defs>
+
+                    {/* Target dashed line at 2.0 hrs */}
+                    <line
+                      x1="30"
+                      y1={targetY}
+                      x2="500"
+                      y2={targetY}
+                      stroke="#f59e0b"
+                      strokeDasharray="4 4"
+                      strokeWidth="1.5"
+                    />
+                    <text x="502" y={targetY + 3} fill="#d97706" fontSize="9" fontWeight="600" textAnchor="start">
+                      2h Target
+                    </text>
+
+                    {/* Daily Bar Capsules rendered dynamically from weeklyEngagement */}
+                    {weeklyEngagement.map((item, idx) => {
+                      const barX = 45 + idx * 66;
+                      const barH = Math.max(8, (item.h / maxStudyHours) * 105);
+                      const barY = 120 - barH;
+                      const isHovered = hoveredStudyDay === idx;
+
+                      return (
+                        <g
+                          key={item.d}
+                          className="cursor-pointer"
+                          onMouseEnter={() => setHoveredStudyDay(idx)}
+                        >
+                          {/* Hover column backdrop */}
+                          {isHovered && (
+                            <rect x={barX - 6} y="15" width="38" height="110" rx="8" fill="#f8fafc" />
+                          )}
+
+                          {/* Bar Pillar */}
+                          <rect
+                            x={barX}
+                            y={barY}
+                            width="26"
+                            height={barH}
+                            rx="6"
+                            fill={isHovered ? 'url(#studyBarGradActive)' : 'url(#studyBarGrad)'}
+                            className="transition-all duration-200"
+                          />
+
+                          {/* Top value */}
+                          <text
+                            x={barX + 13}
+                            y={barY - 5}
+                            fill={isHovered ? '#1e293b' : '#64748b'}
+                            fontSize="9.5"
+                            fontWeight="600"
+                            textAnchor="middle"
+                          >
+                            {item.h}h
+                          </text>
+
+                          {/* Day Label */}
+                          <text
+                            x={barX + 13}
+                            y="134"
+                            fill={isHovered ? '#1f5eff' : '#64748b'}
+                            fontWeight={isHovered ? '700' : '500'}
+                            fontSize="10"
+                            textAnchor="middle"
+                          >
+                            {item.d}
+                          </text>
+                        </g>
+                      );
+                    })}
+                  </svg>
+                </div>
+
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-[#5b6478]">
+                  <span>Streak: <strong className="text-slate-800">9 active days</strong></span>
+                  <span className="text-emerald-600 font-semibold">Exceeding weekly benchmark by 1.7 hrs</span>
+                </div>
               </div>
-            )}
-          </div>
-
-          {/* SVG Bar Chart with Target Line */}
-          <div className="mt-4 pt-1">
-            <div className="h-44 w-full relative">
-              <svg className="w-full h-full select-none" viewBox="0 0 520 140">
-                <defs>
-                  <linearGradient id="studyBarGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#10b981" />
-                    <stop offset="100%" stopColor="#059669" />
-                  </linearGradient>
-                  <linearGradient id="studyBarGradActive" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#1f5eff" />
-                    <stop offset="100%" stopColor="#1d4ed8" />
-                  </linearGradient>
-                </defs>
-
-                {/* Target dashed line at 2.0 hrs */}
-                <line
-                  x1="30"
-                  y1="56"
-                  x2="500"
-                  y2="56"
-                  stroke="#f59e0b"
-                  strokeDasharray="4 4"
-                  strokeWidth="1.5"
-                />
-                <text x="502" y="59" fill="#d97706" fontSize="9" fontWeight="600" textAnchor="start">
-                  2h Target
-                </text>
-
-                {/* Daily Bar Capsules */}
-                {[
-                  { d: 'Mon', h: 1.8, idx: 0 },
-                  { d: 'Tue', h: 2.4, idx: 1 },
-                  { d: 'Wed', h: 2.8, idx: 2 },
-                  { d: 'Thu', h: 2.1, idx: 3 },
-                  { d: 'Fri', h: 1.9, idx: 4 },
-                  { d: 'Sat', h: 2.2, idx: 5 },
-                  { d: 'Sun', h: 1.0, idx: 6 },
-                ].map((item) => {
-                  const barX = 45 + item.idx * 66;
-                  const barH = (item.h / 3.2) * 105;
-                  const barY = 120 - barH;
-                  const isHovered = hoveredStudyDay === item.idx;
-
-                  return (
-                    <g
-                      key={item.d}
-                      className="cursor-pointer"
-                      onMouseEnter={() => setHoveredStudyDay(item.idx)}
-                    >
-                      {/* Hover column backdrop */}
-                      {isHovered && (
-                        <rect x={barX - 6} y="15" width="38" height="110" rx="8" fill="#f8fafc" />
-                      )}
-
-                      {/* Bar Pillar */}
-                      <rect
-                        x={barX}
-                        y={barY}
-                        width="26"
-                        height={barH}
-                        rx="6"
-                        fill={isHovered ? 'url(#studyBarGradActive)' : 'url(#studyBarGrad)'}
-                        className="transition-all duration-200"
-                      />
-
-                      {/* Top value */}
-                      <text
-                        x={barX + 13}
-                        y={barY - 5}
-                        fill={isHovered ? '#1e293b' : '#64748b'}
-                        fontSize="9.5"
-                        fontWeight="600"
-                        textAnchor="middle"
-                      >
-                        {item.h}h
-                      </text>
-
-                      {/* Day Label */}
-                      <text
-                        x={barX + 13}
-                        y="134"
-                        fill={isHovered ? '#1f5eff' : '#64748b'}
-                        fontWeight={isHovered ? '700' : '500'}
-                        fontSize="10"
-                        textAnchor="middle"
-                      >
-                        {item.d}
-                      </text>
-                    </g>
-                  );
-                })}
-              </svg>
             </div>
-
-            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-[#5b6478]">
-              <span>Streak: <strong className="text-slate-800">9 active days</strong></span>
-              <span className="text-emerald-600 font-semibold">Exceeding weekly benchmark by 1.7 hrs</span>
-            </div>
-          </div>
-        </div>
+          );
+        })()}
       </div>
 
       {/* Recommended for You + Mentor Recommendation Showcase */}
@@ -724,107 +717,54 @@ export const TraineeDashboardPage: React.FC<TraineeDashboardPageProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {/* Cyclone Track Analysis */}
-              <tr
-                onClick={() => onSelectTab('course-player')}
-                className="hover:bg-slate-50/70 transition-colors cursor-pointer group"
-              >
-                <td className="py-3.5 pr-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 font-bold text-[11px] flex items-center justify-center shrink-0 border border-amber-200">
-                      CT
-                    </div>
-                    <div>
-                      <span className="font-bold text-[#1c2333] group-hover:text-blue-600 block">
-                        Cyclone Track Analysis
-                      </span>
-                      <span className="text-[11px] text-[#5b6478]">Meteorology</span>
-                    </div>
-                  </div>
-                </td>
-                <td className="py-3.5 px-4 text-[#1c2333] font-medium">
-                  M3 · Track forecasting
-                </td>
-                <td className="py-3.5 px-4">
-                  <div className="flex items-center gap-2.5 w-32">
-                    <div className="flex-1 bg-slate-100 h-2 rounded-full overflow-hidden">
-                      <div className="bg-[#1f5eff] h-2 rounded-full" style={{ width: '38%' }} />
-                    </div>
-                    <span className="text-[11px] text-[#5b6478] font-semibold w-7">
-                      38%
-                    </span>
-                  </div>
-                </td>
-                <td className="py-3.5 pl-4 text-[#1c2333] font-medium">30 Nov</td>
-              </tr>
+              {courses.slice(0, 3).map((c) => {
+                const initials = c.title
+                  .split(' ')
+                  .map((w) => w[0])
+                  .filter(Boolean)
+                  .slice(0, 2)
+                  .join('')
+                  .toUpperCase() || 'CC';
 
-              {/* Climate Data Handling */}
-              <tr
-                onClick={() => onSelectTab('course-player')}
-                className="hover:bg-slate-50/70 transition-colors cursor-pointer group"
-              >
-                <td className="py-3.5 pr-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 font-bold text-[11px] flex items-center justify-center shrink-0 border border-blue-200">
-                      CD
-                    </div>
-                    <div>
-                      <span className="font-bold text-[#1c2333] group-hover:text-blue-600 block">
-                        Climate Data Handling
-                      </span>
-                      <span className="text-[11px] text-[#5b6478]">Climatology</span>
-                    </div>
-                  </div>
-                </td>
-                <td className="py-3.5 px-4 text-[#1c2333] font-medium">
-                  M5 · Final quiz
-                </td>
-                <td className="py-3.5 px-4">
-                  <div className="flex items-center gap-2.5 w-32">
-                    <div className="flex-1 bg-slate-100 h-2 rounded-full overflow-hidden">
-                      <div className="bg-[#1f5eff] h-2 rounded-full" style={{ width: '76%' }} />
-                    </div>
-                    <span className="text-[11px] text-[#5b6478] font-semibold w-7">
-                      76%
-                    </span>
-                  </div>
-                </td>
-                <td className="py-3.5 pl-4 text-[#1c2333] font-medium">05 Nov</td>
-              </tr>
-
-              {/* Radar Data Quality */}
-              <tr
-                onClick={() => onSelectTab('course-player')}
-                className="hover:bg-slate-50/70 transition-colors cursor-pointer group"
-              >
-                <td className="py-3.5 pr-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 font-bold text-[11px] flex items-center justify-center shrink-0 border border-amber-200">
-                      RD
-                    </div>
-                    <div>
-                      <span className="font-bold text-[#1c2333] group-hover:text-blue-600 block">
-                        Radar Data Quality
-                      </span>
-                      <span className="text-[11px] text-[#5b6478]">Instrumentation</span>
-                    </div>
-                  </div>
-                </td>
-                <td className="py-3.5 px-4 text-[#1c2333] font-medium">
-                  M2 · QC methods
-                </td>
-                <td className="py-3.5 px-4">
-                  <div className="flex items-center gap-2.5 w-32">
-                    <div className="flex-1 bg-slate-100 h-2 rounded-full overflow-hidden">
-                      <div className="bg-[#1f5eff] h-2 rounded-full" style={{ width: '44%' }} />
-                    </div>
-                    <span className="text-[11px] text-[#5b6478] font-semibold w-7">
-                      44%
-                    </span>
-                  </div>
-                </td>
-                <td className="py-3.5 pl-4 text-[#1c2333] font-medium">20 Nov</td>
-              </tr>
+                return (
+                  <tr
+                    key={c.id}
+                    onClick={() => {
+                      setSelectedCourseId(c.id);
+                      onSelectTab('course-player');
+                    }}
+                    className="hover:bg-slate-50/70 transition-colors cursor-pointer group"
+                  >
+                    <td className="py-3.5 pr-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 font-bold text-[11px] flex items-center justify-center shrink-0 border border-blue-200">
+                          {initials}
+                        </div>
+                        <div>
+                          <span className="font-bold text-[#1c2333] group-hover:text-blue-600 block">
+                            {c.title}
+                          </span>
+                          <span className="text-[11px] text-[#5b6478]">{c.subject}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4 text-[#1c2333] font-medium">
+                      {c.nextModule || 'M2 · Practice exercises'}
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <div className="flex items-center gap-2.5 w-32">
+                        <div className="flex-1 bg-slate-100 h-2 rounded-full overflow-hidden">
+                          <div className="bg-[#1f5eff] h-2 rounded-full" style={{ width: `${c.progress}%` }} />
+                        </div>
+                        <span className="text-[11px] text-[#5b6478] font-semibold w-7">
+                          {c.progress}%
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-3.5 pl-4 text-[#1c2333] font-medium">{c.deadline || '30 Nov'}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

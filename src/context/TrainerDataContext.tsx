@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
+import { useUnifiedData, TrainerMonthlyTrend } from './UnifiedDataContext';
 import {
   TrainerCourse,
   TrainerAssessment,
@@ -35,6 +36,9 @@ export interface ChatMessage {
 }
 
 interface TrainerDataContextType {
+  // Real Application Data for Graphs
+  monthlyTrends: TrainerMonthlyTrend[];
+
   // Courses
   courses: TrainerCourse[];
   selectedCourseId: string | null;
@@ -871,13 +875,12 @@ const initialChatMessages: ChatMessage[] = [
 const TrainerDataContext = createContext<TrainerDataContextType | undefined>(undefined);
 
 export const TrainerDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [courses, setCourses] = useState<TrainerCourse[]>(initialCourses);
+  const unified = useUnifiedData();
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>('course-1');
 
   const [assessments, setAssessments] = useState<TrainerAssessment[]>(initialAssessments);
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string | null>('asmt-1');
 
-  const [trainees, setTrainees] = useState<TrainerTrainee[]>(initialTrainees);
   const [selectedTraineeId, setSelectedTraineeId] = useState<string | null>('tr-1');
 
   const [materials, setMaterials] = useState<TrainerMaterial[]>(initialMaterials);
@@ -888,38 +891,40 @@ export const TrainerDataProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(initialChatMessages);
 
+  // Sync courses directly with unified shared courses
+  const courses: TrainerCourse[] = unified.sharedCourses;
+
+  // Trainees roster
+  const trainees: TrainerTrainee[] = initialTrainees;
+
   const addCourse = (courseData: Omit<TrainerCourse, 'id' | 'completionRate'>) => {
-    const id = `course-${Date.now()}`;
-    const newCourse: TrainerCourse = {
-      ...courseData,
-      id,
-      completionRate: courseData.enrolled > 0 ? Math.round((courseData.completed / courseData.enrolled) * 100) : 0,
-    };
-    setCourses((prev) => [newCourse, ...prev]);
+    unified.publishCourseGlobally({
+      title: courseData.title,
+      category: courseData.category,
+      level: courseData.level,
+      duration: courseData.duration,
+      description: courseData.description,
+      modulesCount: courseData.modulesCount,
+      modules: courseData.modules || [],
+    });
   };
 
   const updateCourse = (id: string, updates: Partial<TrainerCourse>) => {
-    setCourses((prev) => prev.map((c) => (c.id === id ? { ...c, ...updates } : c)));
+    unified.updateSharedCourse(id, updates);
   };
 
   const addModuleToCourse = (courseId: string, moduleData: Omit<TrainerCourseModule, 'id'>) => {
+    const course = unified.sharedCourses.find((c) => c.id === courseId);
+    if (!course) return;
     const newModule: TrainerCourseModule = {
       ...moduleData,
       id: `mod-${Date.now()}`,
     };
-    setCourses((prev) =>
-      prev.map((c) => {
-        if (c.id === courseId) {
-          const updatedModules = [...c.modules, newModule];
-          return {
-            ...c,
-            modulesCount: updatedModules.length,
-            modules: updatedModules,
-          };
-        }
-        return c;
-      })
-    );
+    const updatedModules = [...course.modules, newModule];
+    unified.updateSharedCourse(courseId, {
+      modulesCount: updatedModules.length,
+      modules: updatedModules,
+    });
   };
 
   const addAssessment = (asmtData: Omit<TrainerAssessment, 'id' | 'submissions' | 'submissionRate' | 'passRate' | 'avgScore' | 'avgTimeMins'>) => {
@@ -1060,6 +1065,7 @@ export const TrainerDataProvider: React.FC<{ children: React.ReactNode }> = ({ c
   return (
     <TrainerDataContext.Provider
       value={{
+        monthlyTrends: unified.trainerMonthlyTrends,
         courses,
         selectedCourseId,
         setSelectedCourseId,

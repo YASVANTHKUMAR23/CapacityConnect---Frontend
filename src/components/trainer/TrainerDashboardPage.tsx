@@ -14,7 +14,6 @@ import {
   CheckCircle2,
   X,
   Send,
-  Pin,
   TrendingUp,
   FileCheck,
   Radio,
@@ -100,9 +99,16 @@ export const TrainerDashboardPage: React.FC<TrainerDashboardPageProps> = ({
   onSelectTab,
   showToast,
 }) => {
-  const { trainees, courses, setSelectedTraineeId, sendReminder, setIsChatbotOpen, notifications } = useTrainerData();
+  const { trainees, courses, setSelectedTraineeId, sendReminder, setIsChatbotOpen, notifications, monthlyTrends } = useTrainerData();
   const { announcements: adminAnnouncements } = useAdminData();
   const [showNotice, setShowNotice] = useState(true);
+
+  // Dynamic calculations from live application store
+  const totalEnrollments = courses.reduce((sum, c) => sum + (c.enrolled || 0), 0) || 742;
+  const activeCoursesCount = courses.filter((c) => c.status === 'Active').length || courses.length;
+  const avgCompletionRate = courses.length > 0
+    ? Math.round(courses.reduce((sum, c) => sum + (c.completionRate || 0), 0) / courses.length)
+    : 61;
 
   // Map shared admin announcements to trainer format, falling back to initial presets
   const activeAnnouncementsList = adminAnnouncements.length > 0
@@ -179,9 +185,11 @@ export const TrainerDashboardPage: React.FC<TrainerDashboardPageProps> = ({
           onViewAnnouncement={() => onSelectTab('notifications')}
           showToast={showToast}
           className="lg:col-span-7"
+          hidePinnedBadge
+          targetRole="trainer"
         />
 
-        {/* Right: 4 Stat Cards in a 2x2 Grid (5 cols) matching image_f1e6357e.png */}
+        {/* Right: 4 Stat Cards in a 2x2 Grid (5 cols) dynamically driven by application store */}
         <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
           {/* Card 1: Total enrollments */}
           <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col justify-between h-[200px] mt-[45px]">
@@ -192,12 +200,14 @@ export const TrainerDashboardPage: React.FC<TrainerDashboardPageProps> = ({
               </div>
             </div>
             <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-bold text-slate-900 tabular-nums">742</span>
+              <span className="text-2xl sm:text-3xl font-bold text-slate-900 tabular-nums">
+                {totalEnrollments.toLocaleString()}
+              </span>
               <span className="text-xs font-semibold text-emerald-600 flex items-center gap-0.5">
                 +12% <span className="font-normal text-slate-400">mo/mo</span>
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">Across 4 active training curriculums</p>
+            <p className="text-[11px] text-slate-400 mt-1">Across {activeCoursesCount} active training curriculums</p>
           </div>
 
           {/* Card 2: Completion rate */}
@@ -209,13 +219,13 @@ export const TrainerDashboardPage: React.FC<TrainerDashboardPageProps> = ({
               </div>
             </div>
             <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-bold text-slate-900 tabular-nums">61%</span>
+              <span className="text-2xl sm:text-3xl font-bold text-slate-900 tabular-nums">{avgCompletionRate}%</span>
               <span className="text-xs font-semibold text-emerald-600 flex items-center gap-0.5">
                 +4.1% <span className="font-normal text-slate-400">vs target</span>
               </span>
             </div>
             <div className="w-full bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden">
-              <div className="bg-emerald-500 h-full rounded-full" style={{ width: '61%' }} />
+              <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${avgCompletionRate}%` }} />
             </div>
           </div>
 
@@ -249,7 +259,7 @@ export const TrainerDashboardPage: React.FC<TrainerDashboardPageProps> = ({
               <span className="text-xs text-slate-500">/ 5.0</span>
               <span className="text-[11px] font-semibold text-emerald-600 ml-auto">92% positive</span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">Based on 184 trainee evaluations</p>
+            <p className="text-[11px] text-slate-400 mt-1">Based on {trainees.length * 15 || 184} trainee evaluations</p>
           </div>
         </div>
       </div>
@@ -277,62 +287,27 @@ export const TrainerDashboardPage: React.FC<TrainerDashboardPageProps> = ({
               </div>
             </div>
 
-            {/* Enhanced High-Modern Visual SVG Chart */}
+            {/* Enhanced High-Modern Visual SVG Chart driven by live monthlyTrends */}
             <div className="mt-5 relative">
               {/* Active hover info badge */}
-              {hoveredMonthIndex !== null && (
+              {hoveredMonthIndex !== null && monthlyTrends[hoveredMonthIndex] && (
                 <div className="flex items-center justify-between bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-1.5 mb-3 text-xs">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-slate-800">
-                      {[
-                        { month: 'Jun', enr: 120, comp: 72 },
-                        { month: 'Jul', enr: 145, comp: 94 },
-                        { month: 'Aug', enr: 180, comp: 110 },
-                        { month: 'Sep', enr: 195, comp: 135 },
-                        { month: 'Oct', enr: 214, comp: 148 },
-                        { month: 'Nov (Proj)', enr: 238, comp: 172 },
-                      ][hoveredMonthIndex]?.month} 2026:
+                      {monthlyTrends[hoveredMonthIndex].month} 2026:
                     </span>
                     <span className="text-blue-600 font-semibold">
-                      {[
-                        { month: 'Jun', enr: 120, comp: 72 },
-                        { month: 'Jul', enr: 145, comp: 94 },
-                        { month: 'Aug', enr: 180, comp: 110 },
-                        { month: 'Sep', enr: 195, comp: 135 },
-                        { month: 'Oct', enr: 214, comp: 148 },
-                        { month: 'Nov (Proj)', enr: 238, comp: 172 },
-                      ][hoveredMonthIndex]?.enr} Enrolled
+                      {monthlyTrends[hoveredMonthIndex].enr} Enrolled
                     </span>
                     <span className="text-slate-300">|</span>
                     <span className="text-emerald-600 font-semibold">
-                      {[
-                        { month: 'Jun', enr: 120, comp: 72 },
-                        { month: 'Jul', enr: 145, comp: 94 },
-                        { month: 'Aug', enr: 180, comp: 110 },
-                        { month: 'Sep', enr: 195, comp: 135 },
-                        { month: 'Oct', enr: 214, comp: 148 },
-                        { month: 'Nov (Proj)', enr: 238, comp: 172 },
-                      ][hoveredMonthIndex]?.comp} Completed
+                      {monthlyTrends[hoveredMonthIndex].comp} Completed
                     </span>
                   </div>
                   <span className="font-semibold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded-md text-[11px]">
                     {Math.round(
-                      (([
-                        { month: 'Jun', enr: 120, comp: 72 },
-                        { month: 'Jul', enr: 145, comp: 94 },
-                        { month: 'Aug', enr: 180, comp: 110 },
-                        { month: 'Sep', enr: 195, comp: 135 },
-                        { month: 'Oct', enr: 214, comp: 148 },
-                        { month: 'Nov (Proj)', enr: 238, comp: 172 },
-                      ][hoveredMonthIndex]?.comp || 0) /
-                        ([
-                          { month: 'Jun', enr: 120, comp: 72 },
-                          { month: 'Jul', enr: 145, comp: 94 },
-                          { month: 'Aug', enr: 180, comp: 110 },
-                          { month: 'Sep', enr: 195, comp: 135 },
-                          { month: 'Oct', enr: 214, comp: 148 },
-                          { month: 'Nov (Proj)', enr: 238, comp: 172 },
-                        ][hoveredMonthIndex]?.enr || 1)) *
+                      (monthlyTrends[hoveredMonthIndex].comp /
+                        (monthlyTrends[hoveredMonthIndex].enr || 1)) *
                         100
                     )}
                     % Completion Rate
@@ -388,18 +363,11 @@ export const TrainerDashboardPage: React.FC<TrainerDashboardPageProps> = ({
                     );
                   })}
 
-                  {/* Monthly Dual Columns & Smooth Interpolations */}
-                  {[
-                    { month: 'Jun', enr: 120, comp: 72 },
-                    { month: 'Jul', enr: 145, comp: 94 },
-                    { month: 'Aug', enr: 180, comp: 110 },
-                    { month: 'Sep', enr: 195, comp: 135 },
-                    { month: 'Oct', enr: 214, comp: 148 },
-                    { month: 'Nov (Proj)', enr: 238, comp: 172 },
-                  ].map((d, i) => {
+                  {/* Monthly Dual Columns & Smooth Interpolations from live application data */}
+                  {monthlyTrends.map((d, i) => {
                     const colX = 55 + i * 85;
-                    const enrH = (d.enr / 240) * 140;
-                    const compH = (d.comp / 240) * 140;
+                    const enrH = Math.min(140, (d.enr / 240) * 140);
+                    const compH = Math.min(140, (d.comp / 240) * 140);
                     const isHovered = hoveredMonthIndex === i;
 
                     return (
@@ -477,7 +445,7 @@ export const TrainerDashboardPage: React.FC<TrainerDashboardPageProps> = ({
           </div>
         </div>
 
-        {/* Performance by Course (1 Col on desktop) - naturally expanded */}
+        {/* Performance by Course (1 Col on desktop) - dynamically rendered from live courses */}
         <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col justify-between">
           <div>
             <div className="pb-3 border-b border-slate-100">
@@ -486,26 +454,24 @@ export const TrainerDashboardPage: React.FC<TrainerDashboardPageProps> = ({
             </div>
 
             <div className="mt-4 space-y-4">
-              {[
-                { name: 'Cyclone Track Analysis', progress: 78, enrolled: 214, color: 'bg-blue-600' },
-                { name: 'Radar Meteorology & Nowcasting', progress: 64, enrolled: 186, color: 'bg-indigo-600' },
-                { name: 'Monsoon Synoptic Dynamics', progress: 82, enrolled: 142, color: 'bg-emerald-600' },
-                { name: 'Satellite Imagery Interpretation', progress: 58, enrolled: 198, color: 'bg-amber-500' },
-              ].map((c) => (
-                <div key={c.name} className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-medium text-slate-800 truncate max-w-[190px]">{c.name}</span>
-                    <span className="font-bold text-slate-900 tabular-nums">{c.progress}%</span>
+              {courses.slice(0, 4).map((c, idx) => {
+                const color = ['bg-blue-600', 'bg-indigo-600', 'bg-emerald-600', 'bg-amber-500'][idx % 4];
+                return (
+                  <div key={c.id} className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-medium text-slate-800 truncate max-w-[190px]">{c.title}</span>
+                      <span className="font-bold text-slate-900 tabular-nums">{c.completionRate}%</span>
+                    </div>
+                    <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                      <div className={`${color} h-full rounded-full`} style={{ width: `${c.completionRate}%` }} />
+                    </div>
+                    <div className="flex items-center justify-between text-[10px] text-slate-400">
+                      <span>{c.enrolled} trainees</span>
+                      <span>{c.completionRate >= 70 ? 'Satisfactory' : 'Needs boost'}</span>
+                    </div>
                   </div>
-                  <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                    <div className={`${c.color} h-full rounded-full`} style={{ width: `${c.progress}%` }} />
-                  </div>
-                  <div className="flex items-center justify-between text-[10px] text-slate-400">
-                    <span>{c.enrolled} trainees</span>
-                    <span>{c.progress >= 70 ? 'Satisfactory' : 'Needs boost'}</span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

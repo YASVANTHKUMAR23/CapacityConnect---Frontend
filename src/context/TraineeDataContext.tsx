@@ -10,6 +10,7 @@ import {
   TraineeNotificationItem,
   TraineeProfileData,
 } from '../types';
+import { useUnifiedData, TraineeMonthlyProgressItem, TraineeWeeklyEngagementItem } from './UnifiedDataContext';
 
 export interface ChatMessage {
   id: string;
@@ -52,11 +53,17 @@ interface TraineeDataContextType {
   savedCourseIds: string[];
   toggleSaveCourse: (courseId: string) => void;
   isCourseSaved: (courseId: string) => boolean;
+
+  // Real Application Data for Graphs
+  monthlyProgress: TraineeMonthlyProgressItem[];
+  weeklyEngagement: TraineeWeeklyEngagementItem[];
+  recordStudyHour: (day: string, hours: number, topic: string) => void;
 }
 
 const TraineeDataContext = createContext<TraineeDataContextType | undefined>(undefined);
 
 export const TraineeDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const unified = useUnifiedData();
   const [activeLanguage, setActiveLanguage] = useState<'English' | 'Hindi'>('English');
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
 
@@ -249,6 +256,7 @@ export const TraineeDataProvider: React.FC<{ children: React.ReactNode }> = ({ c
           : c
       )
     );
+    unified.enrollInCourse(courseId);
   };
 
   const updateCourseProgress = (courseId: string, progress: number, nextMod?: string) => {
@@ -264,7 +272,37 @@ export const TraineeDataProvider: React.FC<{ children: React.ReactNode }> = ({ c
           : c
       )
     );
+    unified.updateCourseProgress(courseId, progress);
   };
+
+  // Keep courses in sync with unified.sharedCourses when trainer or admin creates courses
+  React.useEffect(() => {
+    setCourses((prev) => {
+      const existingIds = new Set(prev.map((c) => c.id));
+      const newlyCreated: TraineeCourseItem[] = unified.sharedCourses
+        .filter((sc) => !existingIds.has(sc.id))
+        .map((sc) => ({
+          id: sc.id,
+          code: sc.code || sc.title.slice(0, 2).toUpperCase(),
+          title: sc.title,
+          subject: sc.category || 'Meteorology',
+          trainer: sc.trainer,
+          institution: sc.institution || 'IMD Division',
+          imageUrl: sc.imageUrl,
+          modulesCount: sc.modulesCount || 4,
+          languages: sc.languages || ['English', 'Hindi'],
+          enrolled: false,
+          status: 'Available',
+          rating: sc.rating || 4.8,
+          reviewsCount: sc.reviewsCount || 1,
+          level: sc.level || 'Intermediate',
+          hours: sc.duration || '20 hrs',
+          description: sc.description || '',
+        }));
+      if (newlyCreated.length === 0) return prev;
+      return [...prev, ...newlyCreated];
+    });
+  }, [unified.sharedCourses]);
 
   const [assessments, setAssessments] = useState<TraineeAssessmentItem[]>([
     {
@@ -772,6 +810,9 @@ export const TraineeDataProvider: React.FC<{ children: React.ReactNode }> = ({ c
         savedCourseIds,
         toggleSaveCourse,
         isCourseSaved,
+        monthlyProgress: unified.traineeMonthlyProgress,
+        weeklyEngagement: unified.traineeWeeklyEngagement,
+        recordStudyHour: unified.recordTraineeStudyActivity,
       }}
     >
       {children}

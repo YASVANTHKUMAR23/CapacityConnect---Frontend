@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Screen, AdminTab, TrainerTab, TraineeTab, UserAccount } from './types';
+import { UnifiedDataProvider } from './context/UnifiedDataContext';
 import { AdminDataProvider } from './context/AdminDataContext';
 import { TrainerDataProvider } from './context/TrainerDataContext';
 import { TraineeDataProvider } from './context/TraineeDataContext';
@@ -81,15 +82,27 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [toastMessage]);
 
+  // Route gating: strictly enforce admin approval before granting dashboard/resource access
+  useEffect(() => {
+    if (currentUser && currentUser.status === 'pending') {
+      const dashboardScreens: Screen[] = ['trainer-portal', 'trainee-portal', 'trainee-setup', 'trainee-take-assessment', 'admin-portal'];
+      if (dashboardScreens.includes(currentScreen)) {
+        setCurrentScreen('pending-approval');
+        showToast('Your account is awaiting admin approval before accessing dashboard resources.');
+      }
+    }
+  }, [currentScreen, currentUser]);
+
   const handleNavigate = (screen: Screen) => {
     setCurrentScreen(screen);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <AdminDataProvider>
-      <TrainerDataProvider>
-        <TraineeDataProvider>
+    <UnifiedDataProvider>
+      <AdminDataProvider>
+        <TrainerDataProvider>
+          <TraineeDataProvider>
           <div className="min-h-screen text-slate-900 flex flex-col justify-between relative selection:bg-slate-900 selection:text-white">
             {/* Global Toast Notification */}
             {toastMessage && (
@@ -331,5 +344,6 @@ export default function App() {
         </TraineeDataProvider>
       </TrainerDataProvider>
     </AdminDataProvider>
+  </UnifiedDataProvider>
   );
 }

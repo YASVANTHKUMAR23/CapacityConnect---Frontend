@@ -71,7 +71,7 @@ export const LibraryAnnouncementBanner: React.FC<LibraryAnnouncementBannerProps>
               Official Announcement
             </span>
 
-            {currentAnn.isPinned && (
+            {currentAnn.isPinned && targetRole !== 'trainer' && targetRole !== 'trainee' && (
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/60 shadow-2xs">
                 <Pin className="w-3 h-3 fill-amber-500 text-amber-600" />
                 Pinned

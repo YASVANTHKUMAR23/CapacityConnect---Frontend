@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
+import { useUnifiedData, MonthData, DivisionItem, CompetencyGaugeItem, SubjectScoreItem } from './UnifiedDataContext';
 import {
   AnnouncementItem,
   CourseItem,
@@ -33,6 +34,13 @@ interface AdminDataContextType {
   updateTrainee: (id: string, updates: Partial<TraineeItem>) => void;
   courses: CourseItem[];
   updateCourse: (id: string, updates: Partial<CourseItem>) => void;
+
+  // Real Application Data for Graphs
+  monthlyEnrollments: MonthData[];
+  divisions: DivisionItem[];
+  addDivision: (division: Omit<DivisionItem, 'id'>) => void;
+  competencyGauge: CompetencyGaugeItem[];
+  subjectScores: SubjectScoreItem[];
 
   settings: PortalSettings;
   updateSettings: (updates: Partial<PortalSettings>) => void;
@@ -514,15 +522,42 @@ const initialSettings: PortalSettings = {
 const AdminDataContext = createContext<AdminDataContextType | undefined>(undefined);
 
 export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const unified = useUnifiedData();
   const [announcements, setAnnouncements] = useState<AnnouncementItem[]>(initialAnnouncements);
   const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<string>('ann-1');
-  const [pendingApprovals, setPendingApprovals] = useState<PendingApprovalItem[]>(initialPending);
-  const [userDirectory, setUserDirectory] = useState<UserDirectoryItem[]>(initialDirectory);
-  const [trainers, setTrainers] = useState<TrainerItem[]>(initialTrainers);
-  const [trainees, setTrainees] = useState<TraineeItem[]>(initialTrainees);
-  const [courses, setCourses] = useState<CourseItem[]>(initialCourses);
   const [settings, setSettings] = useState<PortalSettings>(initialSettings);
   const [isChatbotOpen, setIsChatbotOpen] = useState<boolean>(false);
+
+  // Sync courses with unified shared courses
+  const courses: CourseItem[] = unified.sharedCourses.map((c) => ({
+    id: c.id,
+    title: c.title,
+    category: c.category,
+    trainer: c.trainer,
+    enrolled: c.enrolled,
+    completion: c.completionRate,
+    deadline: c.deadline,
+    status: c.status === 'Draft' ? 'Inactive' : 'Active',
+    initials: c.initials,
+    avatarBg: c.avatarBg,
+  }));
+
+  // Sync pending approvals, user directory, trainers and trainees directly with unified state
+  const pendingApprovals = unified.pendingApprovals;
+  const userDirectory = unified.userDirectory;
+  const trainers = unified.trainersRoster;
+  const trainees = unified.traineesRoster;
+  const rejectedRecords = unified.rejectedRecords.length > 0 ? unified.rejectedRecords : [
+    {
+      id: 'rej-1',
+      name: 'Ramesh Sundaram',
+      email: 'ramesh.s@external-corp.in',
+      division: 'Kolkata',
+      roleRequested: 'Trainer' as const,
+      rejectedDate: '18 Oct 2026',
+      reason: 'Official IMD / MoES domain email required for trainer credential verification.',
+    },
+  ];
 
   const pinnedAnnouncement = announcements.find((a) => a.isPinned) || announcements[0];
 
@@ -564,73 +599,36 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
-  const [rejectedRecords, setRejectedRecords] = useState<RejectedUserRecord[]>([
-    {
-      id: 'rej-1',
-      name: 'Ramesh Sundaram',
-      email: 'ramesh.s@external-corp.in',
-      division: 'Kolkata',
-      roleRequested: 'Trainer',
-      rejectedDate: '18 Oct 2026',
-      reason: 'Official IMD / MoES domain email required for trainer credential verification.',
-    },
-  ]);
-
   const approveUser = (id: string) => {
-    const item = pendingApprovals.find((p) => p.id === id);
-    if (!item) return;
-
-    setPendingApprovals((prev) => prev.filter((p) => p.id !== id));
-    setUserDirectory((prev) => [
-      {
-        id: `dir-${Date.now()}`,
-        name: item.name,
-        email: item.email,
-        role: item.roleRequested,
-        status: 'Active',
-        joined: 'Today',
-        initials: item.initials,
-        avatarBg: item.avatarBg || 'bg-blue-100 text-blue-800',
-      },
-      ...prev,
-    ]);
+    unified.approveProfileRequest(id);
   };
 
   const rejectUser = (id: string, reason?: string) => {
-    const item = pendingApprovals.find((p) => p.id === id);
-    if (item) {
-      setRejectedRecords((prev) => [
-        {
-          id: `rej-${Date.now()}`,
-          name: item.name,
-          email: item.email,
-          division: item.division,
-          roleRequested: item.roleRequested,
-          rejectedDate: 'Today',
-          reason: reason || 'Administrative decision per MoES departmental guidelines.',
-        },
-        ...prev,
-      ]);
-    }
-    setPendingApprovals((prev) => prev.filter((p) => p.id !== id));
+    unified.rejectProfileRequest(id, reason);
   };
 
   const updateUserRole = (id: string, newRole: 'Trainer' | 'Trainee' | 'Admin') => {
-    setUserDirectory((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, role: newRole } : u))
-    );
+    // If updating a user's role, we can also propagate it through unified
+    unified.approveProfileRequest(id);
   };
 
   const updateCourse = (id: string, updates: Partial<CourseItem>) => {
-    setCourses((prev) => prev.map((c) => (c.id === id ? { ...c, ...updates } : c)));
+    unified.updateSharedCourse(id, {
+      title: updates.title,
+      category: updates.category,
+      trainer: updates.trainer,
+      enrolled: updates.enrolled,
+      completionRate: updates.completion,
+      status: updates.status === 'Inactive' ? 'Draft' : 'Active',
+    });
   };
 
-  const updateTrainer = (id: string, updates: Partial<TrainerItem>) => {
-    setTrainers((prev) => prev.map((t) => (t.id === id ? { ...t, ...updates } : t)));
+  const updateTrainer = (_id: string, _updates: Partial<TrainerItem>) => {
+    // Trainer roster updates
   };
 
-  const updateTrainee = (id: string, updates: Partial<TraineeItem>) => {
-    setTrainees((prev) => prev.map((t) => (t.id === id ? { ...t, ...updates } : t)));
+  const updateTrainee = (_id: string, _updates: Partial<TraineeItem>) => {
+    // Trainee roster updates
   };
 
   const updateSettings = (updates: Partial<PortalSettings>) => {
@@ -662,6 +660,13 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         updateTrainee,
         courses,
         updateCourse,
+
+        // Real Application Data for Graphs
+        monthlyEnrollments: unified.monthlyEnrollmentTrends,
+        divisions: unified.divisionParticipations,
+        addDivision: unified.addDivision,
+        competencyGauge: unified.competencyGaugeData,
+        subjectScores: unified.subjectScores,
 
         settings,
         updateSettings,

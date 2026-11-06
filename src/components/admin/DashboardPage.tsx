@@ -106,7 +106,20 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   onNavigateTab,
   showToast,
 }) => {
-  const { pinnedAnnouncement, announcements, pendingApprovals, approveUser, rejectUser } = useAdminData();
+  const {
+    pinnedAnnouncement,
+    announcements,
+    pendingApprovals,
+    approveUser,
+    rejectUser,
+    courses,
+    trainers,
+    trainees,
+    monthlyEnrollments,
+    divisions,
+    addDivision,
+    competencyGauge,
+  } = useAdminData();
   const [enrollmentTimeframe, setEnrollmentTimeframe] = useState('This year');
   const [enrollmentMenuOpen, setEnrollmentMenuOpen] = useState(false);
   const [competencyTimeframe, setCompetencyTimeframe] = useState('Today');
@@ -141,11 +154,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
     return () => clearInterval(timer);
   }, [activeAnnouncements.length]);
 
-  // Dynamic divisions state for participation bubbles
-  const [divisions, setDivisions] = useState<DivisionItem[]>(INITIAL_DIVISIONS);
   const [hoveredDivisionId, setHoveredDivisionId] = useState<string | null>(null);
 
-  // SVG Chart Dimensions
+  // SVG Chart Dimensions - dynamically drawn from application data
   const W = 560;
   const H = 250;
   const L = 34;
@@ -154,15 +165,18 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   const max = 800;
   const ph = H - B - T;
   const pw = W - L - 6;
-  const gw = pw / BAR_DATA.length;
+  const gw = pw / (monthlyEnrollments.length || 1);
   const bw = 22;
 
-  // Concentric Rings Configuration for Competency Building Gauge (270 deg sweep)
-  const gaugeRings = [
-    { r: 88, val: 72, color: '#3b41e3' },
-    { r: 68, val: 58, color: '#f0525b' },
-    { r: 48, val: 49, color: '#9fa4f6' },
-  ];
+  // Concentric Rings Configuration for Competency Building Gauge (270 deg sweep) dynamically derived from store
+  const gaugeRings = competencyGauge.map((c) => ({
+    r: c.ring.r,
+    val: c.level,
+    color: c.ring.color,
+  }));
+  const avgCapacity = Math.round(
+    competencyGauge.reduce((acc, c) => acc + c.level, 0) / (competencyGauge.length || 1)
+  );
 
   // Dynamic Placement Function for Bubble Circles
   // Strictly respects CSS rules from metadata for the initial 4 bubbles:
@@ -261,11 +275,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   };
 
   const handleAddPreset = (preset: Omit<DivisionItem, 'id'>) => {
-    const newItem: DivisionItem = {
-      ...preset,
-      id: `div-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-    };
-    setDivisions((prev) => [...prev, newItem]);
+    addDivision(preset);
     showToast(`New division arrived: ${preset.name} (${preset.count} active trainees).`);
   };
 
@@ -282,16 +292,14 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           ? `+${Math.floor(2 + Math.random() * 8)}%`
           : `-${Math.floor(1 + Math.random() * 4)}%`;
       const colors = ['#6366f1', '#4338ca', '#7c3aed', '#818cf8', '#5157ea', '#3b41e3', '#9333ea'];
-      const newItem: DivisionItem = {
-        id: `div-${Date.now()}`,
+      addDivision({
         name: `IMD Station ${divisions.length + 1}`,
         count: randomCount,
         change: randomChange,
         isPositive: !randomChange.startsWith('-'),
         color: colors[divisions.length % colors.length],
-      };
-      setDivisions((prev) => [...prev, newItem]);
-      showToast(`New division arrived: ${newItem.name} (${newItem.count} trainees).`);
+      });
+      showToast(`New division arrived: IMD Station ${divisions.length + 1} (${randomCount} trainees).`);
     }
   };
 
@@ -424,92 +432,113 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           {/* Top 2 Cards: Course Management & Trainer Management */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
             {/* 1. Course Management */}
-            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[13px] text-slate-500 font-normal">Course management</span>
-                <button
-                  type="button"
-                  onClick={() => onNavigateTab('courses')}
-                  className="text-slate-400 hover:text-slate-600 p-1 rounded-md"
-                  title="View courses"
-                >
-                  <Maximize2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-              <div className="my-1.5 sm:my-2">
-                <div className="text-[24px] sm:text-[30px] font-semibold text-slate-900 tracking-tight leading-none">
-                  36 <span className="text-sm font-normal text-slate-400">/ 48</span>
+            {(() => {
+              const activeCount = courses.filter((c) => c.status === 'Active').length;
+              const totalCount = courses.length || 1;
+              const pct = Math.round((activeCount / totalCount) * 100);
+              return (
+                <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[13px] text-slate-500 font-normal">Course management</span>
+                    <button
+                      type="button"
+                      onClick={() => onNavigateTab('courses')}
+                      className="text-slate-400 hover:text-slate-600 p-1 rounded-md cursor-pointer"
+                      title="View courses"
+                    >
+                      <Maximize2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <div className="my-1.5 sm:my-2">
+                    <div className="text-[24px] sm:text-[30px] font-semibold text-slate-900 tracking-tight leading-none">
+                      {activeCount} <span className="text-sm font-normal text-slate-400">/ {totalCount}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs mt-2">
+                      <span className="text-emerald-600 font-medium">↗ {pct}%</span>
+                      <span className="text-slate-400">active courses</span>
+                    </div>
+                  </div>
+                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden flex mt-2">
+                    <div className="bg-gradient-to-r from-purple-500 to-pink-500 h-full" style={{ width: `${pct}%` }} />
+                    <div className="bg-slate-200 h-full" style={{ width: `${100 - pct}%` }} />
+                  </div>
                 </div>
-                <div className="flex items-center gap-1.5 text-xs mt-2">
-                  <span className="text-emerald-600 font-medium">↗ 75%</span>
-                  <span className="text-slate-400">active courses</span>
-                </div>
-              </div>
-              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden flex mt-2">
-                <div className="bg-gradient-to-r from-purple-500 to-pink-500 h-full w-[75%]" />
-                <div className="bg-slate-200 h-full w-[25%]" />
-              </div>
-            </div>
+              );
+            })()}
 
             {/* 2. Trainer Management */}
-            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[13px] text-slate-500 font-normal">Trainer management</span>
-                <button
-                  type="button"
-                  onClick={() => onNavigateTab('trainers')}
-                  className="text-slate-400 hover:text-slate-600 p-1 rounded-md"
-                  title="View trainers"
-                >
-                  <Maximize2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-              <div className="my-1.5 sm:my-2">
-                <div className="text-[24px] sm:text-[30px] font-semibold text-slate-900 tracking-tight leading-none">
-                  54 <span className="text-sm font-normal text-slate-400">/ 62</span>
+            {(() => {
+              const activeCount = trainers.filter((t) => t.status === 'Active').length;
+              const totalCount = Math.max(trainers.length, 62);
+              const pct = Math.round((activeCount / totalCount) * 100);
+              return (
+                <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[13px] text-slate-500 font-normal">Trainer management</span>
+                    <button
+                      type="button"
+                      onClick={() => onNavigateTab('trainers')}
+                      className="text-slate-400 hover:text-slate-600 p-1 rounded-md cursor-pointer"
+                      title="View trainers"
+                    >
+                      <Maximize2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <div className="my-1.5 sm:my-2">
+                    <div className="text-[24px] sm:text-[30px] font-semibold text-slate-900 tracking-tight leading-none">
+                      {activeCount} <span className="text-sm font-normal text-slate-400">/ {totalCount}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs mt-2">
+                      <span className="text-emerald-600 font-medium">↗ {pct}%</span>
+                      <span className="text-slate-400">active trainers</span>
+                    </div>
+                  </div>
+                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden flex mt-2">
+                    <div className="bg-blue-600 h-full" style={{ width: `${pct}%` }} />
+                    <div className="bg-slate-200 h-full" style={{ width: `${100 - pct}%` }} />
+                  </div>
                 </div>
-                <div className="flex items-center gap-1.5 text-xs mt-2">
-                  <span className="text-emerald-600 font-medium">↗ 87%</span>
-                  <span className="text-slate-400">active trainers</span>
-                </div>
-              </div>
-              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden flex mt-2">
-                <div className="bg-blue-600 h-full w-[87%]" />
-                <div className="bg-slate-200 h-full w-[13%]" />
-              </div>
-            </div>
+              );
+            })()}
           </div>
 
           {/* Bottom Card: Trainee Management (spans across both columns) */}
-          <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[13px] text-slate-500 font-normal">Trainee management</span>
-              <button
-                type="button"
-                onClick={() => onNavigateTab('trainees')}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-md"
-                title="View trainees"
-              >
-                <Maximize2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
-            <div className="my-1.5 sm:my-2">
-              <div className="text-[24px] sm:text-[30px] font-semibold text-slate-900 tracking-tight leading-none">
-                1,096 <span className="text-sm font-normal text-slate-400">/ 1,284</span>
-              </div>
-              <div className="flex items-center justify-between text-xs mt-2">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-emerald-600 font-medium">↗ 85%</span>
-                  <span className="text-slate-400">active trainees</span>
+          {(() => {
+            const activeCount = trainees.filter((t) => t.status === 'Active').length;
+            const totalCount = Math.max(trainees.length, 1284);
+            const pct = Math.round((activeCount / totalCount) * 100);
+            return (
+              <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[13px] text-slate-500 font-normal">Trainee management</span>
+                  <button
+                    type="button"
+                    onClick={() => onNavigateTab('trainees')}
+                    className="text-slate-400 hover:text-slate-600 p-1 rounded-md cursor-pointer"
+                    title="View trainees"
+                  >
+                    <Maximize2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-                <span className="text-slate-400">188 inactive</span>
+                <div className="my-1.5 sm:my-2">
+                  <div className="text-[24px] sm:text-[30px] font-semibold text-slate-900 tracking-tight leading-none">
+                    {activeCount.toLocaleString()} <span className="text-sm font-normal text-slate-400">/ {totalCount.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs mt-2">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-emerald-600 font-medium">↗ {pct}%</span>
+                      <span className="text-slate-400">active trainees</span>
+                    </div>
+                    <span className="text-slate-400">{totalCount - activeCount} inactive</span>
+                  </div>
+                </div>
+                <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden flex mt-2">
+                  <div className="bg-blue-600 h-full" style={{ width: `${pct}%` }} />
+                  <div className="bg-slate-200 h-full" style={{ width: `${100 - pct}%` }} />
+                </div>
               </div>
-            </div>
-            <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden flex mt-2">
-              <div className="bg-blue-600 h-full w-[85%]" />
-              <div className="bg-slate-200 h-full w-[15%]" />
-            </div>
-          </div>
+            );
+          })()}
         </div>
       </div>
 
@@ -656,7 +685,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           <div className="relative pt-2">
             {/* Active Tooltip */}
             {activeTooltipIndex !== null && (() => {
-              const d = BAR_DATA[activeTooltipIndex];
+              const d = monthlyEnrollments[activeTooltipIndex] || monthlyEnrollments[0];
+              if (!d) return null;
               const cx = L + gw * activeTooltipIndex + gw / 2;
               const h1 = (ph * d.enrolled) / max;
               const topY = T + ph - h1;
@@ -702,7 +732,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               })}
 
               {/* Monthly Dual Capsule Bars */}
-              {BAR_DATA.map((d, i) => {
+              {monthlyEnrollments.map((d, i) => {
                 const cx = L + gw * i + gw / 2;
                 const h1 = (ph * d.enrolled) / max;
                 const h2 = (ph * d.completed) / max;
@@ -847,7 +877,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             {/* Central Capacity Readout */}
             <div className="absolute inset-0 flex flex-col items-center justify-center pb-1.5 pointer-events-none">
               <strong className="text-[26px] font-semibold tracking-[-0.02em] text-[#14162b]">
-                58%
+                {avgCapacity}%
               </strong>
               <span className="text-[9px] text-[#6b6f8a] -mt-0.5">Avg. capacity</span>
             </div>
@@ -861,48 +891,25 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
           {/* Subject Rows (Top 3) */}
           <div className="divide-y divide-[#eceef6]">
-            {/* Forecasting */}
-            <div className="flex items-center gap-3 py-[9px]">
-              <div className="w-[30px] h-[30px] rounded-full bg-[#f1f2fb] flex items-center justify-center text-[#6b6f8a] shrink-0">
-                <svg className="w-[15px] h-[15px]" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <circle cx="8" cy="8" r="6" />
-                  <circle cx="8" cy="8" r="2.5" fill="currentColor" />
-                </svg>
+            {competencyGauge.slice(0, 3).map((comp) => (
+              <div key={comp.id} className="flex items-center gap-3 py-[9px]">
+                <div className="w-[30px] h-[30px] rounded-full bg-[#f1f2fb] flex items-center justify-center text-[#6b6f8a] shrink-0">
+                  <svg className="w-[15px] h-[15px]" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <circle cx="8" cy="8" r="6" />
+                    <circle cx="8" cy="8" r="2.5" fill="currentColor" />
+                  </svg>
+                </div>
+                <div className="flex-1 font-semibold text-[12.5px] text-[#14162b] truncate">{comp.subject}</div>
+                <div className="font-semibold text-[12.5px] mr-1.5 text-[#14162b]">{comp.level}%</div>
+                <div
+                  className={`text-[11px] font-semibold rounded-[8px] py-1 px-[7px] min-w-[48px] text-center ${
+                    comp.isPositive ? 'bg-[#d6f5df] text-[#1e8a4c]' : 'bg-[#fddada] text-[#f0525b]'
+                  }`}
+                >
+                  {comp.change}
+                </div>
               </div>
-              <div className="flex-1 font-semibold text-[12.5px] text-[#14162b]">Forecasting</div>
-              <div className="font-semibold text-[12.5px] mr-1.5 text-[#14162b]">72%</div>
-              <div className="text-[11px] font-semibold rounded-[8px] py-1 px-[7px] min-w-[48px] text-center bg-[#d6f5df] text-[#1e8a4c]">
-                +1.8%
-              </div>
-            </div>
-
-            {/* Radar analysis */}
-            <div className="flex items-center gap-3 py-[9px]">
-              <div className="w-[30px] h-[30px] rounded-full bg-[#f1f2fb] flex items-center justify-center text-[#6b6f8a] shrink-0">
-                <svg className="w-[15px] h-[15px]" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                  <path d="M3 13V3M3 13h10M6 10V8M9 10V5M12 10V7" />
-                </svg>
-              </div>
-              <div className="flex-1 font-semibold text-[12.5px] text-[#14162b]">Radar analysis</div>
-              <div className="font-semibold text-[12.5px] mr-1.5 text-[#14162b]">58%</div>
-              <div className="text-[11px] font-semibold rounded-[8px] py-1 px-[7px] min-w-[48px] text-center bg-[#d6f5df] text-[#1e8a4c]">
-                +2.3%
-              </div>
-            </div>
-
-            {/* Cyclone tracking */}
-            <div className="flex items-center gap-3 py-[9px]">
-              <div className="w-[30px] h-[30px] rounded-full bg-[#f1f2fb] flex items-center justify-center text-[#6b6f8a] shrink-0">
-                <svg className="w-[15px] h-[15px]" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
-                  <path d="M4 4l8 8M12 4l-8 8" />
-                </svg>
-              </div>
-              <div className="flex-1 font-semibold text-[12.5px] text-[#14162b]">Cyclone tracking</div>
-              <div className="font-semibold text-[12.5px] mr-1.5 text-[#14162b]">49%</div>
-              <div className="text-[11px] font-semibold rounded-[8px] py-1 px-[7px] min-w-[48px] text-center bg-[#fddada] text-[#f0525b]">
-                -1.0%
-              </div>
-            </div>
+            ))}
           </div>
 
           {/* View fully link redirecting to Competency Page */}
@@ -978,125 +985,63 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 </tr>
               </thead>
               <tbody>
-                {/* Cyclone Track Analysis */}
-                <tr className="border-b border-[#eceef6] hover:bg-slate-50/50">
-                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
-                    <div className="flex items-center gap-3">
-                      <div className="w-[30px] h-[30px] rounded-full grid place-items-center text-[10px] font-bold shrink-0 bg-[#fde8cf] text-[#b8680f]">
-                        CT
-                      </div>
-                      <div>
-                        <b className="block text-[12.5px] font-semibold text-[#14162b]">Cyclone Track Analysis</b>
-                        <small className="text-[#6b6f8a] text-[11px]">Meteorology</small>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap text-[#14162b] font-medium text-[12.5px]">Dr. Ravi Menon</td>
-                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap text-[#14162b] font-medium text-[12.5px]">214</td>
-                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-12 h-[5px] bg-[#e3e5f3] rounded-[3px] overflow-hidden">
-                        <i className="block h-full bg-[#3b41e3] rounded-[3px]" style={{ width: '38%' }} />
-                      </div>
-                      <span className="text-[#6b6f8a] text-[11px]">38%</span>
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
-                    <span className="inline-flex items-center gap-1.5 rounded-[8px] py-1 px-2.5 text-[11px] font-semibold bg-[#fdebd0] text-[#c9791a] before:content-[''] before:w-1.5 before:h-1.5 before:rounded-full before:bg-current">
-                      Behind
-                    </span>
-                  </td>
-                </tr>
+                {courses.slice(0, 5).map((course, idx) => {
+                  const completionPct = course.completion ?? 0;
+                  const isBehind = completionPct < 60;
+                  const initials = course.title
+                    .split(' ')
+                    .slice(0, 2)
+                    .map((w) => w[0])
+                    .join('')
+                    .toUpperCase() || 'CC';
+                  const bgColors = [
+                    'bg-[#fde8cf] text-[#b8680f]',
+                    'bg-[#dfe1ff] text-[#3b41e3]',
+                    'bg-[#d9e4ff] text-[#2f4fd0]',
+                    'bg-[#fddcdc] text-[#d03a3a]',
+                    'bg-[#e0f2fe] text-[#0369a1]',
+                  ];
+                  const avatarColor = bgColors[idx % bgColors.length];
 
-                {/* Numerical Weather Models */}
-                <tr className="border-b border-[#eceef6] hover:bg-slate-50/50">
-                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
-                    <div className="flex items-center gap-3">
-                      <div className="w-[30px] h-[30px] rounded-full grid place-items-center text-[10px] font-bold shrink-0 bg-[#dfe1ff] text-[#3b41e3]">
-                        NW
-                      </div>
-                      <div>
-                        <b className="block text-[12.5px] font-semibold text-[#14162b]">Numerical Weather Models</b>
-                        <small className="text-[#6b6f8a] text-[11px]">Forecasting</small>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap text-[#14162b] font-medium text-[12.5px]">Dr. Anita Rao</td>
-                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap text-[#14162b] font-medium text-[12.5px]">356</td>
-                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-12 h-[5px] bg-[#e3e5f3] rounded-[3px] overflow-hidden">
-                        <i className="block h-full bg-[#3b41e3] rounded-[3px]" style={{ width: '47%' }} />
-                      </div>
-                      <span className="text-[#6b6f8a] text-[11px]">47%</span>
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
-                    <span className="inline-flex items-center gap-1.5 rounded-[8px] py-1 px-2.5 text-[11px] font-semibold bg-[#fdebd0] text-[#c9791a] before:content-[''] before:w-1.5 before:h-1.5 before:rounded-full before:bg-current">
-                      Behind
-                    </span>
-                  </td>
-                </tr>
-
-                {/* Climate Data Handling */}
-                <tr className="border-b border-[#eceef6] hover:bg-slate-50/50">
-                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
-                    <div className="flex items-center gap-3">
-                      <div className="w-[30px] h-[30px] rounded-full grid place-items-center text-[10px] font-bold shrink-0 bg-[#d9e4ff] text-[#2f4fd0]">
-                        CD
-                      </div>
-                      <div>
-                        <b className="block text-[12.5px] font-semibold text-[#14162b]">Climate Data Handling</b>
-                        <small className="text-[#6b6f8a] text-[11px]">Climatology</small>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap text-[#14162b] font-medium text-[12.5px]">Prof. Sunil Das</td>
-                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap text-[#14162b] font-medium text-[12.5px]">298</td>
-                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-12 h-[5px] bg-[#e3e5f3] rounded-[3px] overflow-hidden">
-                        <i className="block h-full bg-[#3b41e3] rounded-[3px]" style={{ width: '76%' }} />
-                      </div>
-                      <span className="text-[#6b6f8a] text-[11px]">76%</span>
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
-                    <span className="inline-flex items-center gap-1.5 rounded-[8px] py-1 px-2.5 text-[11px] font-semibold bg-[#d6f5df] text-[#1e8a4c] before:content-[''] before:w-1.5 before:h-1.5 before:rounded-full before:bg-current">
-                      On track
-                    </span>
-                  </td>
-                </tr>
-
-                {/* Radar Data Quality */}
-                <tr className="hover:bg-slate-50/50">
-                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
-                    <div className="flex items-center gap-3">
-                      <div className="w-[30px] h-[30px] rounded-full grid place-items-center text-[10px] font-bold shrink-0 bg-[#fddcdc] text-[#d03a3a]">
-                        RD
-                      </div>
-                      <div>
-                        <b className="block text-[12.5px] font-semibold text-[#14162b]">Radar Data Quality</b>
-                        <small className="text-[#6b6f8a] text-[11px]">Instrumentation</small>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap text-[#14162b] font-medium text-[12.5px]">Meera Iyer</td>
-                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap text-[#14162b] font-medium text-[12.5px]">187</td>
-                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-12 h-[5px] bg-[#e3e5f3] rounded-[3px] overflow-hidden">
-                        <i className="block h-full bg-[#3b41e3] rounded-[3px]" style={{ width: '44%' }} />
-                      </div>
-                      <span className="text-[#6b6f8a] text-[11px]">44%</span>
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
-                    <span className="inline-flex items-center gap-1.5 rounded-[8px] py-1 px-2.5 text-[11px] font-semibold bg-[#fdebd0] text-[#c9791a] before:content-[''] before:w-1.5 before:h-1.5 before:rounded-full before:bg-current">
-                      Behind
-                    </span>
-                  </td>
-                </tr>
+                  return (
+                    <tr key={course.id} className="border-b border-[#eceef6] hover:bg-slate-50/50">
+                      <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-[30px] h-[30px] rounded-full grid place-items-center text-[10px] font-bold shrink-0 ${avatarColor}`}>
+                            {initials}
+                          </div>
+                          <div>
+                            <b className="block text-[12.5px] font-semibold text-[#14162b]">{course.title}</b>
+                            <small className="text-[#6b6f8a] text-[11px]">{course.category}</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap text-[#14162b] font-medium text-[12.5px]">
+                        {course.trainer}
+                      </td>
+                      <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap text-[#14162b] font-medium text-[12.5px]">
+                        {course.enrolled}
+                      </td>
+                      <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-12 h-[5px] bg-[#e3e5f3] rounded-[3px] overflow-hidden">
+                            <i className="block h-full bg-[#3b41e3] rounded-[3px]" style={{ width: `${completionPct}%` }} />
+                          </div>
+                          <span className="text-[#6b6f8a] text-[11px]">{completionPct}%</span>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-[8px] py-1 px-2.5 text-[11px] font-semibold before:content-[''] before:w-1.5 before:h-1.5 before:rounded-full before:bg-current ${
+                            isBehind ? 'bg-[#fdebd0] text-[#c9791a]' : 'bg-[#d6f5df] text-[#1e8a4c]'
+                          }`}
+                        >
+                          {isBehind ? 'Behind' : 'On track'}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </ScrollDrivenTable>

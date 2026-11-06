@@ -14,12 +14,16 @@ interface DashboardAnnouncementCardProps {
   onViewAnnouncement?: () => void;
   showToast: (msg: string) => void;
   className?: string;
+  hidePinnedBadge?: boolean;
+  targetRole?: 'trainer' | 'trainee' | 'admin';
 }
 
 export const DashboardAnnouncementCard: React.FC<DashboardAnnouncementCardProps> = ({
   onViewAnnouncement,
   showToast,
   className = '',
+  hidePinnedBadge = false,
+  targetRole,
 }) => {
   const { announcements, pinnedAnnouncement } = useAdminData();
   const [announcementIndex, setAnnouncementIndex] = useState(0);
@@ -83,7 +87,7 @@ export const DashboardAnnouncementCard: React.FC<DashboardAnnouncementCardProps>
               <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
               Official Announcement
             </span>
-            {currentAnn?.isPinned && (
+            {!hidePinnedBadge && targetRole !== 'trainer' && targetRole !== 'trainee' && currentAnn?.isPinned && (
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/60">
                 <Pin className="w-3 h-3 fill-amber-500 text-amber-600" />
                 Pinned

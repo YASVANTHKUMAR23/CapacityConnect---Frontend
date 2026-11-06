@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Shield, CloudSun } from 'lucide-react';
 import { Screen, UserAccount } from '../../types';
+import { useUnifiedData } from '../../context/UnifiedDataContext';
 
 interface SignInScreenProps {
   onNavigate: (screen: Screen) => void;
@@ -15,6 +16,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
   setCurrentUser,
   showToast,
 }) => {
+  const unified = useUnifiedData();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -39,6 +41,45 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
 
     setTimeout(() => {
       setIsLoading(false);
+
+      // Check registered profile in UnifiedDataContext
+      const cleanEmail = email.trim();
+      const registeredUser = unified.getUserByEmail(cleanEmail);
+
+      if (registeredUser) {
+        if (registeredUser.status === 'pending') {
+          setCurrentUser(registeredUser);
+          showToast('Account is pending administrator approval.');
+          onNavigate('pending-approval');
+          return;
+        }
+
+        if (registeredUser.status === 'rejected') {
+          setError('This account registration request was declined by the administrator.');
+          return;
+        }
+
+        // Approved user
+        setCurrentUser(registeredUser);
+        if (registeredUser.role === 'admin') {
+          showToast('Welcome, Administrator. Logged into Admin Portal.');
+          onNavigate('admin-portal');
+          return;
+        }
+        if (registeredUser.role === 'trainer') {
+          showToast(`Welcome, ${registeredUser.firstName} ${registeredUser.lastName}. Logged into Trainer Portal.`);
+          onNavigate('trainer-portal');
+          return;
+        }
+        if (registeredUser.profileComplete === false) {
+          showToast('Account approved! Please complete your initial profile setup.');
+          onNavigate('trainee-setup');
+          return;
+        }
+        showToast(`Welcome back, ${registeredUser.firstName} ${registeredUser.lastName}. Logged into Trainee Portal.`);
+        onNavigate('trainee-portal');
+        return;
+      }
 
       // Check if Trainer sign in (Dr. Ravi Menon)
       if (
